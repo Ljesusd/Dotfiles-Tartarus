@@ -1,0 +1,18 @@
+{
+    "id": "audio",
+    "name": "Audio",
+    "version": 1,
+
+    "capabilities": [
+        "bar-widget",
+        "panel",
+        "service"
+    ],
+
+    "entryPoints": {
+        "plugin": "Plugin.qml",
+        "barWidget": "BarWidget.qml",
+        "panel": "Panel.qml",
+        "service": "Service.qml"
+    }
+}

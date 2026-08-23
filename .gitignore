@@ -1,0 +1,21 @@
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Editor / temporary files
+*~
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Filesystem noise
+.DS_Store
+Thumbs.db

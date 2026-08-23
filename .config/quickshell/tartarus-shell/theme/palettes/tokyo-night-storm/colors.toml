@@ -1,0 +1,45 @@
+name = "Tokyo Night Storm"
+slug = "tokyo-night-storm"
+mode = "dark"
+
+[colors]
+background = "#24283b"
+background_dark = "#1f2335"
+background_darker = "#1b1e2d"
+background_highlight = "#292e42"
+background_visual = "#2e3c64"
+
+foreground = "#c0caf5"
+foreground_muted = "#a9b1d6"
+comment = "#565f89"
+
+black = "#1d202f"
+
+red = "#f7768e"
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+
+blue_dark = "#3d59a1"
+blue_light = "#89ddff"
+
+[roles]
+background = "background"
+background_alt = "background_dark"
+
+surface = "background_dark"
+surface_hover = "background_highlight"
+selection = "background_visual"
+
+foreground = "foreground"
+foreground_muted = "foreground_muted"
+foreground_subtle = "comment"
+
+accent = "blue"
+
+error = "red"
+warning = "yellow"
+success = "green"
+info = "cyan"
