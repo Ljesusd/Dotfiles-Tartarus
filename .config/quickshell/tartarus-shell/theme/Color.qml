@@ -24,17 +24,38 @@ QtObject {
     readonly property color surfaceHover:
         role("surface_hover", "#444444")
 
+    readonly property color surfaceContainer:
+        role("surface_container", root.surface)
+
+    readonly property color surfaceContainerHigh:
+        role("surface_container_high", root.surfaceHover)
+
     readonly property color selection:
         role("selection", "#555555")
 
+    readonly property color primaryContainer:
+        role("primary_container", root.selection)
+
+    readonly property color tertiaryContainer:
+        role("tertiary_container", root.accent)
+
     readonly property color foreground:
         role("foreground", "#ffffff")
+
+    readonly property color onPrimaryContainer:
+        role("on_primary_container", root.foreground)
+
+    readonly property color onTertiaryContainer:
+        role("on_tertiary_container", root.background)
 
     readonly property color foregroundMuted:
         role("foreground_muted", "#999999")
 
     readonly property color foregroundSubtle:
         role("foreground_subtle", "#777777")
+
+    readonly property color onSurfaceVariant:
+        role("on_surface_variant", root.foregroundSubtle)
 
     readonly property color accent:
         role("accent", "#89b4fa")

@@ -17,6 +17,9 @@ import "services"
 ShellRoot {
     id: root
 
+    readonly property var sharedLauncherState: launcherState
+    readonly property var sharedPluginRegistry: pluginRegistry
+
     function closePluginPanels() {
         for (const plugin of pluginRegistry.plugins) {
             if (
@@ -66,9 +69,17 @@ ShellRoot {
         }
     }
 
-    Bar {
-        launcherState: launcherState
-        pluginRegistry: pluginRegistry
+    Variants {
+        model: Quickshell.screens
+
+        Bar {
+            required property var modelData
+
+            screen: modelData
+
+            launcherState: root.sharedLauncherState
+            pluginRegistry: root.sharedPluginRegistry
+        }
     }
 
     Launcher {

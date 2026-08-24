@@ -26,7 +26,13 @@ PanelWindow {
         root.launcherState.barWindow = root
 
         for (const plugin of root.pluginRegistry.plugins)
+            root.addLeftBarPlugin(plugin)
+        for (const plugin of root.pluginRegistry.plugins)
             root.addRightBarPlugin(plugin)
+    }
+
+    ListModel {
+        id: leftBarPluginModel
     }
 
     ListModel {
@@ -37,6 +43,7 @@ PanelWindow {
         target: root.pluginRegistry
 
         function onPluginRegistered(plugin) {
+            root.addLeftBarPlugin(plugin)
             root.addRightBarPlugin(plugin)
         }
     }
@@ -44,6 +51,44 @@ PanelWindow {
     function closeLauncherIfOpen() {
         if (root.launcherState.opened)
             root.launcherState.close()
+    }
+
+    function addLeftBarPlugin(plugin) {
+        if (
+            !plugin
+            || !plugin.capabilities
+            || !plugin.capabilities.includes("bar-widget")
+            || plugin.barSection !== "left"
+            || plugin.barWidgetComponent === undefined
+            || plugin.barWidgetComponent === null
+        ) {
+            return
+        }
+
+        for (let i = 0; i < leftBarPluginModel.count; i++) {
+            if (
+                leftBarPluginModel.get(i).pluginId
+                === plugin.pluginId
+            ) {
+                return
+            }
+        }
+
+        const order = plugin.barOrder ?? 0
+        let insertIndex = leftBarPluginModel.count
+
+        for (let i = 0; i < leftBarPluginModel.count; i++) {
+            if (order < leftBarPluginModel.get(i).barOrder) {
+                insertIndex = i
+                break
+            }
+        }
+
+        leftBarPluginModel.insert(insertIndex, {
+            pluginId: plugin.pluginId,
+            barOrder: order,
+            plugin: plugin
+        })
     }
 
     function addRightBarPlugin(plugin) {
@@ -105,13 +150,73 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                Workspaces {
+                RowLayout {
                     anchors {
                         left: parent.left
                         verticalCenter: parent.verticalCenter
                     }
 
-                    launcherState: root.launcherState
+                    spacing: Style.barSpacingNormal
+
+                    Repeater {
+                        model: leftBarPluginModel
+
+                        Item {
+                            id: leftPluginSlot
+
+                            required property string pluginId
+                            required property var plugin
+
+                            implicitWidth:
+                                leftPluginWidgetLoader.implicitWidth
+
+                            implicitHeight: Style.barHeight
+
+                            Loader {
+                                id: leftPluginWidgetLoader
+
+                                anchors.centerIn: parent
+
+                                active:
+                                    plugin.barWidgetComponent !== undefined
+                                    && plugin.barWidgetComponent !== null
+
+                                sourceComponent:
+                                    active
+                                    ? plugin.barWidgetComponent
+                                    : null
+
+                                onLoaded: {
+                                    if (
+                                        item
+                                        && "panelAnchorItem" in item
+                                    ) {
+                                        item.panelAnchorItem = leftPluginSlot
+                                    }
+
+                                    if (
+                                        item
+                                        && "barScreen" in item
+                                    ) {
+                                        item.barScreen = root.screen
+                                    }
+                                }
+
+                                Connections {
+                                    target: leftPluginWidgetLoader.item
+
+                                    ignoreUnknownSignals: true
+
+                                    function onInteracted() {
+                                        root.closeLauncherIfOpen()
+                                        root.pluginRegistry.closeOpenPanelsExcept(
+                                            leftPluginSlot.pluginId
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -186,6 +291,13 @@ PanelWindow {
                                         && "panelAnchorItem" in item
                                     ) {
                                         item.panelAnchorItem = pluginSlot
+                                    }
+
+                                    if (
+                                        item
+                                        && "barScreen" in item
+                                    ) {
+                                        item.barScreen = root.screen
                                     }
                                 }
 

@@ -1,0 +1,16 @@
+{
+    "id": "workspaces",
+    "name": "Workspaces",
+    "version": 1,
+
+    "capabilities": [
+        "bar-widget",
+        "service"
+    ],
+
+    "entryPoints": {
+        "plugin": "Plugin.qml",
+        "barWidget": "BarWidget.qml",
+        "service": "Service.qml"
+    }
+}
