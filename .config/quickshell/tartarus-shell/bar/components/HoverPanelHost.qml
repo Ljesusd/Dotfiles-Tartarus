@@ -17,7 +17,7 @@ PopupWindow {
         && root.activePlugin.panelContentComponent !== null
 
     readonly property bool hoverAllowed:
-        root.hoverPanelController.openReason === "hover"
+        root.hoverPanelController.opened
         && root.hoverPanelController.anchorEntry !== null
         && root.supportsSharedHover
 
@@ -42,7 +42,7 @@ PopupWindow {
     function debugState(label) {
         console.log(
             "HOVER HOST", label,
-            "opened:", root.hoverPanelController.openReason === "hover",
+            "opened:", root.hoverPanelController.opened,
             "reason:", root.hoverPanelController.openReason,
             "panel:", root.hoverPanelController.activePanelId,
             "entry:", root.anchorEntry,
@@ -72,7 +72,8 @@ PopupWindow {
     }
 
     visible:
-        root.hoverAllowed
+        root.hoverPanelController.opened
+        && root.anchorEntry !== null
         && root.panelReady
 
     implicitWidth:

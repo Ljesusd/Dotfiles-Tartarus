@@ -13,6 +13,11 @@ QtObject {
     property string openReason: ""
     property int closeDelay: 160
 
+    readonly property bool opened:
+        root.activePanelId !== ""
+        && root.anchorEntry !== null
+        && root.openReason !== ""
+
     readonly property var activePanelPlugin:
         root.activePanelId !== ""
         && root.pluginRegistry
@@ -68,6 +73,8 @@ QtObject {
             return
         }
 
+        root.entryHovered = false
+        root.panelHovered = false
         root.openPanel(
             panelId,
             anchorEntry,
@@ -92,6 +99,9 @@ QtObject {
         hovered,
         anchorEntry
     ) {
+        if (root.openReason === "click")
+            return
+
         if (hovered) {
             root.entryHovered = true
             root.anchorEntry =
@@ -124,6 +134,9 @@ QtObject {
     }
 
     function setPanelHovered(panelId, hovered) {
+        if (root.openReason === "click")
+            return
+
         if (
             root.activePanelId !== panelId
             || root.openReason !== "hover"

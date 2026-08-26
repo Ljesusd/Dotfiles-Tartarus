@@ -66,11 +66,18 @@ Rectangle {
 
         onClicked: {
             root.interacted()
-            root.plugin.panelAnchor =
-                root.panelAnchorItem ?? root
-            root.plugin.togglePanel(
-                root.panelAnchorItem ?? root
-            )
+            if (root.hoverPanelController) {
+                root.hoverPanelController.togglePanel(
+                    root.plugin.pluginId,
+                    root.panelAnchorItem ?? root
+                )
+            } else {
+                root.plugin.panelAnchor =
+                    root.panelAnchorItem ?? root
+                root.plugin.togglePanel(
+                    root.panelAnchorItem ?? root
+                )
+            }
         }
 
         onWheel: event => {
