@@ -21,15 +21,8 @@ ShellRoot {
     readonly property var sharedPluginRegistry: pluginRegistry
 
     function closePluginPanels() {
-        for (const plugin of pluginRegistry.plugins) {
-            if (
-                plugin
-                && plugin.panelOpened
-                && typeof plugin.closePanel === "function"
-            ) {
-                plugin.closePanel()
-            }
-        }
+        // Paneles hover compartidos:
+        // el cierre se resuelve en cada Bar.
     }
 
     LauncherState {
@@ -63,10 +56,7 @@ ShellRoot {
     Connections {
         target: launcherState
 
-        function onOpenedChanged() {
-            if (launcherState.opened)
-                root.closePluginPanels()
-        }
+        function onOpenedChanged() {}
     }
 
     Variants {
@@ -86,74 +76,28 @@ ShellRoot {
         launcherState: launcherState
     }
 
-    Item {
+    Instantiator {
         id: pluginPanelHost
 
-        width: 0
-        height: 0
+        model: pluginRegistry.plugins
 
-        ListModel {
-            id: panelPluginModel
-        }
+        delegate: Loader {
+            required property var modelData
 
-        Component.onCompleted: {
-            for (const plugin of pluginRegistry.plugins)
-                pluginPanelHost.addPanelPlugin(plugin)
-        }
+            readonly property var plugin: modelData
 
-        Connections {
-            target: pluginRegistry
+            active:
+                plugin
+                && plugin.capabilities
+                && plugin.capabilities.includes("panel")
+                && plugin.panelComponent !== undefined
+                && plugin.panelComponent !== null
 
-            function onPluginRegistered(plugin) {
-                pluginPanelHost.addPanelPlugin(plugin)
-            }
-        }
-
-        function addPanelPlugin(plugin) {
-            if (
-                !plugin
-                || !plugin.capabilities
-                || !plugin.capabilities.includes("panel")
-                || plugin.panelComponent === undefined
-                || plugin.panelComponent === null
-            ) {
-                return
-            }
-
-            for (let i = 0; i < panelPluginModel.count; i++) {
-                if (
-                    panelPluginModel.get(i).pluginId
-                    === plugin.pluginId
-                ) {
-                    return
-                }
-            }
-
-            panelPluginModel.append({
-                pluginId: plugin.pluginId,
-                plugin: plugin
-            })
-        }
-
-        Repeater {
-            model: panelPluginModel
-
-            Loader {
-                id: panelLoader
-
-                required property string pluginId
-                required property var plugin
-
-                active:
-                    plugin.panelComponent !== undefined
-                    && plugin.panelComponent !== null
-
-                sourceComponent:
-                    active
-                    ? plugin.panelComponent
-                    : null
-
-            }
+            sourceComponent:
+                active
+                ? plugin.panelComponent
+                : null
         }
     }
+
 }

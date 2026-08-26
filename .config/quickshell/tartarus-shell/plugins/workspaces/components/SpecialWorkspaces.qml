@@ -51,16 +51,45 @@ Rectangle {
 
         return -1
     }
+    readonly property real dragThreshold: 8
+
+    property real dragStartX: 0
+    property real dragStartContentX: 0
+    property bool specialDragging: false
 
     implicitHeight: Style.barWorkspaceActiveHeight
 
-    function displayName(name) {
-        if (!name)
-            return ""
+    function maxContentX() {
+        return Math.max(
+            0,
+            specialView.contentWidth - specialView.width
+        )
+    }
 
-        return name.startsWith("special:")
-            ? name.slice(8)
-            : name
+    function boundedContentX(value) {
+        return Math.max(
+            0,
+            Math.min(
+                root.maxContentX(),
+                value
+            )
+        )
+    }
+
+    function ensureActiveVisible() {
+        if (root.activeIndex < 0)
+            return
+
+        Qt.callLater(() => {
+            specialView.positionViewAtIndex(
+                root.activeIndex,
+                ListView.Contain
+            )
+        })
+    }
+
+    onActiveIndexChanged: {
+        root.ensureActiveVisible()
     }
 
     ListView {
@@ -71,6 +100,7 @@ Rectangle {
         orientation: ListView.Horizontal
         spacing: Style.spacingSm
         clip: true
+        interactive: false
         z: 1
 
         model: root.specialCount
@@ -78,9 +108,7 @@ Rectangle {
         highlightFollowsCurrentItem: true
         highlightMoveDuration: Style.motionNormal
         highlightResizeDuration: Style.motionNormal
-        highlightRangeMode: ListView.StrictlyEnforceRange
-        preferredHighlightBegin: width * 0.25
-        preferredHighlightEnd: width * 0.75
+        highlightRangeMode: ListView.NoHighlightRange
         highlight: Rectangle {
             radius: Style.radiusFull
             color: Color.tertiaryContainer
@@ -129,26 +157,11 @@ Rectangle {
 
             implicitHeight: Style.barWorkspaceActiveHeight
 
-            MouseArea {
-                anchors.fill: parent
+            Row {
+                id: itemContent
 
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-
-                onClicked: {
-                    root.interacted()
-
-                    root.service.toggleSpecialWorkspace(
-                        specialItem.workspace.name
-                    )
-                }
-            }
-
-                Row {
-                    id: itemContent
-
-                    anchors.centerIn: parent
-                    spacing: Style.barWorkspaceContentSpacing
+                anchors.centerIn: parent
+                spacing: Style.barWorkspaceContentSpacing
 
                 Loader {
                     anchors.verticalCenter: parent.verticalCenter
@@ -207,6 +220,76 @@ Rectangle {
                     verticalAlignment: Text.AlignVCenter
                 }
             }
+        }
+    }
+
+    MouseArea {
+        id: specialInteraction
+
+        anchors.fill: specialView
+        z: 20
+
+        acceptedButtons: Qt.LeftButton
+
+        onPressed: event => {
+            root.dragStartX = event.x
+            root.dragStartContentX = specialView.contentX
+            root.specialDragging = false
+        }
+
+        onPositionChanged: event => {
+            if (!(event.buttons & Qt.LeftButton))
+                return
+
+            const delta = event.x - root.dragStartX
+
+            if (
+                !root.specialDragging
+                && Math.abs(delta) >= root.dragThreshold
+            ) {
+                root.specialDragging = true
+            }
+
+            if (!root.specialDragging)
+                return
+
+            specialView.contentX = root.boundedContentX(
+                root.dragStartContentX - delta
+            )
+        }
+
+        onReleased: event => {
+            const wasDragging = root.specialDragging
+
+            root.specialDragging = false
+
+            if (wasDragging)
+                return
+
+            const contentX = event.x + specialView.contentX
+            const contentY = event.y + specialView.contentY
+
+            const index = specialView.indexAt(
+                contentX,
+                contentY
+            )
+
+            if (index < 0)
+                return
+
+            const workspace = root.specialWorkspaces[index]
+
+            if (!workspace)
+                return
+
+            root.interacted()
+            root.service.toggleSpecialWorkspace(
+                workspace.name
+            )
+        }
+
+        onCanceled: {
+            root.specialDragging = false
         }
     }
 

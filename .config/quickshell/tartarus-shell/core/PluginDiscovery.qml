@@ -82,6 +82,9 @@ Item {
                         return
                     }
 
+                    if ("pluginRegistry" in item)
+                        item.pluginRegistry = root.registry
+
                     if (
                         item.pluginId
                         !== candidate.manifest.id

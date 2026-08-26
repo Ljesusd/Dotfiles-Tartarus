@@ -32,6 +32,12 @@ QtObject {
         }
     }
 
+    readonly property Component panelContentComponent: Component {
+        Panel {
+            plugin: root
+        }
+    }
+
     property bool panelOpened: false
     property var panelAnchor: null
 

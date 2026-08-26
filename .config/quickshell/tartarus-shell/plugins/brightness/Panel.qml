@@ -1,41 +1,20 @@
-import Quickshell
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
 import "../../theme"
 
-PopupWindow {
+Item {
     id: root
 
     required property var plugin
+    property var hoverPanelController: null
 
     readonly property var service:
         root.plugin.service
 
-    visible:
-        root.plugin.panelOpened
-        && root.plugin.panelAnchor !== null
-
-    anchor {
-        item: root.plugin.panelAnchor
-
-        edges:
-            Edges.Bottom
-            | Edges.Left
-
-        gravity:
-            Edges.Bottom
-            | Edges.Right
-
-        margins.bottom: Style.barPopupGap
-    }
-
     implicitWidth: 340
     implicitHeight: panelContent.implicitHeight
-
-    color: "transparent"
-    grabFocus: false
 
     Rectangle {
         id: panelContent
@@ -48,6 +27,17 @@ PopupWindow {
 
         radius: Style.radiusLarge
         color: Color.background
+
+        HoverHandler {
+            onHoveredChanged: {
+                if (root.hoverPanelController) {
+                    root.hoverPanelController.setPanelHovered(
+                        root.plugin.pluginId,
+                        hovered
+                    )
+                }
+            }
+        }
 
         Column {
             id: contentColumn

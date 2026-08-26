@@ -6,6 +6,7 @@ Rectangle {
     id: root
 
     required property var plugin
+    property var hoverPanelController: null
 
     property var panelAnchorItem: null
 
@@ -46,6 +47,19 @@ Rectangle {
 
     signal interacted()
 
+    function handleHover(hovered, anchorEntry) {
+        if (!root.hoverPanelController)
+            return false
+
+        root.hoverPanelController.setEntryHovered(
+            root.plugin.pluginId,
+            hovered,
+            anchorEntry ?? root.panelAnchorItem ?? root
+        )
+
+        return true
+    }
+
     implicitWidth: bluetoothText.implicitWidth
         + Style.barPaddingNormal * 2
 
@@ -84,6 +98,8 @@ Rectangle {
 
         onClicked: {
             root.interacted()
+            root.plugin.panelAnchor =
+                root.panelAnchorItem ?? root
             root.plugin.togglePanel(
                 root.panelAnchorItem ?? root
             )

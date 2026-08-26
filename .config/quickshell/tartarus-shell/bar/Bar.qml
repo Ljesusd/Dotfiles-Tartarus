@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQml.Models
 
+import "../core"
 import "../theme"
 import "components"
 
@@ -11,6 +12,13 @@ PanelWindow {
 
     required property var launcherState
     required property var pluginRegistry
+    property Item hoveredEntry: null
+
+    HoverPanelController {
+        id: hoverPanelController
+
+        pluginRegistry: root.pluginRegistry
+    }
 
     anchors {
         top: true
@@ -51,6 +59,109 @@ PanelWindow {
     function closeLauncherIfOpen() {
         if (root.launcherState.opened)
             root.launcherState.close()
+    }
+
+    function isEntry(item) {
+        return item
+            && item.isBarEntry === true
+            && typeof item.entryId === "string"
+            && item.entryId.length > 0
+    }
+
+    function findEntryAt(item, x, y) {
+        if (!item)
+            return null
+
+        const child = item.childAt(x, y)
+
+        if (!child)
+            return null
+
+        if (root.isEntry(child))
+            return child
+
+        if (typeof child.childAt !== "function")
+            return null
+
+        const point = item.mapToItem(
+            child,
+            x,
+            y
+        )
+
+        return root.findEntryAt(
+            child,
+            point.x,
+            point.y
+        )
+    }
+
+    function entryAt(sourceItem, x, y) {
+        if (!sourceItem)
+            return null
+
+        const point = sourceItem.mapToItem(
+            barLayout,
+            x,
+            y
+        )
+
+        return root.findEntryAt(
+            barLayout,
+            point.x,
+            point.y
+        )
+    }
+
+    function entryIdAt(sourceItem, x, y) {
+        const entry = root.entryAt(
+            sourceItem,
+            x,
+            y
+        )
+
+        return entry
+            ? entry.entryId
+            : ""
+    }
+
+    function routeWheel(sourceItem, x, y, angleDelta) {
+        const entry = root.entryAt(
+            sourceItem,
+            x,
+            y
+        )
+
+        if (!entry)
+            return false
+
+        return entry.handleWheel(angleDelta)
+    }
+
+    function clearHoveredEntry() {
+        if (root.hoveredEntry)
+            root.hoveredEntry.handleHover(false)
+
+        root.hoveredEntry = null
+    }
+
+    function routeHover(sourceItem, x, y) {
+        const entry = root.entryAt(
+            sourceItem,
+            x,
+            y
+        )
+
+        if (entry === root.hoveredEntry)
+            return
+
+        if (root.hoveredEntry)
+            root.hoveredEntry.handleHover(false)
+
+        root.hoveredEntry = entry
+
+        if (root.hoveredEntry)
+            root.hoveredEntry.handleHover(true)
     }
 
     function addLeftBarPlugin(plugin) {
@@ -130,8 +241,14 @@ PanelWindow {
     }
 
     Rectangle {
+        id: barSurface
+
         anchors.fill: parent
         color: Color.background
+
+        HoverPanelHost {
+            hoverPanelController: hoverPanelController
+        }
 
         MouseArea {
             anchors.fill: parent
@@ -142,8 +259,33 @@ PanelWindow {
         }
 
         RowLayout {
+            id: barLayout
+
             anchors.fill: parent
             spacing: 0
+
+            HoverHandler {
+                id: hoverRouter
+
+                parent: barLayout
+                target: null
+                blocking: false
+
+                onPointChanged: {
+                    const position = hoverRouter.point.position
+
+                    root.routeHover(
+                        barLayout,
+                        position.x,
+                        position.y
+                    )
+                }
+
+                onHoveredChanged: {
+                    if (!hovered)
+                        root.clearHoveredEntry()
+                }
+            }
 
             // Izquierda
             Item {
@@ -161,16 +303,12 @@ PanelWindow {
                     Repeater {
                         model: leftBarPluginModel
 
-                        Item {
+                        EntryWrapper {
                             id: leftPluginSlot
 
+                            entryId: pluginId
                             required property string pluginId
                             required property var plugin
-
-                            implicitWidth:
-                                leftPluginWidgetLoader.implicitWidth
-
-                            implicitHeight: Style.barHeight
 
                             Loader {
                                 id: leftPluginWidgetLoader
@@ -200,6 +338,14 @@ PanelWindow {
                                     ) {
                                         item.barScreen = root.screen
                                     }
+
+                                    if (
+                                        item
+                                        && "hoverPanelController" in item
+                                    ) {
+                                        item.hoverPanelController =
+                                            hoverPanelController
+                                    }
                                 }
 
                                 Connections {
@@ -212,11 +358,30 @@ PanelWindow {
                                         root.pluginRegistry.closeOpenPanelsExcept(
                                             leftPluginSlot.pluginId
                                         )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                }
+            }
+        }
+
+        MouseArea {
+            id: wheelDebugArea
+
+            anchors.fill: parent
+            hoverEnabled: false
+            acceptedButtons: Qt.NoButton
+
+            onWheel: event => {
+                const handled = root.routeWheel(
+                    wheelDebugArea,
+                    event.x,
+                    event.y,
+                    event.angleDelta
+                )
+
+                event.accepted = handled
+            }
+        }
+    }
+}
                 }
             }
 
@@ -225,11 +390,13 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                // Centro actual de la barra: busqueda real del launcher.
-                LauncherSearch {
+                EntryWrapper {
                     anchors.centerIn: parent
+                    entryId: "launcher-search"
 
-                    launcherState: root.launcherState
+                    LauncherSearch {
+                        launcherState: root.launcherState
+                    }
                 }
 
                 // ActiveWindow desactivado temporalmente.
@@ -253,23 +420,23 @@ PanelWindow {
 
                     spacing: Style.barSpacingNormal
 
-                    SystemTray {
-                        launcherState: root.launcherState
+                    EntryWrapper {
+                        entryId: "system-tray"
+
+                        SystemTray {
+                            launcherState: root.launcherState
+                        }
                     }
 
                     Repeater {
                         model: rightBarPluginModel
 
-                        Item {
+                        EntryWrapper {
                             id: pluginSlot
 
+                            entryId: pluginId
                             required property string pluginId
                             required property var plugin
-
-                            implicitWidth:
-                                pluginWidgetLoader.implicitWidth
-
-                            implicitHeight: Style.barHeight
 
                             Loader {
                                 id: pluginWidgetLoader
@@ -299,6 +466,14 @@ PanelWindow {
                                     ) {
                                         item.barScreen = root.screen
                                     }
+
+                                    if (
+                                        item
+                                        && "hoverPanelController" in item
+                                    ) {
+                                        item.hoverPanelController =
+                                            hoverPanelController
+                                    }
                                 }
 
                                 Connections {
@@ -317,11 +492,16 @@ PanelWindow {
                         }
                     }
 
-                    Clock {
-                        launcherState: root.launcherState
+                    EntryWrapper {
+                        entryId: "clock"
+
+                        Clock {
+                            launcherState: root.launcherState
+                        }
                     }
                 }
             }
         }
+
     }
 }

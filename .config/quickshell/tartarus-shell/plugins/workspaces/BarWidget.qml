@@ -119,6 +119,48 @@ Item {
         return end
     }
 
+    function handleWheel(angleDelta) {
+        const delta = angleDelta?.y ?? 0
+
+        if (delta === 0)
+            return false
+
+        if (root.specialOpened) {
+            const activeSpecial =
+                root.plugin.service
+                    .activeSpecialWorkspaceNameForScreen(
+                        root.barScreen
+                    )
+
+            if (!activeSpecial)
+                return false
+
+            root.plugin.service.toggleSpecialWorkspace(
+                activeSpecial
+            )
+
+            return true
+        }
+
+        const direction = delta > 0
+            ? -1
+            : 1
+
+        const nextWorkspaceId = Math.max(
+            1,
+            root.activeWorkspaceId + direction
+        )
+
+        if (nextWorkspaceId === root.activeWorkspaceId)
+            return false
+
+        root.plugin.service.activateWorkspace(
+            nextWorkspaceId
+        )
+
+        return true
+    }
+
     implicitWidth: normalLayer.implicitWidth
     implicitHeight: normalLayer.implicitHeight
 
@@ -287,7 +329,7 @@ Item {
                 height: workspaceRow.height
                 z: 3
 
-                visible: activeIndicator.visible
+                visible: false
                 source: workspaceRow
                 colorization: 1.0
                 colorizationColor: Color.onPrimaryContainer
