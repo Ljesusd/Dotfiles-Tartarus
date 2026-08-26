@@ -98,18 +98,10 @@ Rectangle {
 
         onClicked: {
             root.interacted()
-            if (root.hoverPanelController) {
-                root.hoverPanelController.togglePanel(
-                    root.plugin.pluginId,
-                    root.panelAnchorItem ?? root
-                )
-            } else {
-                root.plugin.panelAnchor =
-                    root.panelAnchorItem ?? root
-                root.plugin.togglePanel(
-                    root.panelAnchorItem ?? root
-                )
-            }
+            root.hoverPanelController.togglePanel(
+                root.plugin.pluginId,
+                root.panelAnchorItem ?? root
+            )
         }
     }
 }

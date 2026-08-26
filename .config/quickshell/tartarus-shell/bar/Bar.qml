@@ -355,12 +355,9 @@ PanelWindow {
 
                                     function onInteracted() {
                                         root.closeLauncherIfOpen()
-                                        root.pluginRegistry.closeOpenPanelsExcept(
-                                            leftPluginSlot.pluginId
-                                        )
-                }
-            }
-        }
+                                    }
+                                }
+                            }
 
         MouseArea {
             id: wheelDebugArea
@@ -483,9 +480,6 @@ PanelWindow {
 
                                     function onInteracted() {
                                         root.closeLauncherIfOpen()
-                                        root.pluginRegistry.closeOpenPanelsExcept(
-                                            pluginSlot.pluginId
-                                        )
                                     }
                                 }
                             }

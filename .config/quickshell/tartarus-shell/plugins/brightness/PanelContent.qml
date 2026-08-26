@@ -218,8 +218,6 @@ Item {
                 color: root.service.available
                     ? Color.foreground
                     : Color.foregroundMuted
-
-                horizontalAlignment: Text.AlignRight
             }
         }
     }

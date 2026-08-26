@@ -68,7 +68,7 @@ PopupWindow {
         item: root.anchorEntry
         edges: Edges.Bottom
         gravity: Edges.Bottom
-        adjustment: PopupAdjustment.None
+        adjustment: PopupAdjustment.SlideX
     }
 
     visible:

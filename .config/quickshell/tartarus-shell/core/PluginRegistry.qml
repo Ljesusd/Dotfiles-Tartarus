@@ -49,17 +49,4 @@ QtObject {
             })
     }
 
-    function closeOpenPanelsExcept(pluginId) {
-        for (const plugin of root.plugins) {
-            if (
-                plugin.pluginId !== pluginId
-                && plugin.capabilities
-                && plugin.capabilities.includes("panel")
-                && plugin.panelOpened === true
-                && typeof plugin.closePanel === "function"
-            ) {
-                plugin.closePanel()
-            }
-        }
-    }
 }

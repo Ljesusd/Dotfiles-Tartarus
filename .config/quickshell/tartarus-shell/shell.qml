@@ -76,28 +76,4 @@ ShellRoot {
         launcherState: launcherState
     }
 
-    Instantiator {
-        id: pluginPanelHost
-
-        model: pluginRegistry.plugins
-
-        delegate: Loader {
-            required property var modelData
-
-            readonly property var plugin: modelData
-
-            active:
-                plugin
-                && plugin.capabilities
-                && plugin.capabilities.includes("panel")
-                && plugin.panelComponent !== undefined
-                && plugin.panelComponent !== null
-
-            sourceComponent:
-                active
-                ? plugin.panelComponent
-                : null
-        }
-    }
-
 }

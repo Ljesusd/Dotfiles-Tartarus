@@ -26,35 +26,9 @@ QtObject {
         }
     }
 
-    readonly property Component panelComponent: Component {
-        Panel {
-            plugin: root
-        }
-    }
-
     readonly property Component panelContentComponent: Component {
-        Panel {
+        PanelContent {
             plugin: root
-        }
-    }
-
-    property bool panelOpened: false
-    property var panelAnchor: null
-
-    function openPanel(anchor) {
-        root.panelAnchor = anchor
-        root.panelOpened = true
-    }
-
-    function closePanel() {
-        root.panelOpened = false
-    }
-
-    function togglePanel(anchor) {
-        if (root.panelOpened) {
-            root.closePanel()
-        } else {
-            root.openPanel(anchor)
         }
     }
 }

@@ -26,53 +26,9 @@ QtObject {
         }
     }
 
-    readonly property Component panelComponent: Component {
-        Panel {
-            plugin: root
-        }
-    }
-
     readonly property Component panelContentComponent: Component {
         PanelContent {
             plugin: root
-        }
-    }
-
-    property bool panelOpened: false
-    property var panelAnchor: null
-
-    readonly property Timer stopScanTimer: Timer {
-        interval: 100
-        repeat: false
-
-        onTriggered: {
-            if (
-                !root.panelOpened
-                && root.service.discovering
-            ) {
-                root.service.stopScan()
-            }
-        }
-    }
-
-    function openPanel(anchor) {
-        root.stopScanTimer.stop()
-
-        root.panelAnchor = anchor
-        root.panelOpened = true
-    }
-
-    function closePanel() {
-        root.panelOpened = false
-
-        root.stopScanTimer.restart()
-    }
-
-    function togglePanel(anchor) {
-        if (root.panelOpened) {
-            root.closePanel()
-        } else {
-            root.openPanel(anchor)
         }
     }
 }
