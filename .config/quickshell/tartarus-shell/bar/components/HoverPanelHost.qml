@@ -24,8 +24,11 @@ PopupWindow {
 
     property int currentContentSlot: -1
     property int pendingContentSlot: -1
+    property int outgoingContentSlot: -1
     property var currentContentComponent: null
     property var pendingContentComponent: null
+    property bool contentTransitionRunning: false
+    property real contentTransitionProgress: 1.0
 
     readonly property var currentContentLoader:
         root.currentContentSlot === 0
@@ -90,18 +93,6 @@ PopupWindow {
     property bool positionInitialized: false
     property bool sizeInitialized: false
     property bool surfacePrepared: false
-
-    function debugState(label) {
-        console.log(
-            "HOVER HOST", label,
-            "opened:", root.hoverPanelController.opened,
-            "reason:", root.hoverPanelController.openReason,
-            "panel:", root.hoverPanelController.activePanelId,
-            "entry:", root.anchorEntry,
-            "ready:", root.panelReady,
-            "visible:", root.visible
-        )
-    }
 
     function syncCenterPosition() {
         const target = root.targetCenterX
@@ -250,6 +241,14 @@ PopupWindow {
         )
     }
 
+    function finishContentTransition() {
+        root.contentTransitionProgress = 1.0
+        root.contentTransitionRunning = false
+        root.outgoingContentSlot = -1
+
+        root.refreshPanelContentActivity()
+    }
+
     function commitPanelContent(slot) {
         if (slot !== root.pendingContentSlot)
             return
@@ -260,8 +259,34 @@ PopupWindow {
             return
 
         root.setLoaderProperties(incomingLoader)
+
+        if (root.currentContentSlot < 0) {
+            root.currentContentSlot = slot
+            root.currentContentComponent =
+                root.pendingContentComponent
+
+            root.pendingContentSlot = -1
+            root.pendingContentComponent = null
+
+            root.outgoingContentSlot = -1
+            root.contentTransitionProgress = 1.0
+            root.contentTransitionRunning = false
+
+            root.refreshPanelContentActivity()
+            root.syncHostHeight()
+
+            Qt.callLater(function() {
+                root.updateAnchorIfReady()
+            })
+
+            return
+        }
+
+        root.outgoingContentSlot =
+            root.currentContentSlot
+
         root.setPanelContentActive(
-            root.currentContentLoader,
+            root.loaderForSlot(root.outgoingContentSlot),
             false
         )
 
@@ -272,8 +297,13 @@ PopupWindow {
         root.pendingContentSlot = -1
         root.pendingContentComponent = null
 
+        root.contentTransitionProgress = 0.0
+        root.contentTransitionRunning = true
+
         root.refreshPanelContentActivity()
         root.syncHostHeight()
+
+        contentFadeAnimation.restart()
 
         Qt.callLater(function() {
             root.updateAnchorIfReady()
@@ -283,6 +313,11 @@ PopupWindow {
     function requestPanelContent(nextComponent) {
         if (!nextComponent)
             return
+
+        if (root.contentTransitionRunning) {
+            contentFadeAnimation.stop()
+            root.finishContentTransition()
+        }
 
         if (nextComponent === root.currentContentComponent)
             return
@@ -334,6 +369,22 @@ PopupWindow {
         }
     }
 
+    NumberAnimation {
+        id: contentFadeAnimation
+
+        target: root
+        property: "contentTransitionProgress"
+
+        from: 0.0
+        to: 1.0
+        duration: Style.motionFast
+        easing.type: Easing.OutCubic
+
+        onFinished: {
+            root.finishContentTransition()
+        }
+    }
+
     anchor {
         item: root.anchorSurface
         edges: Edges.Bottom
@@ -379,8 +430,25 @@ PopupWindow {
 
             anchors.fill: parent
 
-            visible: root.currentContentSlot === 0
-            enabled: visible
+            visible:
+                root.currentContentSlot === 0
+                || root.outgoingContentSlot === 0
+                || root.pendingContentSlot === 0
+            opacity: {
+                if (root.contentTransitionRunning) {
+                    if (root.currentContentSlot === 0)
+                        return root.contentTransitionProgress
+
+                    if (root.outgoingContentSlot === 0)
+                        return 1.0 - root.contentTransitionProgress
+                }
+
+                return root.currentContentSlot === 0
+                    ? 1.0
+                    : 0.0
+            }
+            enabled: root.currentContentSlot === 0
+            z: root.currentContentSlot === 0 ? 1 : 0
 
             onLoaded: {
                 root.setLoaderProperties(contentLoaderA)
@@ -397,8 +465,25 @@ PopupWindow {
 
             anchors.fill: parent
 
-            visible: root.currentContentSlot === 1
-            enabled: visible
+            visible:
+                root.currentContentSlot === 1
+                || root.outgoingContentSlot === 1
+                || root.pendingContentSlot === 1
+            opacity: {
+                if (root.contentTransitionRunning) {
+                    if (root.currentContentSlot === 1)
+                        return root.contentTransitionProgress
+
+                    if (root.outgoingContentSlot === 1)
+                        return 1.0 - root.contentTransitionProgress
+                }
+
+                return root.currentContentSlot === 1
+                    ? 1.0
+                    : 0.0
+            }
+            enabled: root.currentContentSlot === 1
+            z: root.currentContentSlot === 1 ? 1 : 0
 
             onLoaded: {
                 root.setLoaderProperties(contentLoaderB)
@@ -412,22 +497,6 @@ PopupWindow {
     }
 
     onVisibleChanged: {
-        console.log(
-            "STABLE HOST VISIBLE:",
-            root.visible,
-            "backing:", root.backingWindowVisible,
-            "actual:", root.width, root.height,
-            "implicit:", root.implicitWidth, root.implicitHeight,
-            "hostHeight:", root.hostHeight,
-            "surface:",
-            panelSurface.x,
-            panelSurface.y,
-            panelSurface.width,
-            panelSurface.height
-        )
-
-        root.debugState("visible")
-
         root.refreshPanelContentActivity()
 
         if (root.visible) {
@@ -441,24 +510,6 @@ PopupWindow {
             root.positionInitialized = false
             root.sizeInitialized = false
         }
-    }
-
-    onBackingWindowVisibleChanged: {
-        console.log(
-            "STABLE HOST BACKING:",
-            root.backingWindowVisible,
-            "visible:", root.visible,
-            "actual:", root.width, root.height,
-            "implicit:", root.implicitWidth, root.implicitHeight,
-            "hostHeight:", root.hostHeight,
-            "anchorSurface:",
-            root.anchorSurface
-                ? root.anchorSurface.width
-                : -1,
-            root.anchorSurface
-                ? root.anchorSurface.height
-                : -1
-        )
     }
 
     onPanelImplicitWidthChanged: {
@@ -482,26 +533,11 @@ PopupWindow {
         }
     }
 
-    onHoverAllowedChanged: {
-        root.debugState("hoverAllowed")
-    }
-
-    onAnchorEntryChanged: {
-        root.debugState("anchorEntry")
-    }
-
     onTargetCenterXChanged: {
         root.syncCenterPosition()
     }
 
-    onCurrentCenterXChanged: {
-    }
-
-    onCurrentWidthChanged: {
-    }
-
     onPanelReadyChanged: {
-        root.debugState("panelReady")
         root.syncHostHeight()
         root.prepareSurfaceIfPossible()
     }
@@ -529,26 +565,6 @@ PopupWindow {
         target: root.anchor
 
         function onAnchoring() {
-            console.log(
-                "STABLE HOST ANCHORING:",
-                "item:", root.anchor.item,
-                "item size:",
-                root.anchor.item
-                    ? root.anchor.item.width
-                    : -1,
-                root.anchor.item
-                    ? root.anchor.item.height
-                    : -1,
-                "rect:",
-                root.anchor.rect.x,
-                root.anchor.rect.y,
-                root.anchor.rect.width,
-                root.anchor.rect.height,
-                "popup:",
-                root.width,
-                root.height
-            )
-
             if (!root.anchorSurface)
                 return
 
