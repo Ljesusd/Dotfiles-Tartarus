@@ -12,6 +12,7 @@ import QtQuick
 import "bar"
 import "core"
 import "launcher"
+import "./shell" as Shell
 import "services"
 
 ShellRoot {
@@ -62,11 +63,10 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
-        Bar {
+        Shell.MonitorShell {
             required property var modelData
 
             screen: modelData
-
             launcherState: root.sharedLauncherState
             pluginRegistry: root.sharedPluginRegistry
         }
