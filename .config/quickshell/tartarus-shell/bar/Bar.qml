@@ -248,6 +248,7 @@ PanelWindow {
 
         HoverPanelHost {
             hoverPanelController: hoverPanelController
+            anchorSurface: barLayout
         }
 
         MouseArea {
