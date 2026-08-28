@@ -1,5 +1,7 @@
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
+
 import "../../theme"
 
 Rectangle {
@@ -7,19 +9,28 @@ Rectangle {
 
     required property var application
     required property bool selected
+    readonly property bool highlighted:
+        root.selected || hoverHandler.hovered
 
     signal activated()
     signal hovered()
 
-    width: ListView.view ? ListView.view.width : 0
-    height: Style.itemHeight
+    implicitWidth: ListView.view ? ListView.view.width : 0
+    implicitHeight: Style.itemHeight
     radius: Style.radiusMedium
 
     color: root.selected
         ? Color.selection
         : hoverHandler.hovered
             ? Color.surfaceHover
-            : "transparent"
+            : Color.surface
+
+    Behavior on color {
+        ColorAnimation {
+            duration: Style.motionFast
+            easing.type: Easing.OutCubic
+        }
+    }
 
     HoverHandler {
         id: hoverHandler
@@ -36,36 +47,35 @@ Rectangle {
         }
     }
 
-    Row {
-        anchors {
-            left: parent.left
-            right: parent.right
-            verticalCenter: parent.verticalCenter
-
-            leftMargin: Style.paddingLarge
-            rightMargin: Style.paddingLarge
-        }
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Style.paddingLarge
+        anchors.rightMargin: Style.paddingLarge
+        anchors.topMargin: Style.spacingMedium
+        anchors.bottomMargin: Style.spacingMedium
 
         spacing: Style.spacingMedium
 
         Image {
             id: appIcon
 
-            width: Style.iconLarge
-            height: Style.iconLarge
+            Layout.alignment: Qt.AlignTop
+
+            Layout.preferredWidth: Style.iconMedium
+            Layout.preferredHeight: Style.iconMedium
 
             source: Quickshell.iconPath(root.application.icon)
             fillMode: Image.PreserveAspectFit
         }
 
-        Column {
-            width: parent.width - appIcon.width - parent.spacing
-            anchors.verticalCenter: parent.verticalCenter
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
 
-            spacing: 2
+            spacing: Style.spacingXs
 
             Text {
-                width: parent.width
+                Layout.fillWidth: true
 
                 text: root.application.name
 
@@ -77,7 +87,7 @@ Rectangle {
             }
 
             Text {
-                width: parent.width
+                Layout.fillWidth: true
 
                 visible: root.application.comment
                     && root.application.comment.length > 0

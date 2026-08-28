@@ -8,12 +8,14 @@ Rectangle {
 
     required property var theme
     required property bool selected
-    required property bool active
+    required property bool current
+    readonly property bool highlighted:
+        root.selected || hoverHandler.hovered
 
     signal activated()
     signal hovered()
 
-    implicitHeight: 82
+    implicitHeight: Style.launcherSchemeItemHeight
 
     radius: Style.radiusMedium
 
@@ -23,16 +25,36 @@ Rectangle {
             ? Color.surfaceHover
             : Color.surface
 
+    Behavior on color {
+        ColorAnimation {
+            duration: Style.motionFast
+            easing.type: Easing.OutCubic
+        }
+    }
+
     RowLayout {
         anchors.fill: parent
 
         anchors.leftMargin: Style.paddingLarge
         anchors.rightMargin: Style.paddingLarge
+        anchors.topMargin: Style.spacingMedium
+        anchors.bottomMargin: Style.spacingMedium
 
         spacing: Style.spacingMedium
 
+        MaterialIcon {
+            Layout.alignment: Qt.AlignTop
+
+            text: "palette"
+            iconSize: Style.materialIconMedium
+            iconColor: root.selected
+                ? Color.foreground
+                : Color.accent
+        }
+
         ColumnLayout {
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
 
             spacing: Style.spacingSmall
 
@@ -53,13 +75,43 @@ Rectangle {
                     maximumLineCount: 1
                 }
 
-                Text {
-                    visible: root.active
+                Rectangle {
+                    radius: Style.radiusFull
+                    color: root.selected
+                        ? Color.surface
+                        : Color.accent
+                    implicitHeight: Style.launcherSchemeBadgeHeight
+                    implicitWidth:
+                        currentText.implicitWidth
+                        + Style.spacingMedium * 2
+                    opacity: root.current ? 1.0 : 0.0
+                    scale: root.current ? 1.0 : 0.96
 
-                    text: "Active"
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Style.motionFast
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.accent
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Style.motionFast
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Text {
+                        id: currentText
+
+                        anchors.centerIn: parent
+
+                        text: "Current"
+                        font.pixelSize: Style.fontSmall
+                        color: root.selected
+                            ? Color.foreground
+                            : Color.background
+                    }
                 }
             }
 
@@ -79,10 +131,10 @@ Rectangle {
                     Rectangle {
                         required property var modelData
 
-                        width: 20
-                        height: 8
+                        width: Style.launcherSchemePreviewWidth
+                        height: Style.launcherSchemePreviewHeight
 
-                        radius: 4
+                        radius: Style.launcherSchemePreviewRadius
 
                         color: modelData
                     }

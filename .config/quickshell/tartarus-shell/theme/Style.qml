@@ -86,6 +86,12 @@ QtObject {
     readonly property int launcherSearchHeight: 42
     readonly property int launcherWidth: 600
     readonly property int launcherHeight: 400
+    readonly property int launcherSchemeItemHeight:
+        itemHeight + paddingLarge
+    readonly property int launcherSchemeBadgeHeight: 22
+    readonly property int launcherSchemePreviewWidth: 20
+    readonly property int launcherSchemePreviewHeight: 8
+    readonly property int launcherSchemePreviewRadius: 4
 
     readonly property int animationFast: 100
     readonly property int animationNormal: 180
