@@ -6,6 +6,7 @@ QtObject {
     readonly property var actions: [
         {
             name: "Scheme",
+            icon: "palette",
             command: "scheme",
             description: "Change the current colour scheme"
         }

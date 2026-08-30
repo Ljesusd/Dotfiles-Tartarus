@@ -283,9 +283,11 @@ Rectangle {
                 return
 
             root.interacted()
-            root.service.toggleSpecialWorkspace(
-                workspace.name
-            )
+            root.service
+                .toggleSpecialWorkspaceForScreen(
+                    root.barScreen,
+                    workspace.name
+                )
         }
 
         onCanceled: {

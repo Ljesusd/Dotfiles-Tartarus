@@ -12,6 +12,10 @@ Scope {
     id: root
 
     required property var launcherState
+    required property var monitorContext
+    required property var shellState
+    required property var launcherAnchor
+    required property var barWindow
 
     LauncherController {
         id: controller
@@ -20,14 +24,11 @@ Scope {
         applications: applications
         themes: themes
         actions: launcherActions
-    }
 
-    GlobalShortcut {
-        name: "launcher"
-        description: "Toggle application launcher"
-
-        onPressed: {
-            root.launcherState.toggle()
+        onCloseRequested: {
+            root.shellState.closeLauncher(
+                root.monitorContext
+            )
         }
     }
 
@@ -35,19 +36,17 @@ Scope {
         id: launcherFocusGrab
 
         windows: [
-            root.launcherState.barWindow,
+            root.barWindow,
             launcherWindow
         ]
 
-        active: root.launcherState.opened
+        active: root.monitorContext.launcherOpened
 
         onCleared: {
-            if (
-                root.launcherState.opened
-                && launcherWindow.outsideClickArmed
-            ) {
-                root.launcherState.close()
-            }
+            if (launcherWindow.outsideClickArmed)
+                root.shellState.closeLauncher(
+                    root.monitorContext
+                )
         }
     }
 
@@ -58,7 +57,7 @@ Scope {
         property bool outsideClickArmed: false
 
         anchor.item:
-            root.launcherState.anchorItem
+            root.launcherAnchor
 
         anchor.edges: Edges.Bottom
         anchor.gravity: Edges.Bottom
@@ -110,18 +109,6 @@ Scope {
         Connections {
             target: root.launcherState
 
-            function onOpenedChanged() {
-                if (root.launcherState.opened) {
-                    launcherWindow.outsideClickArmed = false
-                    outsideClickArmTimer.restart()
-                    launcherWindow.openLauncher()
-                } else {
-                    outsideClickArmTimer.stop()
-                    launcherWindow.outsideClickArmed = false
-                    launcherWindow.closeLauncher()
-                }
-            }
-
             function onQueryChanged() {
                 controller.resetSelection()
             }
@@ -139,10 +126,26 @@ Scope {
             }
 
             function onEscapeRequested() {
-                if (!root.launcherState.opened)
+                if (!root.monitorContext.launcherOpened)
                     return
 
                 controller.goBack()
+            }
+        }
+
+        Connections {
+            target: root.monitorContext
+
+            function onLauncherOpenedChanged() {
+                if (root.monitorContext.launcherOpened) {
+                    launcherWindow.outsideClickArmed = false
+                    outsideClickArmTimer.restart()
+                    launcherWindow.openLauncher()
+                } else {
+                    outsideClickArmTimer.stop()
+                    launcherWindow.outsideClickArmed = false
+                    launcherWindow.closeLauncher()
+                }
             }
         }
 

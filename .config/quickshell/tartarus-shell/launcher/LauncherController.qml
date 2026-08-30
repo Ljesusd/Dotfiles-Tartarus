@@ -3,6 +3,8 @@ import QtQml
 QtObject {
     id: root
 
+    signal closeRequested()
+
     enum Mode {
         Applications,
         Actions,
@@ -137,7 +139,7 @@ QtObject {
             return
 
         root.applications.launch(app)
-        root.launcherState.close()
+        root.closeRequested()
     }
 
     function acceptAction() {
@@ -195,7 +197,7 @@ QtObject {
     }
 
     function close() {
-        root.launcherState.close()
+        root.closeRequested()
     }
 
     function backFromSchemes() {

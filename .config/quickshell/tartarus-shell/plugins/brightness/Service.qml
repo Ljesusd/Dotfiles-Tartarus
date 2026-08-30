@@ -377,6 +377,7 @@ QtObject {
         watchProcess.command = [
             "ddcutil",
             "watch",
+            "--x52-no-fifo",
             "--bus",
             root._watchBus.toString()
         ]

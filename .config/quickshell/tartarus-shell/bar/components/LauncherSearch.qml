@@ -7,6 +7,8 @@ Rectangle {
     id: root
 
     required property var launcherState
+    required property var monitorContext
+    required property var shellState
 
     implicitWidth: Style.launcherSearchWidth
     implicitHeight: Style.launcherSearchHeight
@@ -14,7 +16,7 @@ Rectangle {
     radius: Style.radiusMedium
 
     color: {
-        if (root.launcherState.opened)
+        if (root.monitorContext.launcherOpened)
             return Color.background
 
         if (input.activeFocus || hoverHandler.hovered)
@@ -26,34 +28,6 @@ Rectangle {
     Behavior on color {
         ColorAnimation {
             duration: Style.animationFast
-        }
-    }
-
-    Component.onCompleted: {
-        root.launcherState.anchorItem = root
-    }
-
-    Rectangle {
-        id: bottomCornerFill
-
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-
-        height: root.launcherState.opened
-            ? Style.radiusMedium
-            : 0
-
-        color: root.color
-
-        visible: height > 0
-
-        Behavior on height {
-            NumberAnimation {
-                duration: Style.animationFast
-            }
         }
     }
 
@@ -110,8 +84,12 @@ Rectangle {
                 onTextEdited: {
                     root.launcherState.query = text
 
-                    if (!root.launcherState.opened)
-                        root.launcherState.open()
+                    if (!root.monitorContext.launcherOpened) {
+                        root.shellState.openLauncher(
+                            root.monitorContext
+                        )
+                        root.launcherState.focusSearch()
+                    }
                 }
 
                 Keys.onPressed: event => {
@@ -142,7 +120,10 @@ Rectangle {
 
     TapHandler {
         onTapped: {
-            root.launcherState.open()
+            root.shellState.openLauncher(
+                root.monitorContext
+            )
+            root.launcherState.focusSearch()
 
             Qt.callLater(() => {
                 input.forceActiveFocus()
@@ -154,11 +135,18 @@ Rectangle {
         target: root.launcherState
 
         function onFocusRequested() {
+            if (!root.monitorContext.launcherOpened)
+                return
+
             input.forceActiveFocus()
         }
+    }
 
-        function onOpenedChanged() {
-            if (!root.launcherState.opened)
+    Connections {
+        target: root.monitorContext
+
+        function onLauncherOpenedChanged() {
+            if (!root.monitorContext.launcherOpened)
                 input.focus = false
         }
     }

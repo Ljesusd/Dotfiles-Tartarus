@@ -125,6 +125,31 @@ QtObject {
         return root.windowsForWorkspace(id).length > 0
     }
 
+    function focusMonitorForScreen(screen) {
+        const monitor = root.monitorForScreen(screen)
+
+        if (!monitor)
+            return false
+
+        const monitorName =
+            monitor.name ?? screen?.name ?? ""
+
+        if (!monitorName)
+            return false
+
+        if (Hyprland.usingLua) {
+            Hyprland.dispatch(
+                `hl.dsp.focus({ monitor = "${monitorName}" })`
+            )
+        } else {
+            Hyprland.dispatch(
+                `focusmonitor ${monitorName}`
+            )
+        }
+
+        return true
+    }
+
     function activateWorkspace(id) {
         if (id < 1)
             return false
@@ -153,6 +178,16 @@ QtObject {
         return true
     }
 
+    function activateWorkspaceForScreen(screen, id) {
+        if (id < 1)
+            return false
+
+        if (!root.focusMonitorForScreen(screen))
+            return false
+
+        return root.activateWorkspace(id)
+    }
+
     function toggleSpecialWorkspace(name) {
         if (!name)
             return false
@@ -172,5 +207,15 @@ QtObject {
         }
 
         return true
+    }
+
+    function toggleSpecialWorkspaceForScreen(screen, name) {
+        if (!name)
+            return false
+
+        if (!root.focusMonitorForScreen(screen))
+            return false
+
+        return root.toggleSpecialWorkspace(name)
     }
 }

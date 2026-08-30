@@ -135,9 +135,11 @@ Item {
             if (!activeSpecial)
                 return false
 
-            root.plugin.service.toggleSpecialWorkspace(
-                activeSpecial
-            )
+            root.plugin.service
+                .toggleSpecialWorkspaceForScreen(
+                    root.barScreen,
+                    activeSpecial
+                )
 
             return true
         }
@@ -154,9 +156,11 @@ Item {
         if (nextWorkspaceId === root.activeWorkspaceId)
             return false
 
-        root.plugin.service.activateWorkspace(
-            nextWorkspaceId
-        )
+        root.plugin.service
+            .activateWorkspaceForScreen(
+                root.barScreen,
+                nextWorkspaceId
+            )
 
         return true
     }
@@ -354,6 +358,7 @@ Item {
                         required property int index
 
                         workspaceId: root.groupStart + index
+                        barScreen: root.barScreen
                         service: root.plugin.service
                         maxWindowIcons: root.maxWindowIcons
                         activeWorkspaceId: root.activeWorkspaceId

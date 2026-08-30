@@ -9,6 +9,7 @@ Rectangle {
     id: root
 
     required property int workspaceId
+    required property var barScreen
     required property var service
     required property int maxWindowIcons
     required property int activeWorkspaceId
@@ -135,12 +136,21 @@ Rectangle {
             root.interacted()
 
             if (root.active) {
-                root.service.activateWorkspace(root.workspaceId)
-                root.service.toggleSpecialWorkspace("special")
+                root.service.activateWorkspaceForScreen(
+                    root.barScreen,
+                    root.workspaceId
+                )
+                root.service.toggleSpecialWorkspaceForScreen(
+                    root.barScreen,
+                    "special"
+                )
                 return
             }
 
-            root.service.activateWorkspace(root.workspaceId)
+            root.service.activateWorkspaceForScreen(
+                root.barScreen,
+                root.workspaceId
+            )
         }
     }
 }

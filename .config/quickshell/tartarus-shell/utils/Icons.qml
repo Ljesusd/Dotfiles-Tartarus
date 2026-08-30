@@ -61,6 +61,34 @@ QtObject {
         return DesktopEntries.heuristicLookup(name)
     }
 
+    function desktopEntryForWindow(toplevel) {
+        if (!toplevel)
+            return null
+
+        const ipc = toplevel.lastIpcObject ?? null
+        const wayland = toplevel.wayland ?? null
+        const candidates = [
+            wayland ? wayland.appId ?? "" : "",
+            ipc ? ipc.class ?? "" : "",
+            ipc ? ipc.initialClass ?? "" : ""
+        ]
+        const tried = []
+
+        for (const candidate of candidates) {
+            if (!candidate || tried.includes(candidate))
+                continue
+
+            tried.push(candidate)
+
+            const entry = root.desktopEntryForApp(candidate)
+
+            if (entry)
+                return entry
+        }
+
+        return null
+    }
+
     function appCategoryIcon(name, fallback = "apps") {
         const entry = root.desktopEntryForApp(name)
 
@@ -122,14 +150,16 @@ QtObject {
     }
 
     function iconForWindow(toplevel, fallback = "apps") {
-        const className = root.windowClass(toplevel)
+        const entry = root.desktopEntryForWindow(toplevel)
 
-        if (!className)
+        if (!entry || !entry.categories)
             return fallback
 
-        return root.appCategoryIcon(
-            className,
-            fallback
-        )
+        for (const category of Object.keys(root.appCategoryIcons)) {
+            if (entry.categories.includes(category))
+                return root.appCategoryIcons[category]
+        }
+
+        return fallback
     }
 }

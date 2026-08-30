@@ -2,12 +2,14 @@ import Quickshell
 import QtQml
 
 import "../bar"
+import "../launcher"
 
 Scope {
     id: root
 
     required property var screen
     required property var launcherState
+    required property var shellState
     required property var pluginRegistry
 
     readonly property string screenName:
@@ -40,6 +42,8 @@ Scope {
     QtObject {
         id: context
 
+        property bool launcherOpened: false
+
         readonly property var screen: root.screen
 
         readonly property string name:
@@ -64,9 +68,29 @@ Scope {
             root.screenGeometry
     }
 
+    Component.onCompleted: {
+        root.shellState.registerContext(context)
+    }
+
+    Component.onDestruction: {
+        root.shellState.unregisterContext(context)
+    }
+
     Bar {
+        id: bar
+
         screen: root.screen
         launcherState: root.launcherState
+        monitorContext: context
+        shellState: root.shellState
         pluginRegistry: root.pluginRegistry
+    }
+
+    Launcher {
+        launcherState: root.launcherState
+        monitorContext: context
+        shellState: root.shellState
+        launcherAnchor: bar.launcherAnchor
+        barWindow: bar
     }
 }

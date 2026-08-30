@@ -11,8 +11,12 @@ PanelWindow {
     id: root
 
     required property var launcherState
+    required property var monitorContext
+    required property var shellState
     required property var pluginRegistry
     property Item hoveredEntry: null
+    readonly property var launcherAnchor:
+        launcherSearch
 
     HoverPanelController {
         id: hoverPanelController
@@ -31,8 +35,6 @@ PanelWindow {
     focusable: true
 
     Component.onCompleted: {
-        root.launcherState.barWindow = root
-
         for (const plugin of root.pluginRegistry.plugins)
             root.addLeftBarPlugin(plugin)
         for (const plugin of root.pluginRegistry.plugins)
@@ -57,8 +59,7 @@ PanelWindow {
     }
 
     function closeLauncherIfOpen() {
-        if (root.launcherState.opened)
-            root.launcherState.close()
+        root.shellState.closeLaunchers()
     }
 
     function isEntry(item) {
@@ -388,14 +389,18 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                EntryWrapper {
-                    anchors.centerIn: parent
-                    entryId: "launcher-search"
+                    EntryWrapper {
+                        anchors.centerIn: parent
+                        entryId: "launcher-search"
 
-                    LauncherSearch {
-                        launcherState: root.launcherState
+                        LauncherSearch {
+                            id: launcherSearch
+
+                            launcherState: root.launcherState
+                            monitorContext: root.monitorContext
+                            shellState: root.shellState
+                        }
                     }
-                }
 
                 // ActiveWindow desactivado temporalmente.
                 // Para recuperarlo: comenta LauncherSearch y descomenta este bloque.
@@ -422,7 +427,8 @@ PanelWindow {
                         entryId: "system-tray"
 
                         SystemTray {
-                            launcherState: root.launcherState
+                            onCloseLauncherRequested:
+                                root.closeLauncherIfOpen()
                         }
                     }
 
@@ -491,7 +497,8 @@ PanelWindow {
                         entryId: "clock"
 
                         Clock {
-                            launcherState: root.launcherState
+                            onCloseLauncherRequested:
+                                root.closeLauncherIfOpen()
                         }
                     }
                 }

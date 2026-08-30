@@ -9,6 +9,14 @@ Rectangle {
 
     required property var application
     required property bool selected
+    readonly property string applicationIconSource: {
+        const icon = root.application?.icon ?? ""
+
+        if (!icon)
+            return ""
+
+        return Quickshell.iconPath(icon, true)
+    }
     readonly property bool highlighted:
         root.selected || hoverHandler.hovered
 
@@ -56,16 +64,31 @@ Rectangle {
 
         spacing: Style.spacingMedium
 
-        Image {
-            id: appIcon
-
+        Item {
             Layout.alignment: Qt.AlignTop
-
             Layout.preferredWidth: Style.iconMedium
             Layout.preferredHeight: Style.iconMedium
 
-            source: Quickshell.iconPath(root.application.icon)
-            fillMode: Image.PreserveAspectFit
+            Image {
+                id: appIcon
+
+                anchors.fill: parent
+
+                source: root.applicationIconSource
+                visible: root.applicationIconSource !== ""
+                fillMode: Image.PreserveAspectFit
+            }
+
+            MaterialIcon {
+                anchors.centerIn: parent
+
+                visible: root.applicationIconSource === ""
+                text: "apps"
+                iconSize: Style.materialIconMedium
+                iconColor: root.selected
+                    ? Color.foreground
+                    : Color.foregroundMuted
+            }
         }
 
         ColumnLayout {

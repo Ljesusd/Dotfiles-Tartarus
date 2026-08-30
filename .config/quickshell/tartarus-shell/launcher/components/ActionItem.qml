@@ -8,10 +8,13 @@ Rectangle {
 
     required property var action
     required property bool selected
+    readonly property bool highlighted:
+        root.selected || hoverHandler.hovered
 
     signal activated()
     signal hovered()
 
+    implicitWidth: ListView.view ? ListView.view.width : 0
     implicitHeight: Style.itemHeight
 
     radius: Style.radiusMedium
@@ -20,20 +23,38 @@ Rectangle {
         ? Color.selection
         : hoverHandler.hovered
             ? Color.surfaceHover
-            : "transparent"
+            : Color.surface
+
+    Behavior on color {
+        ColorAnimation {
+            duration: Style.motionFast
+            easing.type: Easing.OutCubic
+        }
+    }
 
     RowLayout {
         anchors.fill: parent
 
         anchors.leftMargin: Style.paddingLarge
         anchors.rightMargin: Style.paddingLarge
+        anchors.topMargin: Style.spacingMedium
+        anchors.bottomMargin: Style.spacingMedium
 
         spacing: Style.spacingMedium
 
+        MaterialIcon {
+            Layout.alignment: Qt.AlignTop
+
+            text: root.action.icon
+            iconSize: Style.iconMedium
+            iconColor: Color.accent
+        }
+
         ColumnLayout {
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
 
-            spacing: 2
+            spacing: Style.spacingXs
 
             Text {
                 Layout.fillWidth: true
@@ -58,6 +79,14 @@ Rectangle {
                 elide: Text.ElideRight
                 maximumLineCount: 1
             }
+        }
+
+        MaterialIcon {
+            Layout.alignment: Qt.AlignVCenter
+
+            text: "chevron_right"
+            iconSize: Style.materialIconMedium
+            iconColor: Color.foregroundMuted
         }
     }
 

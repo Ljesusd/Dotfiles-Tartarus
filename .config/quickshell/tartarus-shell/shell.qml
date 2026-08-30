@@ -5,6 +5,7 @@
 //@ pragma UseQApplication
 
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import QtQml
 import QtQml.Models
@@ -30,6 +31,10 @@ ShellRoot {
         id: launcherState
     }
 
+    ShellState {
+        id: globalShellState
+    }
+
     PluginRegistry {
         id: pluginRegistry
     }
@@ -38,26 +43,54 @@ ShellRoot {
         registry: pluginRegistry
     }
 
+    GlobalShortcut {
+        name: "launcher"
+        description: "Toggle application launcher"
+
+        onPressed: {
+            const context =
+                globalShellState.contextForFocusedMonitor()
+
+            if (!context)
+                return
+
+            globalShellState.toggleLauncher(context)
+
+            if (context.launcherOpened)
+                launcherState.focusSearch()
+        }
+    }
+
     IpcHandler {
         target: "launcher"
 
         function toggle(): void {
-            launcherState.toggle()
+            const context =
+                globalShellState.contextForFocusedMonitor()
+
+            if (!context)
+                return
+
+            globalShellState.toggleLauncher(context)
+
+            if (context.launcherOpened)
+                launcherState.focusSearch()
         }
 
         function open(): void {
-            launcherState.open()
+            const context =
+                globalShellState.contextForFocusedMonitor()
+
+            if (!context)
+                return
+
+            globalShellState.openLauncher(context)
+            launcherState.focusSearch()
         }
 
         function close(): void {
-            launcherState.close()
+            globalShellState.closeLaunchers()
         }
-    }
-
-    Connections {
-        target: launcherState
-
-        function onOpenedChanged() {}
     }
 
     Variants {
@@ -68,12 +101,9 @@ ShellRoot {
 
             screen: modelData
             launcherState: root.sharedLauncherState
+            shellState: globalShellState
             pluginRegistry: root.sharedPluginRegistry
         }
-    }
-
-    Launcher {
-        launcherState: launcherState
     }
 
 }

@@ -9,7 +9,7 @@ import "../../theme"
 RowLayout {
     id: root
 
-    property var launcherState
+    signal closeLauncherRequested()
 
     spacing: Style.barSpacingSmall
 
@@ -78,12 +78,7 @@ RowLayout {
                 }
 
                 onClicked: mouse => {
-                    if (
-                        root.launcherState
-                        && root.launcherState.opened
-                    ) {
-                        root.launcherState.close()
-                    }
+                    root.closeLauncherRequested()
 
                     if (mouse.button === Qt.RightButton) {
                         if (trayItem.modelData.hasMenu)

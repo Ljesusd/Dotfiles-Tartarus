@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 
 import "../../theme"
 import "../components"
@@ -38,50 +39,86 @@ Item {
         }
     }
 
-    ListView {
-        id: actionList
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Style.paddingXLarge
+        anchors.rightMargin: Style.paddingXLarge
+        anchors.topMargin: Style.paddingLarge
+        anchors.bottomMargin: Style.paddingXLarge
 
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
+        spacing: Style.spacingMedium
 
-            topMargin: Style.paddingLarge
-            leftMargin: Style.paddingXLarge
-            rightMargin: Style.paddingXLarge
-            bottomMargin: Style.paddingXLarge
-        }
+        RowLayout {
+            Layout.fillWidth: true
 
-        clip: true
+            spacing: Style.spacingMedium
 
-        model: root.actions.filtered(
-            root.controller.actionQuery
-        )
-
-        currentIndex: root.active
-            ? root.controller.selectedIndex
-            : -1
-
-        onCountChanged: {
-            if (root.active)
-                root.controller.resetSelection()
-        }
-
-        delegate: ActionItem {
-            required property var modelData
-            required property int index
-
-            action: modelData
-            selected: ListView.isCurrentItem
-
-            onHovered: {
-                root.controller.select(index)
+            MaterialIcon {
+                text: "chevron_right"
+                iconSize: Style.materialIconMedium
+                iconColor: Color.accent
             }
 
-            onActivated: {
-                root.controller.select(index)
-                root.controller.accept()
+            Text {
+                text: "Actions"
+
+                font.pixelSize: Style.fontNormal
+                font.weight: Font.DemiBold
+                color: Color.foreground
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            ListView {
+                id: actionList
+
+                anchors.fill: parent
+
+                clip: true
+                spacing: Style.spacingXs
+
+                model: root.actions.filtered(
+                    root.controller.actionQuery
+                )
+
+                currentIndex: root.active
+                    ? root.controller.selectedIndex
+                    : -1
+
+                onCountChanged: {
+                    if (root.active)
+                        root.controller.resetSelection()
+                }
+
+                delegate: ActionItem {
+                    required property var modelData
+                    required property int index
+
+                    action: modelData
+                    selected: ListView.isCurrentItem
+
+                    onHovered: {
+                        root.controller.select(index)
+                    }
+
+                    onActivated: {
+                        root.controller.select(index)
+                        root.controller.accept()
+                    }
+                }
+            }
+
+            Text {
+                anchors.centerIn: actionList
+
+                visible: root.active && actionList.count === 0
+
+                text: "No actions found"
+                font.pixelSize: Style.fontNormal
+                color: Color.foregroundMuted
             }
         }
     }

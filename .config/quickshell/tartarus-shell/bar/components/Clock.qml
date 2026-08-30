@@ -6,7 +6,7 @@ import "../../theme"
 Rectangle {
     id: root
 
-    property var launcherState
+    signal closeLauncherRequested()
 
     color: "transparent"
 
@@ -38,12 +38,7 @@ Rectangle {
 
     TapHandler {
         onTapped: {
-            if (
-                root.launcherState
-                && root.launcherState.opened
-            ) {
-                root.launcherState.close()
-            }
+            root.closeLauncherRequested()
         }
     }
 }
