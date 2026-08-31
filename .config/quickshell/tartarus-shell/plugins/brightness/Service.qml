@@ -1,3 +1,6 @@
+pragma ComponentBehavior: Bound
+
+import Quickshell
 import Quickshell.Io
 import QtQml
 
@@ -12,6 +15,27 @@ QtObject {
 
     property var displays: []
     property var currentDisplay: null
+
+    readonly property var ddcMonitorMap: {
+        const next = {}
+
+        for (const display of root.displays) {
+            const connector =
+                root.normalizeConnector(
+                    display?.connector ?? ""
+                )
+
+            if (!connector)
+                continue
+
+            next[connector] = display
+        }
+
+        return next
+    }
+
+    readonly property var monitors:
+        monitorVariants.instances
 
     property int brightness: 0
     property int maxBrightness: 100
@@ -51,6 +75,314 @@ QtObject {
     readonly property int wheelCommitDelay: 75
     readonly property int sliderCommitDelay: 350
     readonly property int pollInterval: 3000
+
+    readonly property Variants monitorVariants: Variants {
+        model: Quickshell.screens
+
+        QtObject {
+            id: monitor
+
+            property var modelData: null
+            property int _lastInitializedBus: -1
+            property int queuedBrightness: -1
+            property bool writeInFlight: false
+
+            readonly property string screenName:
+                monitor.modelData?.name ?? ""
+
+            readonly property var ddcInfo:
+                monitor.screenName.length > 0
+                    ? (
+                        root.ddcMonitorMap[
+                            monitor.screenName
+                        ] ?? null
+                    )
+                    : null
+
+            readonly property int bus:
+                monitor.ddcInfo?.bus ?? 0
+
+            readonly property string name:
+                monitor.ddcInfo?.name
+                ?? monitor.screenName
+
+            readonly property int brightness:
+                monitor.ddcInfo?.brightness ?? 0
+
+            readonly property int maxBrightness:
+                monitor.ddcInfo?.maxBrightness
+                ?? 100
+
+            readonly property bool available:
+                monitor.ddcInfo?.readable === true
+
+            readonly property int brightnessPercent:
+                monitor.available
+                && monitor.maxBrightness > 0
+                    ? Math.round(
+                        monitor.brightness
+                        / monitor.maxBrightness
+                        * 100
+                    )
+                    : 0
+
+            function initBrightness() {
+                if (!monitor.modelData)
+                    return
+
+                if (monitor.bus <= 0)
+                    return
+
+                if (initProc.running)
+                    return
+
+                monitor._lastInitializedBus =
+                    monitor.bus
+
+                initProc.command = [
+                    "ddcutil",
+                    "getvcp",
+                    "--bus",
+                    monitor.bus.toString(),
+                    "--terse",
+                    "10"
+                ]
+
+                initProc.running = true
+            }
+
+            function setBrightness(
+                value,
+                commitDelay
+            ) {
+                if (!monitor.available)
+                    return
+
+                const target =
+                    Math.max(
+                        0,
+                        Math.min(
+                            Math.round(value),
+                            monitor.maxBrightness
+                        )
+                    )
+
+                if (
+                    target === monitor.brightness
+                    && monitor.queuedBrightness < 0
+                ) {
+                    return
+                }
+
+                root.updateDisplay(
+                    monitor.ddcInfo,
+                    {
+                        brightness: target,
+                        readable: true
+                    }
+                )
+
+                monitor.queuedBrightness = target
+
+                writeDebounceTimer.interval =
+                    commitDelay
+                    ?? root.sliderCommitDelay
+
+                writeDebounceTimer.restart()
+            }
+
+            function changeBrightness(
+                deltaPercent
+            ) {
+                if (!monitor.available)
+                    return
+
+                const rawDelta =
+                    Math.max(
+                        1,
+                        Math.round(
+                            monitor.maxBrightness
+                            * Math.abs(
+                                deltaPercent
+                            )
+                            / 100
+                        )
+                    )
+                    * (
+                        deltaPercent >= 0
+                            ? 1
+                            : -1
+                    )
+
+                monitor.setBrightness(
+                    monitor.brightness + rawDelta,
+                    root.wheelCommitDelay
+                )
+            }
+
+            function startPendingWrite() {
+                if (
+                    !monitor.available
+                    || monitor.bus <= 0
+                    || monitor.queuedBrightness < 0
+                    || monitor.writeInFlight
+                ) {
+                    return
+                }
+
+                const target =
+                    monitor.queuedBrightness
+
+                monitor.queuedBrightness = -1
+                monitor.writeInFlight = true
+
+                setProc.command = [
+                    "ddcutil",
+                    "setvcp",
+                    "--bus",
+                    monitor.bus.toString(),
+                    "10",
+                    target.toString()
+                ]
+
+                setProc.running = true
+            }
+
+            readonly property Process initProc: Process {
+                stdout: StdioCollector {
+                    id: initCollector
+                }
+
+                stderr: StdioCollector {
+                    id: initErrorCollector
+                }
+
+                onExited: (
+                    exitCode,
+                    exitStatus
+                ) => {
+                    if (!monitor.ddcInfo)
+                        return
+
+                    if (exitCode !== 0) {
+                        console.warn(
+                            "Brightness monitor getvcp failed:",
+                            monitor.screenName,
+                            exitCode,
+                            exitStatus
+                        )
+
+                        if (initErrorCollector.text !== "") {
+                            console.warn(
+                                "Brightness monitor getvcp stderr:",
+                                initErrorCollector.text
+                            )
+                        }
+
+                        root.updateDisplay(
+                            monitor.ddcInfo,
+                            {
+                                readable: false
+                            }
+                        )
+
+                        return
+                    }
+
+                    const parsed =
+                        root.parseBrightness(
+                            initCollector.text
+                        )
+
+                    if (!parsed) {
+                        root.updateDisplay(
+                            monitor.ddcInfo,
+                            {
+                                readable: false
+                            }
+                        )
+
+                        return
+                    }
+
+                    root.updateDisplay(
+                        monitor.ddcInfo,
+                        {
+                            brightness:
+                                parsed.current,
+
+                            maxBrightness:
+                                parsed.maximum,
+
+                            readable: true
+                        }
+                    )
+                }
+            }
+
+            readonly property Process setProc: Process {
+                stderr: StdioCollector {
+                    id: setErrorCollector
+                }
+
+                onExited: (
+                    exitCode,
+                    exitStatus
+                ) => {
+                    monitor.writeInFlight = false
+
+                    if (exitCode !== 0) {
+                        console.warn(
+                            "Brightness monitor setvcp failed:",
+                            monitor.screenName,
+                            exitCode,
+                            exitStatus
+                        )
+
+                        if (setErrorCollector.text !== "") {
+                            console.warn(
+                                "Brightness monitor setvcp stderr:",
+                                setErrorCollector.text
+                            )
+                        }
+
+                        monitor.initBrightness()
+                        return
+                    }
+
+                    if (monitor.queuedBrightness >= 0)
+                        writeDebounceTimer.restart()
+                }
+            }
+
+            readonly property Timer writeDebounceTimer: Timer {
+                interval: root.sliderCommitDelay
+                repeat: false
+
+                onTriggered: {
+                    monitor.startPendingWrite()
+                }
+            }
+
+            onModelDataChanged: {
+                monitor.initBrightness()
+            }
+
+            onBusChanged: {
+                if (
+                    monitor.bus > 0
+                    && monitor.bus
+                        !== monitor._lastInitializedBus
+                ) {
+                    monitor.initBrightness()
+                }
+            }
+
+            Component.onCompleted: {
+                monitor.initBrightness()
+            }
+        }
+    }
 
 
     // ============================================================
@@ -117,6 +449,12 @@ QtObject {
     }
 
     function displayForScreen(screen) {
+        const monitor =
+            root.monitorForScreen(screen)
+
+        if (monitor?.ddcInfo)
+            return monitor.ddcInfo
+
         if (!screen)
             return null
 
@@ -141,37 +479,75 @@ QtObject {
         return null
     }
 
-    function brightnessForScreen(screen) {
-        const display =
-            root.displayForScreen(screen)
+    function monitorForScreen(screen) {
+        if (!screen)
+            return null
 
-        return display?.brightness ?? 0
+        return root.monitors.find(monitor => {
+            return monitor?.modelData === screen
+        }) ?? null
+    }
+
+    function monitorForDisplay(display) {
+        if (!display)
+            return null
+
+        if (display.connector) {
+            const connector =
+                root.normalizeConnector(
+                    display.connector
+                )
+
+            const byConnector =
+                root.monitors.find(monitor => {
+                    return (
+                        root.normalizeConnector(
+                            monitor?.screenName ?? ""
+                        ) === connector
+                    )
+                }) ?? null
+
+            if (byConnector)
+                return byConnector
+        }
+
+        if (display.bus > 0) {
+            return root.monitors.find(monitor => {
+                return monitor?.bus === display.bus
+            }) ?? null
+        }
+
+        return null
+    }
+
+    function brightnessForScreen(screen) {
+        const monitor =
+            root.monitorForScreen(screen)
+
+        return monitor?.available
+            ? monitor.brightness
+            : 0
     }
 
     function brightnessPercentForScreen(screen) {
-        const display =
-            root.displayForScreen(screen)
+        const monitor =
+            root.monitorForScreen(screen)
 
         if (
-            !display
-            || !display.readable
-            || display.maxBrightness <= 0
+            !monitor
+            || !monitor.available
         ) {
             return 0
         }
 
-        return Math.round(
-            display.brightness
-            / display.maxBrightness
-            * 100
-        )
+        return monitor.brightnessPercent
     }
 
     function availableForScreen(screen) {
-        const display =
-            root.displayForScreen(screen)
+        const monitor =
+            root.monitorForScreen(screen)
 
-        return !!display && display.readable
+        return monitor?.available ?? false
     }
 
     function selectDisplay(bus) {
@@ -337,6 +713,9 @@ QtObject {
         value,
         commitDelay
     ) {
+        if (!root.currentDisplay)
+            return
+
         root.setBrightnessForDisplay(
             root.currentDisplay,
             value,
@@ -349,8 +728,13 @@ QtObject {
         value,
         commitDelay
     ) {
-        root.setBrightnessForDisplay(
-            root.displayForScreen(screen),
+        const monitor =
+            root.monitorForScreen(screen)
+
+        if (!monitor)
+            return
+
+        monitor.setBrightness(
             value,
             commitDelay
         )
@@ -363,6 +747,17 @@ QtObject {
     ) {
         if (!display)
             return
+
+        const monitor =
+            root.monitorForDisplay(display)
+
+        if (monitor) {
+            monitor.setBrightness(
+                value,
+                commitDelay
+            )
+            return
+        }
 
         if (
             !root.sameDisplay(
@@ -434,6 +829,21 @@ QtObject {
     function changeBrightness(
         deltaPercent
     ) {
+        if (!root.currentDisplay)
+            return
+
+        const monitor =
+            root.monitorForDisplay(
+                root.currentDisplay
+            )
+
+        if (monitor) {
+            monitor.changeBrightness(
+                deltaPercent
+            )
+            return
+        }
+
         if (!root.available)
             return
 
@@ -462,35 +872,17 @@ QtObject {
         screen,
         deltaPercent
     ) {
-        const display =
-            root.displayForScreen(screen)
+        const monitor =
+            root.monitorForScreen(screen)
 
         if (
-            !display
-            || !display.readable
+            !monitor
         ) {
             return
         }
 
-        const rawDelta =
-            Math.max(
-                1,
-                Math.round(
-                    display.maxBrightness
-                    * Math.abs(deltaPercent)
-                    / 100
-                )
-            )
-            * (
-                deltaPercent >= 0
-                    ? 1
-                    : -1
-            )
-
-        root.setBrightnessForScreen(
-            screen,
-            display.brightness + rawDelta,
-            root.wheelCommitDelay
+        monitor.changeBrightness(
+            deltaPercent
         )
     }
 
@@ -1100,9 +1492,7 @@ QtObject {
                 return
             }
 
-            root.refreshAllDisplays(
-                "initial"
-            )
+            root.syncCurrentDisplayState()
         }
     }
 
@@ -1316,7 +1706,7 @@ QtObject {
     readonly property Timer pollTimer: Timer {
         interval: root.pollInterval
         repeat: true
-        running: true
+        running: false
 
         onTriggered: {
             if (
