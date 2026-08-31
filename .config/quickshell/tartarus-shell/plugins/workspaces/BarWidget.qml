@@ -28,16 +28,10 @@ Item {
                 root.barScreen
             )
 
-    readonly property int groupStart: {
-        const activeId = root.activeWorkspaceId
-
-        if (activeId <= 0)
-            return 1
-
-        return Math.floor(
-            (activeId - 1) / root.shownWorkspaces
-        ) * root.shownWorkspaces + 1
-    }
+    readonly property int groupStart:
+        root.plugin.service.firstWorkspaceForScreen(
+            root.barScreen
+        )
 
     readonly property int activeIndex:
         root.activeWorkspaceId - root.groupStart

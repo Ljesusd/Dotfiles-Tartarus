@@ -8,18 +8,29 @@ Rectangle {
 
     required property var plugin
     property var hoverPanelController: null
+    property var barScreen: null
 
     property var panelAnchorItem: null
 
     readonly property var service:
         root.plugin.service
 
+    readonly property bool brightnessAvailable:
+        root.service.availableForScreen(
+            root.barScreen
+        )
+
+    readonly property int brightnessPercent:
+        root.service.brightnessPercentForScreen(
+            root.barScreen
+        )
+
     readonly property string brightnessIcon: {
-        if (!root.service.available)
+        if (!root.brightnessAvailable)
             return "󰃞"
 
         const percent =
-            root.service.brightnessPercent
+            root.brightnessPercent
 
         if (percent >= 75)
             return "󰃠"
@@ -31,8 +42,8 @@ Rectangle {
     }
 
     readonly property string brightnessText:
-        root.service.available
-        ? root.service.brightnessPercent + "%"
+        root.brightnessAvailable
+        ? root.brightnessPercent + "%"
         : "N/A"
 
     signal interacted()
@@ -74,7 +85,7 @@ Rectangle {
             font.family: Style.iconFont
             font.pixelSize: Style.barIconNormal
 
-            color: root.service.available
+            color: root.brightnessAvailable
                 ? Color.foreground
                 : Color.foregroundMuted
         }
@@ -84,7 +95,7 @@ Rectangle {
 
             font.pixelSize: Style.barFontNormal
 
-            color: root.service.available
+            color: root.brightnessAvailable
                 ? Color.foreground
                 : Color.foregroundMuted
         }
@@ -117,7 +128,7 @@ Rectangle {
             | PointerDevice.TouchPad
 
         onWheel: event => {
-            if (!root.service.available)
+            if (!root.brightnessAvailable)
                 return
 
             const deltaY =
@@ -128,11 +139,13 @@ Rectangle {
 
             root.interacted()
 
-            root.service.changeBrightness(
+            root.service.changeBrightnessForScreen(
+                root.barScreen,
                 deltaY > 0 ? 5 : -5
             )
 
             event.accepted = true
         }
     }
+
 }

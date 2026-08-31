@@ -39,21 +39,18 @@ QtObject {
 
     property var _readDisplay: null
     property var _writeDisplay: null
+    property var _readQueue: []
 
     property string _readPurpose: ""
     property string _writeStep: ""
 
+    property bool _readInProgress: false
     property bool _writeInFlight: false
     property bool _localOverrideActive: false
 
-    // Whether the Service wants the watcher to stay alive.
-    property bool _watchWanted: false
-
-    // I2C bus currently watched by ddcutil.
-    property int _watchBus: -1
-
     readonly property int wheelCommitDelay: 75
     readonly property int sliderCommitDelay: 350
+    readonly property int pollInterval: 3000
 
 
     // ============================================================
@@ -64,12 +61,11 @@ QtObject {
         if (
             root._writeInFlight
             || root._pendingBrightness >= 0
+            || root._readInProgress
             || setDebounceTimer.running
         ) {
             return
         }
-
-        root.stopWatch()
 
         root._detectRevision =
             root._stateRevision
@@ -111,6 +107,73 @@ QtObject {
             : null
     }
 
+    function normalizeConnector(value) {
+        if (!value)
+            return ""
+
+        return String(value)
+            .trim()
+            .replace(/^card\d+-/, "")
+    }
+
+    function displayForScreen(screen) {
+        if (!screen)
+            return null
+
+        const connector =
+            root.normalizeConnector(
+                screen.name ?? ""
+            )
+
+        if (!connector)
+            return null
+
+        for (const display of root.displays) {
+            if (
+                root.normalizeConnector(
+                    display?.connector ?? ""
+                ) === connector
+            ) {
+                return display
+            }
+        }
+
+        return null
+    }
+
+    function brightnessForScreen(screen) {
+        const display =
+            root.displayForScreen(screen)
+
+        return display?.brightness ?? 0
+    }
+
+    function brightnessPercentForScreen(screen) {
+        const display =
+            root.displayForScreen(screen)
+
+        if (
+            !display
+            || !display.readable
+            || display.maxBrightness <= 0
+        ) {
+            return 0
+        }
+
+        return Math.round(
+            display.brightness
+            / display.maxBrightness
+            * 100
+        )
+    }
+
+    function availableForScreen(screen) {
+        const display =
+            root.displayForScreen(screen)
+
+        return !!display && display.readable
+    }
+
     function selectDisplay(bus) {
         if (
             root._writeInFlight
@@ -134,8 +197,6 @@ QtObject {
         ) {
             return
         }
-
-        root.stopWatch()
 
         root.currentDisplay = display
         root.available =
@@ -228,15 +289,31 @@ QtObject {
                 patch
             )
 
+        root.syncCurrentDisplayState()
+    }
+
+    function syncCurrentDisplayState() {
+        if (!root.currentDisplay) {
+            root.available = false
+            return
+        }
+
+        const updated =
+            root.displays.find(item => {
+                return root.sameDisplay(
+                    item,
+                    root.currentDisplay
+                )
+            }) ?? root.currentDisplay
+
+        root.currentDisplay = updated
+
         if (
             root.sameDisplay(
-                root.currentDisplay,
-                display
+                updated,
+                root.currentDisplay
             )
         ) {
-            root.currentDisplay =
-                updated
-
             if (updated.readable === true) {
                 root.brightness =
                     updated.brightness
@@ -245,6 +322,8 @@ QtObject {
                     updated.maxBrightness
 
                 root.available = true
+            } else {
+                root.available = false
             }
         }
     }
@@ -258,10 +337,53 @@ QtObject {
         value,
         commitDelay
     ) {
+        root.setBrightnessForDisplay(
+            root.currentDisplay,
+            value,
+            commitDelay
+        )
+    }
+
+    function setBrightnessForScreen(
+        screen,
+        value,
+        commitDelay
+    ) {
+        root.setBrightnessForDisplay(
+            root.displayForScreen(screen),
+            value,
+            commitDelay
+        )
+    }
+
+    function setBrightnessForDisplay(
+        display,
+        value,
+        commitDelay
+    ) {
+        if (!display)
+            return
+
         if (
-            !root.available
-            || !root.currentDisplay
+            !root.sameDisplay(
+                display,
+                root.currentDisplay
+            )
         ) {
+            root.currentDisplay = display
+            root.available =
+                display.readable === true
+
+            if (display.readable === true) {
+                root.brightness =
+                    display.brightness
+
+                root.maxBrightness =
+                    display.maxBrightness
+            }
+        }
+
+        if (!root.available) {
             return
         }
 
@@ -336,64 +458,124 @@ QtObject {
         )
     }
 
+    function changeBrightnessForScreen(
+        screen,
+        deltaPercent
+    ) {
+        const display =
+            root.displayForScreen(screen)
 
-    // ============================================================
-    // Watch lifecycle
-    // ============================================================
-
-    function startWatch() {
-        if (!root.available)
+        if (
+            !display
+            || !display.readable
+        ) {
             return
+        }
 
-        if (!root.currentDisplay)
-            return
+        const rawDelta =
+            Math.max(
+                1,
+                Math.round(
+                    display.maxBrightness
+                    * Math.abs(deltaPercent)
+                    / 100
+                )
+            )
+            * (
+                deltaPercent >= 0
+                    ? 1
+                    : -1
+            )
 
-        if (root.currentDisplay.bus <= 0)
-            return
-
-        if (root._writeInFlight)
-            return
-
-        if (getProcess.running)
-            return
-
-        if (setProcess.running)
-            return
-
-        if (scsProcess.running)
-            return
-
-        if (detectProcess.running)
-            return
-
-        if (watchProcess.running)
-            return
-
-        root._watchWanted = true
-
-        root._watchBus =
-            root.currentDisplay.bus
-
-        watchProcess.command = [
-            "ddcutil",
-            "watch",
-            "--x52-no-fifo",
-            "--bus",
-            root._watchBus.toString()
-        ]
-
-        watchProcess.running = true
+        root.setBrightnessForScreen(
+            screen,
+            display.brightness + rawDelta,
+            root.wheelCommitDelay
+        )
     }
 
-    function stopWatch() {
-        root._watchWanted = false
 
-        watchRestartTimer.stop()
+    // ============================================================
+    // Read queue lifecycle
+    // ============================================================
 
-        if (watchProcess.running)
-            watchProcess.running = false
+    function clearReadQueue() {
+        root._readQueue = []
+        root._readDisplay = null
+        root._readPurpose = ""
+        root._readInProgress = false
+    }
 
-        root._watchBus = -1
+    function refreshAllDisplays(purpose) {
+        if (
+            root._writeInFlight
+            || root._pendingBrightness >= 0
+            || root._localOverrideActive
+            || root._readInProgress
+            || getProcess.running
+        ) {
+            return
+        }
+
+        root.startReadQueue(
+            root.displays,
+            purpose ?? "refresh"
+        )
+    }
+
+    function startReadQueue(
+        displays,
+        purpose
+    ) {
+        if (
+            root._writeInFlight
+            || getProcess.running
+        ) {
+            return
+        }
+
+        const queue =
+            displays.filter(display => {
+                return display
+                    && display.bus > 0
+            }).slice()
+
+        if (queue.length === 0) {
+            root.clearReadQueue()
+            return
+        }
+
+        root._readQueue = queue
+        root._readPurpose = purpose
+        root._readInProgress = false
+
+        root.readNextInQueue()
+    }
+
+    function readNextInQueue() {
+        if (
+            root._writeInFlight
+            || getProcess.running
+        ) {
+            return
+        }
+
+        if (root._readQueue.length === 0) {
+            root.clearReadQueue()
+            return
+        }
+
+        const queue =
+            root._readQueue.slice()
+
+        const display = queue.shift()
+
+        root._readQueue = queue
+
+        root.startRead(
+            display,
+            root._readPurpose
+        )
     }
 
 
@@ -403,8 +585,7 @@ QtObject {
 
     function readBrightness() {
         if (
-            !root.available
-            || !root.currentDisplay
+            root.displays.length === 0
         ) {
             return
         }
@@ -418,8 +599,7 @@ QtObject {
             return
         }
 
-        root.startRead(
-            root.currentDisplay,
+        root.refreshAllDisplays(
             "refresh"
         )
     }
@@ -435,8 +615,6 @@ QtObject {
             return
         }
 
-        root.stopWatch()
-
         root._readDisplay =
             display
 
@@ -445,6 +623,8 @@ QtObject {
 
         root._readRevision =
             root._stateRevision
+
+        root._readInProgress = true
 
         getProcess.command = [
             "ddcutil",
@@ -471,9 +651,7 @@ QtObject {
             return
         }
 
-        // watch and write should not operate on the
-        // same DDC bus at the same time.
-        root.stopWatch()
+        root.clearReadQueue()
 
         root._writeDisplay =
             root.currentDisplay
@@ -588,7 +766,9 @@ QtObject {
         root._localOverrideActive = false
 
         Qt.callLater(() => {
-            root.startWatch()
+            root.refreshAllDisplays(
+                "post-write"
+            )
         })
     }
 
@@ -620,6 +800,7 @@ QtObject {
                         parseInt(match[1]),
 
                     bus: 0,
+                    connector: "",
 
                     manufacturer: "",
                     model: "",
@@ -641,6 +822,20 @@ QtObject {
             if (match) {
                 current.bus =
                     parseInt(match[1])
+
+                continue
+            }
+
+            match =
+                line.match(
+                    /DRM connector:\s+(.+)/
+                )
+
+            if (match) {
+                current.connector =
+                    root.normalizeConnector(
+                        match[1].trim()
+                    )
 
                 continue
             }
@@ -713,6 +908,9 @@ QtObject {
 
                 bus:
                     display.bus,
+
+                connector:
+                    display.connector,
 
                 manufacturer:
                     display.manufacturer,
@@ -829,107 +1027,6 @@ QtObject {
 
 
     // ============================================================
-    // watch parser
-    // ============================================================
-
-    function parseWatchBrightness(line) {
-        // Actual output observed on the MSI:
-        //
-        // VCP code 0x10 (Brightness):
-        // current value = 60, max value = 100
-        //
-        // SplitParser delivers it as one textual line.
-
-        const match =
-            line.match(
-                /VCP code 0x10\b.*current value\s*=\s*(\d+),\s*max value\s*=\s*(\d+)/
-            )
-
-        if (!match)
-            return null
-
-        return {
-            current:
-                parseInt(match[1]),
-
-            maximum:
-                parseInt(match[2])
-        }
-    }
-
-    function applyWatchBrightness(line) {
-        const parsed =
-            root.parseWatchBrightness(
-                line
-            )
-
-        // Ignore lines such as:
-        //
-        // Watching for VCP...
-        // Type ^C to exit...
-        // MAX_CHANGES...
-        // other VCP features.
-        if (!parsed)
-            return
-
-        if (!root.currentDisplay)
-            return
-
-        if (root._watchBus <= 0)
-            return
-
-        // Ensure this watcher still corresponds to
-        // the currently selected monitor.
-        if (
-            root.currentDisplay.bus
-            !== root._watchBus
-        ) {
-            return
-        }
-
-        // Normally our own write path stops watch,
-        // but keep this as a defensive guard.
-        if (
-            root._writeInFlight
-            || root._localOverrideActive
-        ) {
-            return
-        }
-
-        // The MSI repeats the same VCP 0x10 event
-        // multiple times.
-        //
-        // Only the first actual state change matters.
-        if (
-            root.brightness
-                === parsed.current
-            && root.maxBrightness
-                === parsed.maximum
-        ) {
-            return
-        }
-
-        // This value already came from the physical
-        // monitor.
-        //
-        // Do NOT call setBrightness(), because that
-        // would write it back through DDC.
-        root.updateDisplay(
-            root.currentDisplay,
-            {
-                brightness:
-                    parsed.current,
-
-                maxBrightness:
-                    parsed.maximum,
-
-                readable: true
-            }
-        )
-    }
-
-
-    // ============================================================
     // ddcutil detect
     // ============================================================
 
@@ -986,6 +1083,8 @@ QtObject {
                     detected
                 )
 
+            root.syncCurrentDisplayState()
+
             if (!root.currentDisplay) {
                 root.available = false
                 return
@@ -1001,17 +1100,11 @@ QtObject {
                 return
             }
 
-            root.startRead(
-                root.currentDisplay,
+            root.refreshAllDisplays(
                 "initial"
             )
         }
     }
-
-
-    // ============================================================
-    // ddcutil getvcp
-    // ============================================================
 
     readonly property Process getProcess: Process {
         stdout: StdioCollector {
@@ -1048,6 +1141,17 @@ QtObject {
                     }
                 }
 
+                if (root._readDisplay) {
+                    root.updateDisplay(
+                        root._readDisplay,
+                        {
+                            readable: false
+                        }
+                    )
+                }
+
+                root._readDisplay = null
+                root.readNextInQueue()
                 return
             }
 
@@ -1055,16 +1159,8 @@ QtObject {
                 getCollector.text
             )
 
-            if (
-                root.available
-                && !root._writeInFlight
-                && root._pendingBrightness < 0
-                && !root._localOverrideActive
-            ) {
-                Qt.callLater(() => {
-                    root.startWatch()
-                })
-            }
+            root._readDisplay = null
+            root.readNextInQueue()
         }
     }
 
@@ -1190,56 +1286,6 @@ QtObject {
             )
         }
     }
-
-
-    // ============================================================
-    // ddcutil watch
-    // ============================================================
-
-    readonly property Process watchProcess: Process {
-        stdout: SplitParser {
-            onRead: line => {
-                if (line.length === 0)
-                    return
-
-                root.applyWatchBrightness(
-                    line
-                )
-            }
-        }
-
-        stderr: SplitParser {
-            onRead: line => {
-                if (line.length === 0)
-                    return
-
-                console.warn(
-                    "Brightness watch stderr:",
-                    line
-                )
-            }
-        }
-
-        onExited: (
-            exitCode,
-            exitStatus
-        ) => {
-            // stopWatch() intentionally terminating
-            // ddcutil is not a failure.
-            if (!root._watchWanted)
-                return
-
-            console.warn(
-                "Brightness: watch exited:",
-                exitCode,
-                exitStatus
-            )
-
-            watchRestartTimer.restart()
-        }
-    }
-
-
     // ============================================================
     // Timers
     // ============================================================
@@ -1267,15 +1313,29 @@ QtObject {
         }
     }
 
-    readonly property Timer watchRestartTimer: Timer {
-        id: watchRestartTimer
-
-        interval: 500
-        repeat: false
+    readonly property Timer pollTimer: Timer {
+        interval: root.pollInterval
+        repeat: true
+        running: true
 
         onTriggered: {
-            if (root._watchWanted)
-                root.startWatch()
+            if (
+                root._writeInFlight
+                || root._pendingBrightness >= 0
+                || root._localOverrideActive
+                || root._readInProgress
+                || getProcess.running
+                || detectProcess.running
+                || setProcess.running
+                || scsProcess.running
+                || setDebounceTimer.running
+            ) {
+                return
+            }
+
+            root.refreshAllDisplays(
+                "poll"
+            )
         }
     }
 

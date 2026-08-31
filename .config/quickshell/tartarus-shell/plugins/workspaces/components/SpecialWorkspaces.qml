@@ -10,6 +10,7 @@ Rectangle {
 
     required property var service
     required property var barScreen
+    color: "transparent"
 
     signal interacted()
 
@@ -22,7 +23,6 @@ Rectangle {
     readonly property int specialCount:
         specialWorkspaces.length
 
-    readonly property int maxWindowIcons: 5
     readonly property real edgeFadeWidth:
         Style.spacingLg
     readonly property real edgeFadeRatio:
@@ -139,12 +139,21 @@ Rectangle {
                 specialItem.active
                 ? Color.onTertiaryContainer
                 : Color.onSurfaceVariant
-            readonly property string specialIcon:
-                Icons.specialWorkspaceIcon(
+            readonly property string displayLabel:
+                root.service.specialWorkspaceLabel(
                     specialItem.workspace?.name ?? ""
                 )
-            readonly property bool specialIconIsText:
-                specialItem.specialIcon.length === 1
+            readonly property string displayIcon:
+                root.service.specialWorkspaceIcon(
+                    specialItem.workspace?.name ?? ""
+                )
+            readonly property int windowHintCount:
+                root.service.showWindowsOnSpecialWorkspaces
+                    ? Math.min(
+                        root.service.maxWindowIcons,
+                        specialItem.windows.length
+                    )
+                    : 0
 
             radius: Style.radiusSmall
             color: specialItem.containerColor
@@ -152,7 +161,7 @@ Rectangle {
 
             implicitWidth: Math.max(
                 Style.barInnerHeight,
-                itemContent.implicitWidth + Style.spacingMd
+                itemContent.implicitWidth + Style.spacingMd * 2
             )
 
             implicitHeight: Style.barWorkspaceActiveHeight
@@ -163,23 +172,30 @@ Rectangle {
                 anchors.centerIn: parent
                 spacing: Style.barWorkspaceContentSpacing
 
-                Loader {
+                MaterialIcon {
                     anchors.verticalCenter: parent.verticalCenter
 
-                    sourceComponent:
-                        specialItem.specialIconIsText
-                        ? letterComponent
-                        : materialIconComponent
+                    text: specialItem.displayIcon
+                    iconSize: Style.barWorkspaceIconSize
+                    iconColor: specialItem.contentColor
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    text: specialItem.displayLabel
+                    font.pixelSize: Style.fontSmall
+                    font.weight: Font.Medium
+                    color: specialItem.contentColor
                 }
 
                 Row {
-                    spacing: 0
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: Style.spacingXs
+                    opacity: 0.7
 
                     Repeater {
-                        model: Math.min(
-                            specialItem.windows.length,
-                            root.maxWindowIcons
-                        )
+                        model: specialItem.windowHintCount
 
                         MaterialIcon {
                             required property int index
@@ -193,31 +209,6 @@ Rectangle {
                             iconColor: specialItem.contentColor
                         }
                     }
-                }
-            }
-
-            Component {
-                id: materialIconComponent
-
-                MaterialIcon {
-                    text: specialItem.specialIcon
-
-                    iconSize: Style.barWorkspaceIconSize
-                    iconColor: specialItem.contentColor
-                }
-            }
-
-            Component {
-                id: letterComponent
-
-                Text {
-                    text: specialItem.specialIcon
-
-                    font.pixelSize: Style.barWorkspaceIconSize
-                    color: specialItem.contentColor
-
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
                 }
             }
         }

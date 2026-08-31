@@ -9,9 +9,30 @@ Item {
 
     required property var plugin
     property var hoverPanelController: null
+    property var barScreen: null
 
     readonly property var service:
         root.plugin.service
+
+    readonly property var panelDisplay:
+        root.service.displayForScreen(
+            root.barScreen
+        )
+
+    readonly property bool brightnessAvailable:
+        root.service.availableForScreen(
+            root.barScreen
+        )
+
+    readonly property int brightnessValue:
+        root.service.brightnessForScreen(
+            root.barScreen
+        )
+
+    readonly property int brightnessPercent:
+        root.service.brightnessPercentForScreen(
+            root.barScreen
+        )
 
     implicitWidth: 340
     implicitHeight: panelContent.implicitHeight
@@ -66,10 +87,10 @@ Item {
                 }
 
                 Text {
-                    text: root.service.brightnessPercent + "%"
+                    text: root.brightnessPercent + "%"
 
                     font.pixelSize: Style.fontNormal
-                    color: root.service.available
+                    color: root.brightnessAvailable
                         ? Color.foreground
                         : Color.foregroundMuted
                 }
@@ -79,8 +100,8 @@ Item {
                 width: parent.width
 
                 text:
-                    root.service.currentDisplay
-                    ? root.service.currentDisplay.name
+                    root.panelDisplay
+                    ? root.panelDisplay.name
                     : "No display"
 
                 font.pixelSize: Style.fontSmall
@@ -104,8 +125,8 @@ Item {
                     required property var modelData
 
                     readonly property bool selected:
-                        root.service.currentDisplay
-                        && root.service.currentDisplay.bus
+                        root.panelDisplay
+                        && root.panelDisplay.bus
                             === modelData.bus
 
                     width: contentColumn.width
@@ -173,13 +194,6 @@ Item {
                         id: displayHover
                     }
 
-                    TapHandler {
-                        onTapped: {
-                            root.service.selectDisplay(
-                                displayItem.modelData.bus
-                            )
-                        }
-                    }
                 }
             }
 
@@ -196,13 +210,14 @@ Item {
                 width: contentColumn.width
 
                 from: 0
-                to: root.service.maxBrightness
-                value: root.service.brightness
+                to: root.panelDisplay?.maxBrightness ?? 100
+                value: root.brightnessValue
 
-                enabled: root.service.available
+                enabled: root.brightnessAvailable
 
                 onMoved: {
-                    root.service.setBrightness(
+                    root.service.setBrightnessForScreen(
+                        root.barScreen,
                         value,
                         root.service.sliderCommitDelay
                     )
@@ -212,10 +227,10 @@ Item {
             Text {
                 width: parent.width
 
-                text: root.service.brightnessPercent + "%"
+                text: root.brightnessPercent + "%"
 
                 font.pixelSize: Style.fontSmall
-                color: root.service.available
+                color: root.brightnessAvailable
                     ? Color.foreground
                     : Color.foregroundMuted
             }

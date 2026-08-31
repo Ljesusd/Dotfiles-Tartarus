@@ -8,6 +8,7 @@ PopupWindow {
 
     required property var hoverPanelController
     required property Item anchorSurface
+    property var barScreen: null
 
     readonly property var activePlugin:
         root.hoverPanelController.activePanelPlugin
@@ -216,6 +217,13 @@ PopupWindow {
         ) {
             loader.item.hoverPanelController =
                 root.hoverPanelController
+        }
+
+        if (
+            "barScreen" in loader.item
+        ) {
+            loader.item.barScreen =
+                root.barScreen
         }
     }
 

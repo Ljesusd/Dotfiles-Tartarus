@@ -4,6 +4,18 @@ import QtQml
 QtObject {
     id: root
 
+    readonly property var workspaceBaseByMonitor: ({
+        "DP-2": 1,
+        "HDMI-A-1": 6
+    })
+    readonly property var specialWorkspaceIcons: ({
+        gaming: "sports_esports",
+        communication: "forum",
+        music: "music_note"
+    })
+    readonly property bool showWindowsOnSpecialWorkspaces: true
+    readonly property int maxWindowIcons: 3
+
     readonly property var workspaces:
         Hyprland.workspaces.values
 
@@ -53,6 +65,24 @@ QtObject {
             : -1
     }
 
+    function firstWorkspaceForScreen(screen) {
+        if (!screen)
+            return 1
+
+        const monitor = root.monitorForScreen(screen)
+        const monitorName =
+            monitor?.name
+            ?? screen.name
+            ?? ""
+
+        const base =
+            root.workspaceBaseByMonitor[monitorName]
+
+        return typeof base === "number" && base > 0
+            ? base
+            : 1
+    }
+
     function activeSpecialWorkspaceNameForScreen(screen) {
         const monitor = root.monitorForScreen(screen)
 
@@ -89,6 +119,38 @@ QtObject {
         }
 
         return null
+    }
+
+    function specialWorkspaceKey(name) {
+        if (!name)
+            return ""
+
+        return name.startsWith("special:")
+            ? name.slice(8)
+            : name
+    }
+
+    function specialWorkspaceLabel(name) {
+        const key = root.specialWorkspaceKey(name)
+
+        if (!key)
+            return "Special"
+
+        return key.charAt(0).toUpperCase()
+            + key.slice(1)
+    }
+
+    function specialWorkspaceIcon(name) {
+        const key = root.specialWorkspaceKey(name)
+        const configuredIcon =
+            root.specialWorkspaceIcons[key]
+
+        if (configuredIcon)
+            return configuredIcon
+
+        return key.length > 0
+            ? key.charAt(0).toUpperCase()
+            : "layers"
     }
 
     function specialWorkspaces() {
