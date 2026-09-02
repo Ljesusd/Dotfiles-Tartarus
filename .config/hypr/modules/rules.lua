@@ -48,3 +48,54 @@ hl.window_rule({
     move = "20 monitor_h-120",
     float = true,
 })
+
+hl.window_rule({
+    name = "steam-to-gaming",
+
+    match = {
+        initial_class = "^steam$",
+    },
+
+    workspace = "special:gaming silent",
+})
+
+hl.window_rule({
+    name = "steam-big-picture-fullscreen",
+
+    match = {
+        initial_class = "^steam$",
+        initial_title = "^Steam Big Picture Mode$",
+    },
+
+    fullscreen = true,
+})
+
+hl.window_rule({
+    name = "steam-games-to-gaming",
+
+    match = {
+        initial_class = "^steam_app_[0-9]+$",
+    },
+
+    workspace = "special:gaming silent",
+})
+
+hl.on("window.active", function(window)
+    if window == nil then
+        return
+    end
+
+    if window.class ~= "steam" then
+        return
+    end
+
+    if window.initial_title ~= "Steam Big Picture Mode" then
+        return
+    end
+
+    hl.dispatch(hl.dsp.window.fullscreen({
+        window = window,
+        action = "set",
+        mode = "fullscreen",
+    }))
+end)
