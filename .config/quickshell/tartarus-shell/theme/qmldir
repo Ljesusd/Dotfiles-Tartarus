@@ -1,5 +1,7 @@
 module TartarusShell.Theme
 
 MaterialIcon 1.0 MaterialIcon.qml
+Anim 1.0 Anim.qml
+ColorAnim 1.0 ColorAnim.qml
 singleton Style 1.0 Style.qml
 singleton Color 1.0 Color.qml

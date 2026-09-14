@@ -21,6 +21,21 @@ hl.bind(
     hl.dsp.global("quickshell:launcher"),
     { description = "[TartarusShell] Toggle launcher" }
 )
+hl.bind(
+    mainMod .. " + N",
+    hl.dsp.global("quickshell:notification-center"),
+    { description = "[TartarusShell] Toggle notification center" }
+)
+hl.bind(
+    mainMod .. " + SHIFT + N",
+    hl.dsp.global("quickshell:notification-dnd"),
+    { description = "[TartarusShell] Toggle notification DND" }
+)
+hl.bind(
+    mainMod .. " + CTRL + V",
+    hl.dsp.global("quickshell:clipboard"),
+    { description = "[TartarusShell] Toggle clipboard history" }
+)
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
@@ -38,9 +53,31 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
--- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+-- Special workspace (scratchpad)
+hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("scratchpad"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:scratchpad" }))
+hl.bind(
+    mainMod .. " + O",
+    hl.dsp.exec_cmd(
+        "if hyprctl clients -j | jq -e 'any(.[]; .initialClass == \"vesktop\")' >/dev/null; "
+        .. "then "
+        .. "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"communication\")'; "
+        .. "else "
+        .. "flatpak run dev.vencord.Vesktop >/tmp/vesktop.log 2>&1 & "
+        .. "for i in $(seq 1 50); do "
+        .. "if hyprctl clients -j | jq -e "
+        .. "'any(.[]; .initialClass == \"vesktop\" and .initialTitle == \"Discord\")' "
+        .. ">/dev/null; "
+        .. "then "
+        .. "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"communication\")'; "
+        .. "break; "
+        .. "fi; "
+        .. "sleep 0.1; "
+        .. "done; "
+        .. "fi"
+    )
+)
+hl.bind(mainMod .. " + SHIFT + O", hl.dsp.window.move({ workspace = "special:communication" }))
 hl.bind(
     mainMod .. " + G",
     hl.dsp.exec_cmd(
@@ -51,6 +88,14 @@ hl.bind(
     )
 )
 hl.bind(mainMod .. " + SHIFT + G", hl.dsp.window.move({ workspace = "special:gaming" }))
+hl.bind(
+    mainMod .. " + PRINT",
+    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh area")
+)
+hl.bind(
+    mainMod .. " + SHIFT + PRINT",
+    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh monitor")
+)
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -61,9 +106,9 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Laptop multimedia keys for volume and LCD brightness
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+; qs -c tartarus-shell ipc call osd showVolume"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; qs -c tartarus-shell ipc call osd showVolume"),      { locked = true, repeating = true })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; qs -c tartarus-shell ipc call osd showVolume"),     { locked = true, repeating = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })

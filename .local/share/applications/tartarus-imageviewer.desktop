@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Tartarus Image Viewer
+Comment=Open images in Tartarus Image Viewer
+Exec=/home/Leandro/dotfiles/.config/quickshell/tartarus-shell/scripts/open-imageviewer.sh %f
+TryExec=/home/Leandro/dotfiles/.config/quickshell/tartarus-shell/scripts/open-imageviewer.sh
+Terminal=false
+NoDisplay=true
+StartupNotify=false
+MimeType=image/png;image/jpeg;image/webp;image/gif;image/bmp;image/tiff;image/svg+xml;
+Categories=Graphics;Viewer;

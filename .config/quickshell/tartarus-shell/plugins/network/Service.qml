@@ -1,8 +1,66 @@
 import Quickshell.Networking
+import Quickshell.Io
 import QtQml
 
 QtObject {
     id: root
+
+    property real downloadSpeed: 0
+    property real uploadSpeed: 0
+    property var _lastCounters: null
+    property var _samples: []
+    property string detectedInterface: ""
+
+    function formatRate(bytes) {
+        if (bytes < 1024) return `${Math.round(bytes)} B/s`
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB/s`
+        return `${(bytes / 1024 / 1024).toFixed(1)} MB/s`
+    }
+
+    readonly property string activeInterface:
+        root.detectedInterface || "wlan0"
+
+    readonly property var interfaceProcess: Process {
+        command: ["sh", "-c", "for i in /sys/class/net/wlan* /sys/class/net/wlp* /sys/class/net/en*; do [ -e \"$i/operstate\" ] && [ \"$(cat \"$i/operstate\")\" = up ] && { basename \"$i\"; exit; }; done"]
+        stdout: StdioCollector {
+            onStreamFinished: root.detectedInterface = text.trim()
+        }
+    }
+
+    readonly property var counterProcess: Process {
+        command: ["sh", "-c", "i=\"$1\"; cat /sys/class/net/\"$i\"/statistics/rx_bytes /sys/class/net/\"$i\"/statistics/tx_bytes", "stats", root.activeInterface]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const values = text.trim().split(/\s+/).map(Number)
+                if (values.length !== 2 || values.some(v => !isFinite(v))) return
+                const now = Date.now()
+                if (root._lastCounters) {
+                    const dt = Math.max(0.1, (now - root._lastCounters.time) / 1000)
+                    const down = Math.max(0, (values[0] - root._lastCounters.rx) / dt)
+                    const up = Math.max(0, (values[1] - root._lastCounters.tx) / dt)
+                    root._samples = root._samples.concat([{ down: down, up: up }]).slice(-8)
+                    const total = root._samples.reduce((sum, sample) => ({
+                        down: sum.down + sample.down,
+                        up: sum.up + sample.up
+                    }), { down: 0, up: 0 })
+                    root.downloadSpeed = total.down / root._samples.length
+                    root.uploadSpeed = total.up / root._samples.length
+                }
+                root._lastCounters = { rx: values[0], tx: values[1], time: now }
+            }
+        }
+    }
+
+    readonly property var counterTimer: Timer {
+        interval: 500
+        running: root.activeInterface.length > 0
+        repeat: true
+        onTriggered: {
+            root.counterProcess.running = true
+        }
+    }
+
+    Component.onCompleted: root.interfaceProcess.running = true
 
     readonly property var wifiDevice: {
         const devices = Networking.devices.values

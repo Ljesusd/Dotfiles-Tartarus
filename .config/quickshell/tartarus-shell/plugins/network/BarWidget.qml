@@ -26,22 +26,22 @@ Rectangle {
 
     readonly property string networkIcon: {
         if (root.connectionType === "ethernet")
-            return "󰈀"
+                return "lan"
 
         if (root.connectionType === "wifi") {
             if (root.service.strength >= 75)
-                return "󰤨"
+                return "wifi"
 
             if (root.service.strength >= 50)
-                return "󰤥"
+                return "wifi"
 
             if (root.service.strength >= 25)
-                return "󰤢"
+                return "wifi"
 
-            return "󰤟"
+            return "wifi_2_bar"
         }
 
-        return "󰤭"
+        return "wifi_off"
     }
 
     readonly property string connectionLabel: {
@@ -91,16 +91,14 @@ Rectangle {
         return true
     }
 
-    implicitWidth: content.implicitWidth
-        + Style.barPaddingNormal * 2
+    implicitWidth: Style.barControlHeight
 
     implicitHeight: Style.barControlHeight
 
-    radius: Style.radiusSmall
+    radius: Style.barControlRadius
+    border.width: 0
 
-    color: mouseArea.containsMouse
-        ? Color.surfaceHover
-        : "transparent"
+    color: "transparent"
 
     RowLayout {
         id: content
@@ -109,11 +107,9 @@ Rectangle {
 
         spacing: Style.barSpacingSmall
 
-        Text {
+        MaterialIcon {
             text: root.networkIcon
-
-            font.family: Style.iconFont
-            font.pixelSize: Style.barIconNormal
+            iconSize: Style.barIconNormal
 
             color: root.connectionType !== "disconnected"
                 ? Color.foreground
@@ -121,6 +117,7 @@ Rectangle {
         }
 
         Text {
+            visible: false
             text: root.connectionLabel
 
             font.pixelSize: Style.barFontNormal

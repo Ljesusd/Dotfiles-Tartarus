@@ -32,10 +32,23 @@ background_alt = "background_dark"
 surface = "background_dark"
 surface_hover = "background_highlight"
 selection = "background_visual"
+surface_variant = "background_highlight"
 
 foreground = "foreground"
+on_surface = "foreground"
 foreground_muted = "foreground_muted"
 foreground_subtle = "comment"
+
+primary = "blue"
+primary_container = "background_visual"
+on_primary = "background_darker"
+secondary = "cyan"
+secondary_container = "background_highlight"
+on_secondary = "background_darker"
+tertiary = "magenta"
+tertiary_container = "background_highlight"
+on_tertiary = "background_darker"
+outline = "comment"
 
 accent = "blue"
 

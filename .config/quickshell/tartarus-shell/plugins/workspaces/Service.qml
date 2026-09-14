@@ -9,12 +9,12 @@ QtObject {
         "HDMI-A-1": 6
     })
     readonly property var specialWorkspaceIcons: ({
+        scratchpad: "layers",
         gaming: "sports_esports",
         communication: "forum",
         music: "music_note"
     })
-    readonly property bool showWindowsOnSpecialWorkspaces: true
-    readonly property int maxWindowIcons: 3
+    property var lastSpecialByMonitor: ({})
 
     readonly property var workspaces:
         Hyprland.workspaces.values
@@ -100,21 +100,49 @@ QtObject {
             !== ""
     }
 
+    function specialWorkspacesForScreen(screen) {
+        const monitor = root.monitorForScreen(screen)
+        const names = new Set()
+        const specials = []
+
+        for (const workspace of root.workspaces) {
+            const workspaceName =
+                workspace?.name ?? ""
+
+            if (!workspaceName.startsWith("special:"))
+                continue
+
+            if (monitor && workspace.monitor !== monitor)
+                continue
+
+            const key = root.specialWorkspaceKey(workspaceName)
+
+            if (names.has(key))
+                continue
+
+            names.add(key)
+            specials.push(workspace)
+        }
+
+        specials.sort((left, right) => {
+            const leftName = root.specialWorkspaceKey(left?.name)
+            const rightName = root.specialWorkspaceKey(right?.name)
+
+            if (leftName < rightName)
+                return -1
+
+            if (leftName > rightName)
+                return 1
+
+            return 0
+        })
+
+        return specials
+    }
+
     function workspace(id) {
         for (const candidate of root.workspaces) {
             if (candidate.id === id)
-                return candidate
-        }
-
-        return null
-    }
-
-    function specialWorkspace(name) {
-        if (!name)
-            return null
-
-        for (const candidate of root.workspaces) {
-            if (candidate.name === name)
                 return candidate
         }
 
@@ -153,34 +181,12 @@ QtObject {
             : "layers"
     }
 
-    function specialWorkspaces() {
-        return root.workspaces.filter(
-            workspace =>
-                workspace.name.startsWith("special:")
-        )
-    }
-
     function windowsForWorkspace(id) {
         const target = root.workspace(id)
 
         return target
             ? target.toplevels.values
             : []
-    }
-
-    function windowsForSpecialWorkspace(name) {
-        const workspace = root.specialWorkspace(name)
-
-        return workspace
-            ? workspace.toplevels.values
-            : []
-    }
-
-    function windowsForActiveSpecialWorkspace(screen) {
-        const name =
-            root.activeSpecialWorkspaceNameForScreen(screen)
-
-        return root.windowsForSpecialWorkspace(name)
     }
 
     function isOccupied(id) {
@@ -278,6 +284,23 @@ QtObject {
         if (!root.focusMonitorForScreen(screen))
             return false
 
+        const monitor = root.monitorForScreen(screen)
+        const key = monitor?.name ?? screen?.name ?? ""
+        if (key) {
+            const next = Object.assign({}, root.lastSpecialByMonitor)
+            next[key] = root.specialWorkspaceKey(name)
+            root.lastSpecialByMonitor = next
+        }
         return root.toggleSpecialWorkspace(name)
+    }
+
+    function toggleLastSpecialWorkspaceForScreen(screen) {
+        const monitor = root.monitorForScreen(screen)
+        const key = monitor?.name ?? screen?.name ?? ""
+        const remembered = key ? root.lastSpecialByMonitor[key] : ""
+        return root.toggleSpecialWorkspaceForScreen(
+            screen,
+            remembered || "special"
+        )
     }
 }

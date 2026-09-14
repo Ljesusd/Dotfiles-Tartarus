@@ -3,6 +3,9 @@ import QtQml
 
 import "../bar"
 import "../launcher"
+import "."
+import "../services"
+import "../services" as Services
 
 Scope {
     id: root
@@ -11,7 +14,6 @@ Scope {
     required property var launcherState
     required property var shellState
     required property var pluginRegistry
-
     readonly property string screenName:
         root.screen ? root.screen.name : ""
 
@@ -39,33 +41,9 @@ Scope {
 
     readonly property alias monitorContext: context
 
-    QtObject {
+    ScreenState {
         id: context
-
-        property bool launcherOpened: false
-
-        readonly property var screen: root.screen
-
-        readonly property string name:
-            root.screenName
-
-        readonly property real x:
-            root.screenX
-
-        readonly property real y:
-            root.screenY
-
-        readonly property real width:
-            root.screenWidth
-
-        readonly property real height:
-            root.screenHeight
-
-        readonly property real scale:
-            root.screenScale
-
-        readonly property rect geometry:
-            root.screenGeometry
+        screen: root.screen
     }
 
     Component.onCompleted: {
@@ -92,5 +70,27 @@ Scope {
         shellState: root.shellState
         launcherAnchor: bar.launcherAnchor
         barWindow: bar
+    }
+
+    ToastOverlay {
+        monitorScreen: root.screen
+    }
+
+    NotificationOverlay {
+        monitorScreen: root.screen
+        monitorContext: context
+    }
+
+    NotificationCenter {
+        monitorScreen: root.screen
+        monitorContext: context
+    }
+
+    OsdOverlay { monitorScreen: root.screen; monitorContext: context }
+    SidebarOverlay { monitorScreen: root.screen; pluginRegistry: root.pluginRegistry; monitorContext: context }
+
+    ClipboardOverlay {
+        monitorScreen: root.screen
+        monitorContext: context
     }
 }

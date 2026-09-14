@@ -26,7 +26,6 @@ QtObject {
     readonly property int fontNormal: 18
     readonly property int fontLarge: 24
 
-    readonly property string iconFont: "JetBrainsMono Nerd Font"
     readonly property string materialIconFont:
         "Material Symbols Rounded"
 
@@ -45,6 +44,13 @@ QtObject {
     readonly property int barHeight: 56
     readonly property int barInnerHeight: 28
     readonly property int barControlHeight: 38
+    readonly property int barControlRadius: 12
+    readonly property int barSurfaceRadius: 20
+    // Debe dejar aire dentro de la barra flotante (44 px útiles).
+    readonly property int barSearchHeight: 34
+    readonly property int barFloatingMargin: 6
+    readonly property int barContentHorizontalPadding: 12
+    readonly property int panelBorderWidth: 1
 
     readonly property int barIconSmall: 18
     readonly property int barIconNormal: 20
@@ -58,15 +64,16 @@ QtObject {
 
     readonly property int barSpacingSmall: 6
     readonly property int barSpacingNormal: 10
+    readonly property int barHoverBorderWidth: 1
 
-    readonly property int barWorkspaceIconSize: 18
+    readonly property int barWorkspaceIconSize: 16
     readonly property int barWorkspaceBaseSize:
-        barInnerHeight - spacingMd
+        barInnerHeight - spacingLg
     readonly property int barWorkspaceActiveHeight:
-        barInnerHeight - spacingXs
+        barInnerHeight - spacingMd
     readonly property int barWorkspaceRailPaddingHorizontal: 11
-    readonly property int barWorkspaceSpacing: spacingSm
-    readonly property int barWorkspaceContentSpacing: 3
+    readonly property int barWorkspaceSpacing: spacingXs
+    readonly property int barWorkspaceContentSpacing: 2
     readonly property int barWorkspaceActivePaddingHorizontal: 3
 
     readonly property int barWorkspaceTrailBaseDuration: 100
@@ -76,6 +83,7 @@ QtObject {
 
     readonly property real barWorkspaceBackgroundScale: 0.88
     readonly property real barWorkspaceBackgroundOpacity: 0.35
+    readonly property real barWorkspaceSpecialDimOpacity: 0.28
     readonly property real barWorkspaceSpecialEnterScale: 0.78
     readonly property real barWorkspaceSpecialBlur: 0.55
     readonly property int barWorkspaceSpecialBlurMax: 8
@@ -83,9 +91,10 @@ QtObject {
     readonly property int barPopupGap: 6
 
     readonly property int launcherSearchWidth: 380
-    readonly property int launcherSearchHeight: 42
+    readonly property int launcherSearchHeight: barSearchHeight
     readonly property int launcherWidth: 600
     readonly property int launcherHeight: 400
+    readonly property int launcherWallpaperHeight: 330
     readonly property int launcherSchemeItemHeight:
         itemHeight + paddingLarge
     readonly property int launcherSchemeBadgeHeight: 22

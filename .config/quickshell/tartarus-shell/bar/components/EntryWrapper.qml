@@ -11,11 +11,11 @@ Item {
 
     default property alias content: contentHost.data
 
-    readonly property Item contentItem:
+    readonly property var contentItem:
         contentHost.children.length > 0
             ? contentHost.children[0]
             : null
-    readonly property Item entryItem: {
+    readonly property var entryItem: {
         if (!root.contentItem)
             return null
 

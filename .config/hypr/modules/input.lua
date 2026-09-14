@@ -4,7 +4,7 @@
 
 local INPUT = {
     input = {
-        kb_layout = "us",
+        kb_layout = "us,br",
         kb_variant = "",
         kb_model = "",
         kb_options = "",

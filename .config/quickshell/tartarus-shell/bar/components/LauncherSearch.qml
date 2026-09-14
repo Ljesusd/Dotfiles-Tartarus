@@ -13,16 +13,16 @@ Rectangle {
     implicitWidth: Style.launcherSearchWidth
     implicitHeight: Style.launcherSearchHeight
 
-    radius: Style.radiusMedium
+    radius: Style.radiusFull
 
     color: {
         if (root.monitorContext.launcherOpened)
-            return Color.background
+            return Color.surfaceContainerHigh
 
         if (input.activeFocus || hoverHandler.hovered)
-            return Color.surfaceHover
+            return Color.surfaceContainerHigh
 
-        return Color.surface
+        return Color.surfaceContainer
     }
 
     Behavior on color {
@@ -30,6 +30,11 @@ Rectangle {
             duration: Style.animationFast
         }
     }
+
+    border.width: Style.panelBorderWidth
+    border.color: input.activeFocus || hoverHandler.hovered
+        ? Color.primary
+        : Color.outlineVariant
 
     RowLayout {
         anchors.fill: parent
@@ -39,12 +44,10 @@ Rectangle {
 
         spacing: Style.barSpacingSmall
 
-        Text {
+        MaterialIcon {
             text: "⌕"
-
-            font.family: Style.iconFont
-            font.pixelSize: Style.barIconNormal
-            color: Color.foregroundMuted
+            iconSize: Style.barIconNormal
+            iconColor: Color.foregroundMuted
         }
 
         Item {
@@ -99,6 +102,22 @@ Rectangle {
                     } else if (event.key === Qt.Key_Up) {
                         root.launcherState.moveUpRequested()
                         event.accepted = true
+                    } else if (event.key === Qt.Key_Left) {
+                        if (
+                            input.text.length === 0
+                            || input.cursorPosition === 0
+                        ) {
+                            root.launcherState.moveLeftRequested()
+                            event.accepted = true
+                        }
+                    } else if (event.key === Qt.Key_Right) {
+                        if (
+                            input.text.length === 0
+                            || input.cursorPosition === input.text.length
+                        ) {
+                            root.launcherState.moveRightRequested()
+                            event.accepted = true
+                        }
                     } else if (
                         event.key === Qt.Key_Return
                         || event.key === Qt.Key_Enter

@@ -38,9 +38,12 @@ Item {
 
     Rectangle {
         anchors.fill: parent
+        anchors.margins: Style.barPopupGap
 
         radius: Style.radiusLarge
-        color: Color.background
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
+        border.color: Color.outlineVariant
 
         HoverHandler {
             onHoveredChanged: {
@@ -87,28 +90,49 @@ Item {
 
                     implicitWidth: toggleText.implicitWidth
                         + Style.paddingMedium * 2
+                        + Style.materialIconSmall
+                        + Style.spacingSmall
 
                     implicitHeight: 32
 
-                    radius: Style.radiusMedium
+                    radius: Style.radiusFull
 
                     color: root.service.enabled
-                        ? Color.selection
-                        : Color.surface
+                        ? Color.primary
+                        : Color.surfaceContainerHigh
 
-                    Text {
-                        id: toggleText
+                    border.width: Style.panelBorderWidth
+                    border.color: root.service.enabled
+                        ? Color.primary
+                        : Color.outlineVariant
 
+                    Row {
                         anchors.centerIn: parent
+                        spacing: Style.spacingSmall
 
-                        text: root.service.enabled
-                            ? "ON"
-                            : "OFF"
+                        MaterialIcon {
+                            text: root.service.enabled
+                                ? "bluetooth_connected"
+                                : "bluetooth_disabled"
+                            color: root.service.enabled
+                                ? Color.onPrimary
+                                : Color.onSurfaceVariant
+                            font.pixelSize: Style.materialIconSmall
+                        }
 
-                        font.pixelSize: Style.fontSmall
-                        color: root.service.enabled
-                            ? Color.accent
-                            : Color.foregroundMuted
+                        Text {
+                            id: toggleText
+
+                            text: root.service.enabled
+                                ? "ON"
+                                : "OFF"
+
+                            font.pixelSize: Style.fontSmall
+                            font.weight: Font.DemiBold
+                            color: root.service.enabled
+                                ? Color.onPrimary
+                                : Color.onSurfaceVariant
+                        }
                     }
 
                     TapHandler {
@@ -148,12 +172,20 @@ Item {
 
                     spacing: Style.spacingMedium
 
+                    MaterialIcon {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "bluetooth_disabled"
+                        font.pixelSize: Style.materialIconExtraLarge
+                        iconColor: Color.foregroundMuted
+                    }
+
                     Text {
                         Layout.alignment: Qt.AlignHCenter
 
-                        text: "Bluetooth is disabled"
+                        text: "Bluetooth disabled"
 
                         font.pixelSize: Style.fontSmall
+                        font.weight: Font.Medium
                         color: Color.foregroundMuted
                     }
 
@@ -165,8 +197,10 @@ Item {
 
                         implicitHeight: 38
 
-                        radius: Style.radiusMedium
-                        color: Color.surface
+                        radius: Style.radiusFull
+                        color: enableHover.hovered
+                            ? Color.primary
+                            : Color.primaryContainer
 
                         Text {
                             id: enableText
@@ -176,7 +210,7 @@ Item {
                             text: "Enable Bluetooth"
 
                             font.pixelSize: Style.fontSmall
-                            color: Color.foreground
+                            color: Color.onPrimaryContainer
                         }
 
                         TapHandler {
@@ -184,6 +218,8 @@ Item {
                                 root.service.setEnabled(true)
                             }
                         }
+
+                        HoverHandler { id: enableHover }
                     }
                 }
 
@@ -343,12 +379,13 @@ Item {
 
             spacing: Style.spacingMedium
 
-            Text {
-                text: "󰂯"
+            MaterialIcon {
+                text: deviceItem.device.connected
+                    ? "bluetooth_connected"
+                    : "bluetooth"
 
-                font.family: Style.iconFont
-                font.pixelSize: Style.iconMedium
-                color: deviceItem.device.connected
+                iconSize: Style.iconMedium
+                iconColor: deviceItem.device.connected
                     ? Color.accent
                     : Color.foregroundMuted
             }

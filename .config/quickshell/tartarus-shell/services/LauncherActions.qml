@@ -9,6 +9,24 @@ QtObject {
             icon: "palette",
             command: "scheme",
             description: "Change the current colour scheme"
+        },
+        {
+            name: "Wallpaper",
+            icon: "photo",
+            command: "wallpaper",
+            description: "Open wallpaper selector"
+        },
+        {
+            name: "Reapply wallpapers",
+            icon: "sync",
+            command: "reapply-wallpapers",
+            description: "Apply saved wallpapers on every monitor"
+        },
+        {
+            name: "Clipboard",
+            icon: "content_paste",
+            command: "clipboard",
+            description: "Open clipboard history"
         }
     ]
 

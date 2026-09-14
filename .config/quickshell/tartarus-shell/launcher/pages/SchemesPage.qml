@@ -51,12 +51,12 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            spacing: Style.spacingMedium
+            spacing: Style.spacingLarge
 
             MaterialIcon {
                 text: "palette"
                 iconSize: Style.materialIconMedium
-                iconColor: Color.accent
+                iconColor: Color.primary
             }
 
             ColumnLayout {
@@ -84,7 +84,7 @@ Item {
                 text: root.themes.currentSlug
 
                 font.pixelSize: Style.fontSmall
-                color: Color.accent
+                color: Color.tertiary
             }
         }
 

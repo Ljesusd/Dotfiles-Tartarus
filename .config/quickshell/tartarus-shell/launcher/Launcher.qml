@@ -16,14 +16,30 @@ Scope {
     required property var shellState
     required property var launcherAnchor
     required property var barWindow
+    readonly property var wallpapers: Wallpapers
 
-    LauncherController {
-        id: controller
+    readonly property int wallpaperSlots: {
+        const available = (root.barWindow.screen?.width ?? 1280) - 64 - 176
+        const count = wallpapers.filtered(controller.wallpaperQuery).length
+        let slots = Math.min(5, Math.max(1, Math.floor(available / 272)), count)
+        if (slots > 1 && slots % 2 === 0)
+            slots--
+        return Math.max(1, slots)
+    }
+    readonly property int panelWidth: controller.mode === LauncherController.Mode.Wallpaper
+        ? Math.min(root.wallpaperSlots * 272 + 176,
+            (root.barWindow.screen?.width ?? 1280) - 64)
+        : Style.launcherWidth
 
-        launcherState: root.launcherState
-        applications: applications
-        themes: themes
-        actions: launcherActions
+        LauncherController {
+            id: controller
+
+            launcherState: root.launcherState
+            applications: applications
+            themes: themes
+            actions: launcherActions
+            wallpapers: root.wallpapers
+            monitorName: root.monitorContext.name
 
         onCloseRequested: {
             root.shellState.closeLauncher(
@@ -43,6 +59,9 @@ Scope {
         active: root.monitorContext.launcherOpened
 
         onCleared: {
+            if (root.shellState.launcherFocusCloseSuppressed)
+                return
+
             if (launcherWindow.outsideClickArmed)
                 root.shellState.closeLauncher(
                     root.monitorContext
@@ -62,8 +81,11 @@ Scope {
         anchor.edges: Edges.Bottom
         anchor.gravity: Edges.Bottom
 
-        implicitWidth: Style.launcherWidth
-        implicitHeight: Style.launcherHeight
+        implicitWidth: root.panelWidth
+        implicitHeight: controller.mode
+            === LauncherController.Mode.Wallpaper
+                ? 236
+                : Style.launcherHeight
 
         color: "transparent"
 
@@ -76,13 +98,13 @@ Scope {
             query: controller.applicationQuery
         }
 
-        Themes {
-            id: themes
-        }
+            Themes {
+                id: themes
+            }
 
-        LauncherActions {
-            id: launcherActions
-        }
+            LauncherActions {
+                id: launcherActions
+            }
 
         Timer {
             id: closeTimer
@@ -108,6 +130,7 @@ Scope {
 
         Connections {
             target: root.launcherState
+            enabled: root.monitorContext.launcherOpened
 
             function onQueryChanged() {
                 controller.resetSelection()
@@ -119,6 +142,14 @@ Scope {
 
             function onMoveUpRequested() {
                 controller.moveUp()
+            }
+
+            function onMoveLeftRequested() {
+                controller.moveLeft()
+            }
+
+            function onMoveRightRequested() {
+                controller.moveRight()
             }
 
             function onAcceptRequested() {
@@ -172,18 +203,23 @@ Scope {
             id: launcherContent
 
             clip: true
+            enabled: root.monitorContext.launcherOpened
 
             width: launcherWindow.contentOpened
-                ? Style.launcherWidth
-                : Style.launcherSearchWidth
+                ? root.panelWidth - Style.barPopupGap * 2
+                : Style.launcherSearchWidth - Style.barPopupGap * 2
 
             height: launcherWindow.contentOpened
-                ? Style.launcherHeight
+                ? controller.mode
+                    === LauncherController.Mode.Wallpaper
+                        ? 236
+                        : Style.launcherHeight
                 : 0
 
             anchors {
                 top: parent.top
                 horizontalCenter: parent.horizontalCenter
+                topMargin: Style.barPopupGap
             }
 
             opacity: launcherWindow.contentOpened
@@ -191,7 +227,9 @@ Scope {
                 : 0
 
             radius: Style.radiusLarge
-            color: Color.background
+            color: Color.backgroundAlt
+            border.width: Style.panelBorderWidth
+            border.color: Color.outline
 
             Behavior on width {
                 NumberAnimation {
@@ -209,18 +247,6 @@ Scope {
                 NumberAnimation {
                     duration: Style.animationFast
                 }
-            }
-
-            Rectangle {
-                anchors {
-                    top: parent.top
-                    left: parent.left
-                    right: parent.right
-                }
-
-                height: Style.radiusLarge
-
-                color: launcherContent.color
             }
 
             AppsPage {
@@ -251,6 +277,18 @@ Scope {
                 active:
                     controller.mode
                     === LauncherController.Mode.Schemes
+            }
+
+            WallpapersPage {
+                anchors.fill: parent
+                visibleSlots: root.wallpaperSlots
+                monitorName: root.monitorContext.name
+
+                wallpapers: root.wallpapers
+                controller: controller
+                active:
+                    controller.mode
+                    === LauncherController.Mode.Wallpaper
             }
         }
     }

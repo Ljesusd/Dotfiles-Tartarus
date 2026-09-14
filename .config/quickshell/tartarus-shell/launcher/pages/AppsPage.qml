@@ -51,12 +51,12 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            spacing: Style.spacingMedium
+            spacing: Style.spacingLarge
 
             MaterialIcon {
                 text: "apps"
                 iconSize: Style.materialIconMedium
-                iconColor: Color.accent
+                iconColor: Color.primary
             }
 
             ColumnLayout {

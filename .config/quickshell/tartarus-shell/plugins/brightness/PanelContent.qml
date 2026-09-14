@@ -35,19 +35,24 @@ Item {
         )
 
     implicitWidth: 340
-    implicitHeight: panelContent.implicitHeight
+    implicitHeight:
+        contentColumn.implicitHeight
+        + Style.paddingLarge * 2
 
     Rectangle {
         id: panelContent
 
         anchors.fill: parent
+        anchors.margins: Style.barPopupGap
 
         implicitHeight:
             contentColumn.implicitHeight
             + Style.paddingLarge * 2
 
         radius: Style.radiusLarge
-        color: Color.background
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
+        border.color: Color.outlineVariant
 
         HoverHandler {
             onHoveredChanged: {
@@ -74,6 +79,14 @@ Item {
 
             RowLayout {
                 width: parent.width
+
+                MaterialIcon {
+                    text: "brightness_6"
+                    font.pixelSize: Style.materialIconMedium
+                    color: root.brightnessAvailable
+                        ? Color.accent
+                        : Color.foregroundMuted
+                }
 
                 Text {
                     text: "Brightness"
@@ -110,7 +123,7 @@ Item {
             }
 
             Text {
-                text: "Displays"
+                text: "Monitores"
 
                 font.pixelSize: Style.fontSmall
                 color: Color.foregroundMuted
@@ -148,12 +161,10 @@ Item {
 
                         spacing: Style.spacingMedium
 
-                        Text {
-                            text: displayItem.selected
-                                ? "●"
-                                : "○"
-
-                            font.pixelSize: Style.fontSmall
+                        MaterialIcon {
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "monitor"
+                            font.pixelSize: Style.materialIconMedium
                             color: displayItem.selected
                                 ? Color.accent
                                 : Color.foregroundMuted
@@ -179,7 +190,7 @@ Item {
                             Text {
                                 Layout.fillWidth: true
 
-                                text: "I²C bus " + displayItem.modelData.bus
+                                text: "Bus " + displayItem.modelData.bus
 
                                 font.pixelSize: Style.fontSmall
                                 color: Color.foregroundMuted
@@ -209,11 +220,46 @@ Item {
 
                 width: contentColumn.width
 
+                implicitHeight: Style.barControlHeight
+
                 from: 0
                 to: root.panelDisplay?.maxBrightness ?? 100
                 value: root.brightnessValue
 
                 enabled: root.brightnessAvailable
+
+                background: Rectangle {
+                    x: brightnessSlider.leftPadding
+                    y: brightnessSlider.topPadding
+                        + (brightnessSlider.availableHeight - height) / 2
+                    width: brightnessSlider.availableWidth
+                    implicitHeight: 6
+                    radius: 3
+                    color: Color.surfaceContainerHigh
+
+                    Rectangle {
+                        width: brightnessSlider.visualPosition * parent.width
+                        height: parent.height
+                        radius: 3
+                        color: Color.accent
+                    }
+                }
+
+                handle: Rectangle {
+                    x: brightnessSlider.leftPadding
+                        + brightnessSlider.visualPosition
+                            * (brightnessSlider.availableWidth - width)
+                    y: brightnessSlider.topPadding
+                        + brightnessSlider.availableHeight / 2 - height / 2
+                    implicitWidth: 18
+                    implicitHeight: 18
+                    radius: 9
+                    color: brightnessSlider.pressed
+                        ? Color.foreground
+                        : Color.accent
+                    border.color: Color.background
+                    border.width: 2
+                }
 
                 onMoved: {
                     root.service.setBrightnessForScreen(

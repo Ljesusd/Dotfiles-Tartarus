@@ -28,9 +28,9 @@ Rectangle {
     radius: Style.radiusMedium
 
     color: root.selected
-        ? Color.selection
+        ? Color.primaryContainer
         : hoverHandler.hovered
-            ? Color.surfaceHover
+            ? Color.surfaceVariant
             : Color.surface
 
     Behavior on color {
@@ -86,8 +86,8 @@ Rectangle {
                 text: "apps"
                 iconSize: Style.materialIconMedium
                 iconColor: root.selected
-                    ? Color.foreground
-                    : Color.foregroundMuted
+                    ? Color.onPrimaryContainer
+                    : Color.primary
             }
         }
 

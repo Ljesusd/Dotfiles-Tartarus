@@ -43,6 +43,10 @@ Rectangle {
         )
     }
 
+    // Recalculate after the row layout has settled when a workspace is
+    // revealed or removed. This keeps the pill attached to its target.
+    onWidthChanged: root.scheduleSync()
+
     function syncToTarget() {
         if (!root.targetItem)
             return
@@ -148,7 +152,7 @@ Rectangle {
         root.scheduleSync()
     }
 
-    NumberAnimation {
+    Anim {
         id: leftAnimation
 
         target: root
@@ -156,7 +160,7 @@ Rectangle {
         easing.type: Easing.OutCubic
     }
 
-    NumberAnimation {
+    Anim {
         id: rightAnimation
 
         target: root

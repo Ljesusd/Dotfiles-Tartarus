@@ -9,6 +9,8 @@ Rectangle {
     signal escapePressed()
     signal moveUp()
     signal moveDown()
+    signal moveLeft()
+    signal moveRight()
     signal acceptPressed()
 
     height: Style.controlHeight
@@ -63,6 +65,20 @@ Rectangle {
             root.moveUp()
         }
 
+        Keys.onLeftPressed: (event) => {
+            if (input.text.length === 0 || input.cursorPosition === 0) {
+                event.accepted = true
+                root.moveLeft()
+            }
+        }
+
+        Keys.onRightPressed: (event) => {
+            if (input.text.length === 0 || input.cursorPosition === input.text.length) {
+                event.accepted = true
+                root.moveRight()
+            }
+        }
+
         Keys.onReturnPressed: {
             root.acceptPressed()
         }
@@ -78,7 +94,7 @@ Rectangle {
 
         text: "Search applications..."
         font.pixelSize: Style.fontLarge
-        color: Color.foregroundSubtle
+        color: Color.foregroundMuted
     }
 
     function forceActiveFocus() {

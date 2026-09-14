@@ -17,16 +17,67 @@ Item {
 
     readonly property int shownWorkspaces: 5
     readonly property int maxWindowIcons: 5
-    readonly property bool showOccupiedBg: false
+    readonly property bool showOccupiedBg: true
+    readonly property bool showUnoccupied: false
+    readonly property bool showWindowIcons: true
     readonly property int activeWorkspaceId:
         root.plugin.service.activeWorkspaceIdForScreen(
             root.barScreen
         )
-    readonly property bool specialOpened:
+    readonly property string activeSpecialName:
         root.plugin.service
-            .hasActiveSpecialWorkspaceForScreen(
+            .activeSpecialWorkspaceNameForScreen(
                 root.barScreen
             )
+    readonly property bool hasActiveSpecial:
+        root.activeSpecialName !== ""
+    readonly property var specialWorkspaces:
+        root.plugin.service.specialWorkspacesForScreen(
+            root.barScreen
+        )
+    readonly property int specialCount:
+        root.specialWorkspaces.length
+    readonly property string activeSpecialKey:
+        root.specialKey(root.activeSpecialName)
+    readonly property int activeSpecialIndex: {
+        for (let i = 0; i < root.specialCount; ++i) {
+            const workspace = root.specialWorkspaces[i]
+            const specialName = workspace?.name ?? ""
+
+            if (root.specialKey(specialName) === root.activeSpecialKey)
+                return i
+        }
+
+        return -1
+    }
+    property int displayedSpecialIndex: -1
+
+    function specialKey(name) {
+        if (!name)
+            return ""
+
+        return name.startsWith("special:")
+            ? name.slice(8)
+            : name
+    }
+
+    function workspaceSlotWidth(index) {
+        const workspace = workspaceRepeater.itemAt(index)
+
+        return workspace
+            ? workspace.width
+            : Style.barWorkspaceBaseSize
+    }
+
+    onActiveSpecialIndexChanged: {
+        if (activeSpecialIndex >= 0)
+            displayedSpecialIndex = activeSpecialIndex
+    }
+
+    Component.onCompleted: {
+        if (activeSpecialIndex >= 0)
+            displayedSpecialIndex = activeSpecialIndex
+    }
 
     readonly property int groupStart:
         root.plugin.service.firstWorkspaceForScreen(
@@ -119,20 +170,11 @@ Item {
         if (delta === 0)
             return false
 
-        if (root.specialOpened) {
-            const activeSpecial =
-                root.plugin.service
-                    .activeSpecialWorkspaceNameForScreen(
-                        root.barScreen
-                    )
-
-            if (!activeSpecial)
-                return false
-
+        if (root.hasActiveSpecial) {
             root.plugin.service
                 .toggleSpecialWorkspaceForScreen(
                     root.barScreen,
-                    activeSpecial
+                    root.activeSpecialName
                 )
 
             return true
@@ -176,9 +218,11 @@ Item {
 
         radius: Style.radiusFull
 
-        color: Color.surfaceContainer
+        color: Color.surfaceContainerHigh
+        border.width: Style.panelBorderWidth
+        border.color: Color.outlineVariant
 
-        clip: false
+        clip: true
 
         Item {
             id: workspaceContent
@@ -191,30 +235,14 @@ Item {
             width: implicitWidth
             height: implicitHeight
             z: 0
-            scale: root.specialOpened
+            scale: root.hasActiveSpecial
                 ? Style.barWorkspaceBackgroundScale
                 : 1.0
-            opacity: root.specialOpened
-                ? Style.barWorkspaceBackgroundOpacity
+            opacity: root.hasActiveSpecial
+                ? Style.barWorkspaceSpecialDimOpacity
                 : 1.0
-            enabled: !root.specialOpened
+            enabled: !root.hasActiveSpecial
             transformOrigin: Item.Center
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blur: root.specialOpened
-                    ? Style.barWorkspaceSpecialBlur
-                    : 0.0
-                blurMax: Style.barWorkspaceSpecialBlurMax
-                autoPaddingEnabled: false
-
-                Behavior on blur {
-                    NumberAnimation {
-                        duration: Style.motionNormal
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
 
             Behavior on scale {
                 NumberAnimation {
@@ -227,6 +255,12 @@ Item {
                 NumberAnimation {
                     duration: Style.motionFast
                     easing.type: Easing.OutCubic
+                }
+            }
+
+            Behavior on enabled {
+                PropertyAnimation {
+                    duration: Style.motionFast
                 }
             }
 
@@ -292,6 +326,7 @@ Item {
                 targetItem: root.activeWorkspaceItem
                 targetIndex: root.activeIndex
                 groupStart: root.groupStart
+                visible: !root.hasActiveSpecial
 
                 z: 1
             }
@@ -327,7 +362,7 @@ Item {
                 height: workspaceRow.height
                 z: 3
 
-                visible: false
+                visible: !root.hasActiveSpecial
                 source: workspaceRow
                 colorization: 1.0
                 colorizationColor: Color.onPrimaryContainer
@@ -356,6 +391,8 @@ Item {
                         service: root.plugin.service
                         maxWindowIcons: root.maxWindowIcons
                         activeWorkspaceId: root.activeWorkspaceId
+                        showUnoccupied: root.showUnoccupied
+                        showWindowIcons: root.showWindowIcons
 
                         onInteracted: {
                             root.interacted()
@@ -365,51 +402,111 @@ Item {
             }
 
         }
-    }
 
-    Item {
-        id: specialLayer
+        Item {
+            id: specialLayer
 
-        anchors.fill: parent
-        z: 1
+            anchors.fill: parent
+            z: 4
 
-        opacity: root.specialOpened
-            ? 1.0
-            : 0.0
-        scale: root.specialOpened
-            ? 1.0
-            : Style.barWorkspaceSpecialEnterScale
-        enabled: root.specialOpened
-        transformOrigin: Item.Center
+            opacity: root.hasActiveSpecial ? 1.0 : 0.0
+            scale: root.hasActiveSpecial ? 1.0 : 0.8
+            enabled: root.hasActiveSpecial
+            transformOrigin: Item.Left
 
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Style.motionFast
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        Behavior on scale {
-            NumberAnimation {
-                duration: Style.motionNormal
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        SpecialWorkspaces {
-            anchors {
-                centerIn: parent
-                horizontalCenterOffset: 8
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Style.motionNormal
+                    easing.type: Easing.OutCubic
+                }
             }
 
-            width: parent.width
-            height: parent.height
+            Behavior on scale {
+                NumberAnimation {
+                    duration: Style.motionNormal
+                    easing.type: Easing.OutCubic
+                }
+            }
 
-            service: root.plugin.service
-            barScreen: root.barScreen
+            ListView {
+                id: specialList
 
-            onInteracted: {
-                root.interacted()
+                x: workspaceContent.x + workspaceRow.x
+                y: workspaceContent.y + workspaceRow.y
+                width: workspaceRow.width
+                height: workspaceRow.height
+
+                clip: true
+                interactive: false
+                orientation: ListView.Horizontal
+                spacing: workspaceRow.spacing
+
+                model: root.specialWorkspaces
+                currentIndex: root.displayedSpecialIndex
+                highlightFollowsCurrentItem: true
+                highlightMoveDuration: Style.motionNormal
+                highlightResizeDuration: Style.motionNormal
+
+                highlight: Item {
+                    width: Style.barWorkspaceBaseSize
+                        + Style.barWorkspaceActivePaddingHorizontal * 2
+                    height: specialList.height
+
+                    Rectangle {
+                        x: -Style.barWorkspaceActivePaddingHorizontal
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        width: parent.width
+                            + Style.barWorkspaceActivePaddingHorizontal * 2
+                        height: Style.barWorkspaceActiveHeight
+                        radius: Style.radiusFull
+                        color: Color.primary
+                    }
+                }
+
+                delegate: Item {
+                    id: specialItem
+
+                    required property int index
+                    required property var modelData
+
+                    readonly property string specialName:
+                        modelData?.name ?? ""
+                    readonly property string specialKey:
+                        root.specialKey(specialName)
+                    readonly property bool active:
+                        index === root.activeSpecialIndex
+
+                    width: Style.barWorkspaceBaseSize
+                    height: specialList.height
+                    opacity: specialItem.active ? 1.0 : 0.72
+                    scale: specialItem.active ? 1.0 : 0.86
+                    transformOrigin: Item.Center
+
+                    Behavior on opacity { Anim { duration: Style.motionFast } }
+                    Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutBack } }
+
+                    MaterialIcon {
+                        anchors.centerIn: parent
+
+                        text: root.plugin.service.specialWorkspaceIcon(
+                            specialItem.specialKey
+                        )
+                        iconSize: Style.barWorkspaceIconSize
+                        iconColor:
+                            specialItem.active
+                                ? Color.onPrimary
+                                : Color.onSurfaceVariant
+                        opacity: 1.0
+                    }
+
+                    TapHandler {
+                        onTapped: {
+                            root.plugin.service
+                                .toggleSpecialWorkspaceForScreen(root.barScreen, specialItem.specialKey)
+                        }
+                    }
+                }
             }
         }
     }

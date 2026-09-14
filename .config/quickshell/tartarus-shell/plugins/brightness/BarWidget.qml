@@ -61,16 +61,14 @@ Rectangle {
         return true
     }
 
-    implicitWidth: content.implicitWidth
-        + Style.barPaddingNormal * 2
+    implicitWidth: Style.barControlHeight
 
     implicitHeight: Style.barControlHeight
 
-    radius: Style.radiusSmall
+    radius: Style.barControlRadius
+    border.width: 0
 
-    color: mouseArea.containsMouse
-        ? Color.surfaceHover
-        : "transparent"
+    color: "transparent"
 
     RowLayout {
         id: content
@@ -79,10 +77,8 @@ Rectangle {
 
         spacing: Style.barSpacingSmall
 
-        Text {
+        MaterialIcon {
             text: root.brightnessIcon
-
-            font.family: Style.iconFont
             font.pixelSize: Style.barIconNormal
 
             color: root.brightnessAvailable
@@ -91,6 +87,7 @@ Rectangle {
         }
 
         Text {
+            visible: false
             text: root.brightnessText
 
             font.pixelSize: Style.barFontNormal

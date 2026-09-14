@@ -84,6 +84,18 @@ PopupWindow {
             entry.height
         )
 
+        // EntryWrapper includes the visual capsule padding. Anchor to the
+        // actual widget center so the popout sits under its icon.
+        const visual = entry.entryItem ?? entry.contentItem ?? entry
+        if (visual && visual !== entry) {
+            const visualPoint = visual.mapToItem(
+                root.anchorSurface,
+                visual.width / 2,
+                visual.height
+            )
+            return visualPoint.x
+        }
+
         return point.x
     }
 
@@ -145,8 +157,7 @@ PopupWindow {
             return
         }
 
-        if (targetHeight > root.hostHeight)
-            root.hostHeight = targetHeight
+        root.hostHeight = targetHeight
     }
 
     function prepareSurface() {
@@ -465,6 +476,11 @@ PopupWindow {
                     root.commitPanelContent(0)
 
                 root.refreshPanelContentActivity()
+                Qt.callLater(function() {
+                    root.syncPanelSize()
+                    root.syncHostHeight()
+                    root.updateAnchorIfReady()
+                })
             }
         }
 
@@ -500,6 +516,11 @@ PopupWindow {
                     root.commitPanelContent(1)
 
                 root.refreshPanelContentActivity()
+                Qt.callLater(function() {
+                    root.syncPanelSize()
+                    root.syncHostHeight()
+                    root.updateAnchorIfReady()
+                })
             }
         }
     }
@@ -520,11 +541,13 @@ PopupWindow {
         }
     }
 
-    onPanelImplicitWidthChanged: {
+    // Sync after the derived target bindings have updated. Listening to the
+    // source implicit sizes can read the previous target during a model change.
+    onTargetWidthChanged: {
         root.syncPanelSize()
     }
 
-    onPanelImplicitHeightChanged: {
+    onTargetHeightChanged: {
         root.syncPanelSize()
         root.syncHostHeight()
     }

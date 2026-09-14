@@ -51,12 +51,12 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            spacing: Style.spacingMedium
+            spacing: Style.spacingLarge
 
             MaterialIcon {
                 text: "chevron_right"
                 iconSize: Style.materialIconMedium
-                iconColor: Color.accent
+                iconColor: Color.primary
             }
 
             Text {

@@ -13,6 +13,8 @@ Rectangle {
     required property var service
     required property int maxWindowIcons
     required property int activeWorkspaceId
+    property bool showUnoccupied: false
+    property bool showWindowIcons: true
     property bool interactive: true
     property bool usePrimaryContentColor: false
 
@@ -37,21 +39,21 @@ Rectangle {
         Style.barWorkspaceBaseSize
 
     readonly property bool hasWindows:
-        windowCount > 0
+        root.showWindowIcons && windowCount > 0
+    readonly property bool shouldShow:
+        root.showUnoccupied || root.active || root.occupied
     readonly property color contentColor:
-        Color.onSurfaceVariant
-    readonly property real contentOpacity:
         root.active
-        ? 1.0
-        : root.occupied
-            ? 0.85
-            : 0.35
+            ? Color.onPrimaryContainer
+            : Color.onSurfaceVariant
+    readonly property real contentOpacity: 1.0
 
-    implicitWidth: Math.max(
+    implicitWidth: root.shouldShow ? Math.max(
         root.baseSize,
         content.implicitWidth + Style.spacingSm
-    )
+    ) : 0
     implicitHeight: root.baseSize
+    opacity: root.shouldShow ? 1 : 0
 
     radius: Style.radiusSmall
 
@@ -61,6 +63,13 @@ Rectangle {
             && mouseArea.containsMouse
             ? Color.surfaceHover
             : "transparent"
+
+    Behavior on color {
+        ColorAnim { }
+    }
+    Behavior on opacity { Anim { duration: Style.motionFast } }
+    Behavior on implicitWidth { Anim { duration: Style.motionNormal } }
+    Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutBack } }
 
     Row {
         id: content
@@ -140,10 +149,7 @@ Rectangle {
                     root.barScreen,
                     root.workspaceId
                 )
-                root.service.toggleSpecialWorkspaceForScreen(
-                    root.barScreen,
-                    "special"
-                )
+                root.service.toggleLastSpecialWorkspaceForScreen(root.barScreen)
                 return
             }
 

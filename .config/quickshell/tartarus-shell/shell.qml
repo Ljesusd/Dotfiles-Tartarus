@@ -13,6 +13,7 @@ import QtQuick
 import "bar"
 import "core"
 import "launcher"
+import "shell/imageviewer" as ImageViewer
 import "./shell" as Shell
 import "services"
 
@@ -62,6 +63,105 @@ ShellRoot {
     }
 
     IpcHandler {
+        target: "osd"
+        function showVolume(): void { OsdService.showCurrentVolume() }
+        function showBrightness(): void { OsdService.show("brightness", 0, false) }
+        function showMute(): void { OsdService.show("volume", 0, true) }
+    }
+
+    IpcHandler {
+        target: "sidebar"
+        function toggle(): void { globalShellState.toggleSidebar(globalShellState.contextForFocusedMonitor()) }
+        function open(): void { globalShellState.openSidebar(globalShellState.contextForFocusedMonitor()) }
+        function close(): void { globalShellState.closeSidebar(globalShellState.contextForFocusedMonitor()) }
+    }
+
+    IpcHandler {
+        target: "power"
+        function lock(): void { PowerService.lock() }
+        function suspend(): void { PowerService.suspend() }
+        function logout(): void { PowerService.logout() }
+        function reboot(): void { PowerService.reboot() }
+        function shutdown(): void { PowerService.shutdown() }
+    }
+
+    GlobalShortcut {
+        name: "notification-dnd"
+        description: "Toggle notification Do Not Disturb"
+
+        onPressed: NotificationService.toggleDnd()
+    }
+
+    GlobalShortcut {
+        name: "notification-center"
+        description: "Toggle notification center"
+
+        onPressed: NotificationService.toggleCenter()
+    }
+
+    GlobalShortcut {
+        name: "clipboard"
+        description: "Toggle clipboard history"
+
+        onPressed: ClipboardService.toggle()
+    }
+
+    IpcHandler {
+        target: "notification"
+
+        function toggleDnd(): void {
+            NotificationService.toggleDnd()
+        }
+
+        function setDnd(enabled: bool): void {
+            if (NotificationService.dnd === enabled)
+                return
+
+            NotificationService.toggleDnd()
+        }
+
+        function toggleCenter(): void {
+            globalShellState.toggleNotificationCenter()
+        }
+
+        function openCenter(): void {
+            NotificationService.centerOpen = true
+        }
+
+        function closeCenter(): void {
+            globalShellState.closeNotificationCenter()
+        }
+
+        function clearHistory(): void {
+            NotificationService.clearHistory()
+        }
+    }
+
+    IpcHandler {
+        target: "clipboard"
+
+        function toggle(): void {
+            globalShellState.syncClipboardState()
+            const context = globalShellState.contextForFocusedMonitor()
+            if (context)
+                context.toggleClipboard()
+            ClipboardService.open = context ? context.clipboardOpen : false
+        }
+
+        function open(): void {
+            ClipboardService.open = true
+        }
+
+        function close(): void {
+            ClipboardService.close()
+        }
+
+        function clear(): void {
+            ClipboardService.clear()
+        }
+    }
+
+    IpcHandler {
         target: "launcher"
 
         function toggle(): void {
@@ -91,6 +191,10 @@ ShellRoot {
         function close(): void {
             globalShellState.closeLaunchers()
         }
+
+        function suppressFocusClose(suppressed: bool): void {
+            globalShellState.setLauncherFocusCloseSuppressed(suppressed)
+        }
     }
 
     Variants {
@@ -104,6 +208,12 @@ ShellRoot {
             shellState: globalShellState
             pluginRegistry: root.sharedPluginRegistry
         }
+    }
+
+    ImageViewer.ImageViewerWindow { shellState: globalShellState }
+
+    QtObject {
+        property var notificationService: NotificationService
     }
 
 }

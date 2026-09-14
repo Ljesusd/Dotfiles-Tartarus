@@ -41,10 +41,15 @@ QtObject {
         if (!root.available)
             return
 
-        root.adapter.enabled = enabled
-
-        if (!enabled)
+        if (
+            !enabled
+            && root.enabled
+            && root.discovering
+        ) {
             root.stopScan()
+        }
+
+        root.adapter.enabled = enabled
     }
 
     function startScan() {
@@ -55,8 +60,13 @@ QtObject {
     }
 
     function stopScan() {
-        if (!root.available)
+        if (
+            !root.available
+            || !root.enabled
+            || !root.discovering
+        ) {
             return
+        }
 
         root.adapter.discovering = false
     }

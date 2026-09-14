@@ -20,9 +20,9 @@ Rectangle {
     radius: Style.radiusMedium
 
     color: root.selected
-        ? Color.selection
+        ? Color.primaryContainer
         : hoverHandler.hovered
-            ? Color.surfaceHover
+            ? Color.surfaceVariant
             : Color.surface
 
     Behavior on color {
@@ -47,7 +47,9 @@ Rectangle {
 
             text: root.action.icon
             iconSize: Style.iconMedium
-            iconColor: Color.accent
+            iconColor: root.selected
+                ? Color.onPrimaryContainer
+                : Color.primary
         }
 
         ColumnLayout {
@@ -86,7 +88,9 @@ Rectangle {
 
             text: "chevron_right"
             iconSize: Style.materialIconMedium
-            iconColor: Color.foregroundMuted
+            iconColor: root.selected
+                ? Color.onPrimaryContainer
+                : Color.foregroundMuted
         }
     }
 

@@ -57,9 +57,12 @@ Item {
 
     Rectangle {
         anchors.fill: parent
+        anchors.margins: Style.barPopupGap
 
         radius: Style.radiusLarge
-        color: Color.background
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
+        border.color: Color.outlineVariant
 
         HoverHandler {
             onHoveredChanged: {
@@ -104,7 +107,7 @@ Item {
 
                     implicitHeight: 30
 
-                    radius: Style.radiusSmall
+                    radius: Style.radiusFull
 
                     color: wifiToggleHover.hovered
                         ? Color.surfaceHover
@@ -139,6 +142,41 @@ Item {
                             if (nextEnabled)
                                 root.service.scan()
                         }
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Style.spacingMedium
+
+                Repeater {
+                    model: [
+                        { label: "↑", value: root.service.uploadSpeed, color: Color.accent },
+                        { label: "↓", value: root.service.downloadSpeed, color: Color.primary }
+                    ]
+                    delegate: RowLayout {
+                        required property var modelData
+                        readonly property real rate: Number(modelData.value) || 0
+                        readonly property color rateColor: modelData.color
+                        Layout.fillWidth: true
+                        spacing: Style.spacingXs
+                        Text { text: modelData.label; color: modelData.color; font.bold: true }
+                        Row {
+                            spacing: 2
+                            Repeater {
+                                model: 8
+                                delegate: Rectangle {
+                                    required property int index
+                                    width: 3
+                                    height: 5 + ((index + Math.floor(rate / 1024 / 8)) % 5) * 3
+                                    radius: 2
+                                    color: rateColor
+                                    opacity: rate > 0 ? 0.9 : 0.3
+                                }
+                            }
+                        }
+                        Text { text: root.service.formatRate(rate); color: Color.foregroundMuted; font.pixelSize: Style.fontSmall }
                     }
                 }
             }
@@ -181,12 +219,11 @@ Item {
 
                         spacing: Style.spacingMedium
 
-                        Text {
-                            text: "󰈀"
+                        MaterialIcon {
+                            text: "lan"
 
-                            font.family: Style.iconFont
-                            font.pixelSize: Style.iconMedium
-                            color: root.service.ethernetConnected
+                            iconSize: Style.iconMedium
+                            iconColor: root.service.ethernetConnected
                                 ? Color.accent
                                 : Color.foregroundMuted
                         }
@@ -317,12 +354,11 @@ Item {
 
                     spacing: Style.spacingMedium
 
-                    Text {
-                        text: "󰤨"
+                    MaterialIcon {
+                        text: "wifi"
 
-                        font.family: Style.iconFont
-                        font.pixelSize: Style.iconMedium
-                        color: Color.accent
+                        iconSize: Style.iconMedium
+                        iconColor: Color.accent
                     }
 
                     ColumnLayout {
@@ -363,19 +399,34 @@ Item {
                 color: Color.foregroundMuted
             }
 
-            Text {
+            Item {
+                id: wifiDisabledState
                 visible:
                     !root.service.wifiEnabled
 
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                implicitHeight: 150
 
-                horizontalAlignment:
-                    Text.AlignHCenter
+                Column {
+                    anchors.centerIn: parent
+                    spacing: Style.spacingSmall
 
-                text: "Wi-Fi is disabled"
+                    MaterialIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "wifi_off"
+                        iconSize: Style.materialIconExtraLarge
+                        iconColor: Color.foregroundMuted
+                    }
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "Wi-Fi disabled"
+                        font.pixelSize: Style.fontSmall
+                        font.weight: Font.Medium
+                        color: Color.foregroundMuted
+                    }
+                }
             }
 
             Text {
@@ -434,12 +485,11 @@ Item {
 
                         spacing: Style.spacingMedium
 
-                        Text {
-                            text: "󰤨"
+                        MaterialIcon {
+                            text: networkItem.modelData.connected ? "wifi" : "wifi_off"
 
-                            font.family: Style.iconFont
-                            font.pixelSize: Style.iconMedium
-                            color: networkItem.modelData.connected
+                            iconSize: Style.iconMedium
+                            iconColor: networkItem.modelData.connected
                                 ? Color.accent
                                 : Color.foregroundMuted
                         }

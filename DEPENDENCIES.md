@@ -9,3 +9,5 @@ Initial scope:
 - Kitty
 - Zed
 - Python
+- wl-paste
+- wl-copy

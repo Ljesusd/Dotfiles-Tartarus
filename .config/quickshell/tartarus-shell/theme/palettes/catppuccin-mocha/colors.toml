@@ -41,10 +41,23 @@ background_alt = "mantle"
 surface = "surface0"
 surface_hover = "surface1"
 selection = "surface2"
+surface_variant = "surface1"
 
 foreground = "text"
+on_surface = "text"
 foreground_muted = "subtext0"
 foreground_subtle = "overlay1"
+
+primary = "mauve"
+primary_container = "surface2"
+on_primary = "crust"
+secondary = "blue"
+secondary_container = "surface1"
+on_secondary = "crust"
+tertiary = "teal"
+tertiary_container = "surface1"
+on_tertiary = "crust"
+outline = "overlay0"
 
 accent = "mauve"
 

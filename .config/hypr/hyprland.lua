@@ -24,6 +24,7 @@ require("modules.env")
 require("modules.appearance")
 require("modules.layouts")
 require("modules.misc")
+require("modules.animations")
 
 require("modules.input")
 require("modules.binds")

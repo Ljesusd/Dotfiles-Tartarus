@@ -6,15 +6,23 @@ import QtQuick.Layouts
 
 import "../../theme"
 
-RowLayout {
+Item {
     id: root
 
     signal closeLauncherRequested()
 
-    spacing: Style.barSpacingSmall
+    implicitWidth: trayLayout.implicitWidth
+    implicitHeight: Style.barControlHeight
+    RowLayout {
+        id: trayLayout
 
-    Repeater {
-        model: SystemTray.items
+        anchors.fill: parent
+        anchors.leftMargin: Style.barPaddingSmall
+        anchors.rightMargin: Style.barPaddingSmall
+        spacing: Style.barSpacingSmall
+
+        Repeater {
+            model: SystemTray.items
 
         Rectangle {
             id: trayItem
@@ -24,11 +32,10 @@ RowLayout {
             implicitWidth: Style.barControlHeight
             implicitHeight: Style.barControlHeight
 
-            radius: Style.radiusSmall
+            radius: Style.radiusMedium
 
-            color: mouseArea.containsMouse
-                ? Color.surfaceHover
-                : "transparent"
+            color: "transparent"
+            border.width: 0
 
             Image {
                 anchors.centerIn: parent
@@ -40,11 +47,31 @@ RowLayout {
                 fillMode: Image.PreserveAspectFit
             }
 
-            QsMenuAnchor {
+            TrayMenu {
                 id: menuAnchor
 
-                anchor.item: trayItem
-                menu: trayItem.modelData.menu
+                trayItem: trayItem.modelData
+                anchorItem: trayItem
+            }
+
+            Timer {
+                id: menuHoverDelay
+                interval: Style.motionFast
+                repeat: false
+                onTriggered: {
+                    if (mouseArea.containsMouse && trayItem.modelData.hasMenu)
+                        menuAnchor.popupOpen = true
+                }
+            }
+
+            Timer {
+                id: menuCloseDelay
+                interval: Style.motionFast
+                repeat: false
+                onTriggered: {
+                    if (!mouseArea.containsMouse && !menuAnchor.menuHovered)
+                        menuAnchor.close()
+                }
             }
 
             MouseArea {
@@ -112,7 +139,19 @@ RowLayout {
                         )
                     }
                 }
+
+                onEntered: {
+                    menuCloseDelay.stop()
+                    menuHoverDelay.restart()
+                }
+
+                onExited: {
+                    menuHoverDelay.stop()
+                    menuCloseDelay.restart()
+                }
             }
         }
+        }
     }
+
 }

@@ -7,6 +7,8 @@ QtObject {
 
     signal moveUpRequested()
     signal moveDownRequested()
+    signal moveLeftRequested()
+    signal moveRightRequested()
     signal acceptRequested()
     signal escapeRequested()
     signal focusRequested()

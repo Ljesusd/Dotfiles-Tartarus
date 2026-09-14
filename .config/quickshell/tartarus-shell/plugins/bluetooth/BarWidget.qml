@@ -60,28 +60,29 @@ Rectangle {
         return true
     }
 
-    implicitWidth: bluetoothText.implicitWidth
-        + Style.barPaddingNormal * 2
+    implicitWidth: Style.barControlHeight
 
     implicitHeight: Style.barControlHeight
 
-    color: mouseArea.containsMouse
-        ? Color.surfaceHover
-        : "transparent"
+    color: "transparent"
 
-    radius: Style.radiusSmall
+    radius: Style.barControlRadius
+    border.width: 0
 
-    Text {
+    MaterialIcon {
         id: bluetoothText
 
         anchors.centerIn: parent
 
-        font.family: Style.iconFont
-        font.pixelSize: Style.barIconNormal
+        text: root.bluetoothIcon === "󰂲"
+            ? "bluetooth_disabled"
+            : root.bluetoothIcon === "󰂱"
+                ? "bluetooth_connected"
+                : "bluetooth"
 
-        text: root.bluetoothIcon
+        iconSize: Style.barIconNormal
 
-        color:
+        iconColor:
             root.service.available
             && root.service.enabled
             ? Color.foreground

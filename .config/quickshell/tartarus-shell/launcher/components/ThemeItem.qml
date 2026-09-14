@@ -20,9 +20,9 @@ Rectangle {
     radius: Style.radiusMedium
 
     color: root.selected
-        ? Color.selection
+        ? Color.primaryContainer
         : hoverHandler.hovered
-            ? Color.surfaceHover
+            ? Color.surfaceVariant
             : Color.surface
 
     Behavior on color {
@@ -48,8 +48,8 @@ Rectangle {
             text: "palette"
             iconSize: Style.materialIconMedium
             iconColor: root.selected
-                ? Color.foreground
-                : Color.accent
+                ? Color.onPrimaryContainer
+                : Color.primary
         }
 
         ColumnLayout {
@@ -78,8 +78,8 @@ Rectangle {
                 Rectangle {
                     radius: Style.radiusFull
                     color: root.selected
-                        ? Color.surface
-                        : Color.accent
+                        ? Color.secondaryContainer
+                        : Color.secondary
                     implicitHeight: Style.launcherSchemeBadgeHeight
                     implicitWidth:
                         currentText.implicitWidth
@@ -109,8 +109,8 @@ Rectangle {
                         text: "Current"
                         font.pixelSize: Style.fontSmall
                         color: root.selected
-                            ? Color.foreground
-                            : Color.background
+                            ? Color.onSurface
+                            : Color.onSecondary
                     }
                 }
             }

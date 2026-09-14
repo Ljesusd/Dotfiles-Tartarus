@@ -25,21 +25,35 @@ Rectangle {
         return true
     }
 
-    implicitWidth: audioText.implicitWidth
-        + Style.barPaddingNormal * 2
+    implicitWidth: Style.barControlHeight
 
     implicitHeight: Style.barControlHeight
 
-    color: mouseArea.containsMouse
-        ? Color.surfaceHover
-        : "transparent"
+    color: "transparent"
 
-    radius: Style.radiusSmall
+    radius: Style.barControlRadius
+    border.width: 0
+
+    MaterialIcon {
+        id: audioIcon
+
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: Style.barPaddingNormal
+        text: root.plugin.service.muted ? "volume_off" : "volume_up"
+        font.pixelSize: Style.barIconNormal
+        color: root.plugin.service.muted
+            ? Color.foregroundMuted
+            : Color.foreground
+    }
 
     Text {
         id: audioText
+        visible: false
 
-        anchors.centerIn: parent
+        anchors.left: audioIcon.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: Style.barSpacingSmall
 
         font.pixelSize: Style.barFontNormal
 

@@ -30,11 +30,20 @@ QtObject {
     readonly property color surfaceContainerHigh:
         role("surface_container_high", root.surfaceHover)
 
+    readonly property color surfaceElevated:
+        role("surface_elevated", root.surfaceContainerHigh)
+
     readonly property color selection:
         role("selection", "#555555")
 
+    readonly property color surfaceVariant:
+        role("surface_variant", root.surfaceHover)
+
     readonly property color primaryContainer:
         role("primary_container", root.selection)
+
+    readonly property color secondaryContainer:
+        role("secondary_container", root.surfaceHover)
 
     readonly property color tertiaryContainer:
         role("tertiary_container", root.accent)
@@ -42,11 +51,38 @@ QtObject {
     readonly property color foreground:
         role("foreground", "#ffffff")
 
+    readonly property color onSurface:
+        role("on_surface", root.foreground)
+
     readonly property color onPrimaryContainer:
         role("on_primary_container", root.foreground)
 
     readonly property color onTertiaryContainer:
         role("on_tertiary_container", root.background)
+
+    readonly property color primary:
+        role("primary", root.accent)
+
+    readonly property color onPrimary:
+        role("on_primary", root.background)
+
+    readonly property color secondary:
+        role("secondary", root.info)
+
+    readonly property color onSecondary:
+        role("on_secondary", root.background)
+
+    readonly property color tertiary:
+        role("tertiary", root.accent)
+
+    readonly property color onTertiary:
+        role("on_tertiary", root.background)
+
+    readonly property color outline:
+        role("outline", root.foregroundSubtle)
+
+    readonly property color outlineVariant:
+        role("outline_variant", root.outline)
 
     readonly property color foregroundMuted:
         role("foreground_muted", "#999999")
@@ -55,7 +91,7 @@ QtObject {
         role("foreground_subtle", "#777777")
 
     readonly property color onSurfaceVariant:
-        role("on_surface_variant", root.foregroundSubtle)
+        role("on_surface_variant", root.foregroundMuted)
 
     readonly property color accent:
         role("accent", "#89b4fa")

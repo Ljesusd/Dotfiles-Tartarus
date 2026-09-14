@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 import QtQml.Models
+import Quickshell.Io
 
 import "../core"
 import "../theme"
@@ -14,7 +15,7 @@ PanelWindow {
     required property var monitorContext
     required property var shellState
     required property var pluginRegistry
-    property Item hoveredEntry: null
+    property var hoveredEntry: null
     readonly property var launcherAnchor:
         launcherSearch
 
@@ -244,8 +245,17 @@ PanelWindow {
     Rectangle {
         id: barSurface
 
-        anchors.fill: parent
-        color: Color.background
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: Style.barFloatingMargin
+        }
+        radius: Style.barSurfaceRadius
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
+        border.color: Color.outline
 
         HoverPanelHost {
             hoverPanelController: hoverPanelController
@@ -264,7 +274,14 @@ PanelWindow {
         RowLayout {
             id: barLayout
 
-            anchors.fill: parent
+            anchors {
+                top: barSurface.top
+                bottom: barSurface.bottom
+                left: barSurface.left
+                right: barSurface.right
+                leftMargin: Style.barContentHorizontalPadding
+                rightMargin: Style.barContentHorizontalPadding
+            }
             spacing: 0
 
             HoverHandler {
@@ -433,11 +450,25 @@ PanelWindow {
                         }
                     }
 
-                    Repeater {
-                        model: rightBarPluginModel
+                    Rectangle {
+                        implicitWidth: pluginGroup.implicitWidth + Style.barPaddingSmall * 2
+                        implicitHeight: Style.barControlHeight
+                        radius: 0
+                        color: "transparent"
+                        border.width: 0
 
-                        EntryWrapper {
-                            id: pluginSlot
+                        RowLayout {
+                            id: pluginGroup
+                            anchors.fill: parent
+                            anchors.leftMargin: Style.barPaddingSmall
+                            anchors.rightMargin: Style.barPaddingSmall
+                            spacing: Style.barSpacingSmall
+
+                            Repeater {
+                                model: rightBarPluginModel
+
+                                EntryWrapper {
+                                    id: pluginSlot
 
                             entryId: pluginId
                             required property string pluginId
@@ -489,6 +520,30 @@ PanelWindow {
                                     function onInteracted() {
                                         root.closeLauncherIfOpen()
                                     }
+                                }
+                            }
+
+                                }
+                            }
+
+                            MaterialIcon {
+                                id: notificationIcon
+                                Layout.preferredWidth: Style.barControlHeight
+                                Layout.preferredHeight: Style.barControlHeight
+                                text: "notifications"
+                                iconSize: Style.barIconNormal
+                                iconColor: Color.foreground
+
+                                Process {
+                                    id: notificationProcess
+                                    command: ["qs", "-c", "tartarus-shell", "ipc", "call", "notification", "toggleCenter"]
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: false
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: notificationProcess.running = true
                                 }
                             }
                         }

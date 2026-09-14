@@ -1,0 +1,8 @@
+[Default Applications]
+image/png=tartarus-imageviewer.desktop
+image/jpeg=tartarus-imageviewer.desktop
+image/webp=tartarus-imageviewer.desktop
+image/gif=tartarus-imageviewer.desktop
+image/bmp=tartarus-imageviewer.desktop
+image/tiff=tartarus-imageviewer.desktop
+image/svg+xml=tartarus-imageviewer.desktop

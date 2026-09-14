@@ -1,4 +1,5 @@
 import QtQml
+import "../services" as Services
 
 QtObject {
     id: root
@@ -8,13 +9,16 @@ QtObject {
     enum Mode {
         Applications,
         Actions,
-        Schemes
+        Schemes,
+        Wallpaper
     }
 
     required property var launcherState
     required property var applications
     required property var themes
     required property var actions
+    required property var wallpapers
+    required property string monitorName
 
     property int selectedIndex: 0
 
@@ -26,6 +30,9 @@ QtObject {
     readonly property int mode: {
         if (root.normalizedQuery.startsWith(">scheme"))
             return LauncherController.Mode.Schemes
+
+        if (root.normalizedQuery.startsWith(">wallpaper"))
+            return LauncherController.Mode.Wallpaper
 
         if (root.normalizedQuery.startsWith(">"))
             return LauncherController.Mode.Actions
@@ -45,6 +52,17 @@ QtObject {
                 .trim()
             : ""
 
+    readonly property string wallpaperQuery: {
+        if (root.mode !== LauncherController.Mode.Wallpaper)
+            return ""
+
+        const prefix = ">wallpaper"
+
+        return root.launcherState.query
+            .slice(prefix.length)
+            .trim()
+    }
+
     readonly property string schemeQuery: {
         if (root.mode !== LauncherController.Mode.Schemes)
             return ""
@@ -57,6 +75,7 @@ QtObject {
     }
 
     readonly property int currentCount: {
+        let itemCount = 0
         switch (root.mode) {
         case LauncherController.Mode.Applications:
             return (
@@ -66,20 +85,21 @@ QtObject {
             )
                 ? root.applications.applications.values.length
                 : 0
-        case LauncherController.Mode.Actions: {
-            const items = root.actions
-                ? root.actions.filtered(root.actionQuery)
-                : []
-
-            return items ? items.length : 0
-        }
-        case LauncherController.Mode.Schemes: {
-            const items = root.themes
-                ? root.themes.filtered(root.schemeQuery)
-                : []
-
-            return items ? items.length : 0
-        }
+        case LauncherController.Mode.Actions:
+            itemCount = root.actions
+                ? root.actions.filtered(root.actionQuery).length
+                : 0
+            return itemCount
+        case LauncherController.Mode.Schemes:
+            itemCount = root.themes
+                ? root.themes.filtered(root.schemeQuery).length
+                : 0
+            return itemCount
+        case LauncherController.Mode.Wallpaper:
+            itemCount = root.wallpapers
+                ? root.wallpapers.filtered(root.wallpaperQuery).length
+                : 0
+            return itemCount
         default:
             return 0
         }
@@ -120,6 +140,40 @@ QtObject {
         root.select(root.selectedIndex + 1)
     }
 
+    function wrapIndex(index, count) {
+        return ((index % count) + count) % count
+    }
+
+    function moveLeft() {
+        if (root.currentCount <= 0)
+            return
+
+        if (root.mode === LauncherController.Mode.Wallpaper) {
+            root.selectedIndex = root.wrapIndex(
+                root.selectedIndex - 1,
+                root.currentCount
+            )
+            return
+        }
+
+        root.moveUp()
+    }
+
+    function moveRight() {
+        if (root.currentCount <= 0)
+            return
+
+        if (root.mode === LauncherController.Mode.Wallpaper) {
+            root.selectedIndex = root.wrapIndex(
+                root.selectedIndex + 1,
+                root.currentCount
+            )
+            return
+        }
+
+        root.moveDown()
+    }
+
     function acceptApplication() {
         const values = (
             root.applications
@@ -139,6 +193,7 @@ QtObject {
             return
 
         root.applications.launch(app)
+        root.launcherState.query = ""
         root.closeRequested()
     }
 
@@ -155,6 +210,29 @@ QtObject {
 
         if (!action)
             return
+
+        if (action.command === "clipboard") {
+            root.launcherState.query = ""
+            root.closeRequested()
+            Services.ClipboardService.open = true
+            Services.ClipboardService.query = ""
+            Services.ClipboardService.selectedIndex = 0
+            return
+        }
+
+        if (action.command === "wallpaper") {
+            root.launcherState.query = ">wallpaper"
+            root.launcherState.focusSearch()
+            root.resetSelection()
+            return
+        }
+
+        if (action.command === "reapply-wallpapers") {
+            root.wallpapers.applySaved()
+            root.launcherState.query = ""
+            root.closeRequested()
+            return
+        }
 
         root.launcherState.query =
             ">" + action.command
@@ -193,7 +271,28 @@ QtObject {
         case LauncherController.Mode.Schemes:
             root.acceptScheme()
             break
+        case LauncherController.Mode.Wallpaper:
+            root.acceptWallpaper()
+            break
         }
+    }
+
+    function acceptWallpaper() {
+        const items = root.wallpapers
+            ? root.wallpapers.filtered(root.wallpaperQuery)
+            : null
+        const index = root.selectedIndex
+
+        if (!items || index < 0 || index >= items.length)
+            return
+
+        const wallpaper = items[index]
+
+        if (!wallpaper || !wallpaper.path) {
+            return
+        }
+
+        root.wallpapers.setWallpaper(wallpaper.path, root.monitorName)
     }
 
     function close() {
@@ -210,6 +309,11 @@ QtObject {
         root.launcherState.focusSearch()
     }
 
+    function backFromWallpapers() {
+        root.launcherState.query = ">"
+        root.launcherState.focusSearch()
+    }
+
     function goBack() {
         switch (root.mode) {
         case LauncherController.Mode.Schemes:
@@ -217,6 +321,9 @@ QtObject {
             break
         case LauncherController.Mode.Actions:
             root.backFromActions()
+            break
+        case LauncherController.Mode.Wallpaper:
+            root.backFromWallpapers()
             break
         case LauncherController.Mode.Applications:
         default:

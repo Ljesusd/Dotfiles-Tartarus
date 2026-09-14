@@ -13,13 +13,18 @@ Item {
         root.plugin.service
 
     implicitWidth: 360
-    implicitHeight: 240
+    implicitHeight:
+        contentColumn.implicitHeight
+        + Style.paddingLarge * 2
 
     Rectangle {
         anchors.fill: parent
+        anchors.margins: Style.barPopupGap
 
         radius: Style.radiusLarge
-        color: Color.background
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
+        border.color: Color.outlineVariant
 
         HoverHandler {
             onHoveredChanged: {
@@ -33,6 +38,8 @@ Item {
         }
 
         ColumnLayout {
+            id: contentColumn
+
             anchors {
                 fill: parent
                 margins: Style.paddingLarge
@@ -101,10 +108,39 @@ Item {
                         readonly property bool selected:
                             modelData === root.service.currentOutput
 
+                        readonly property string outputName:
+                            root.service.outputDisplayName(modelData)
+
+                        readonly property string outputIcon: {
+                            if (/headphone|headset|earbud|head[- ]?phones|starship|matisse/i.test(
+                                outputRow.outputName
+                            )) {
+                                return "headphones"
+                            }
+
+                            if (/hdmi|displayport|\bDP\b|navi|monitor|amd|intel|nvidia/i.test(
+                                outputRow.outputName
+                            )) {
+                                return "speaker"
+                            }
+
+                            return "speaker"
+                        }
+
                         Layout.fillWidth: true
 
                         width: parent ? parent.width : 0
                         implicitHeight: Style.barControlHeight
+
+                        MaterialIcon {
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: outputRow.outputIcon
+                            font.pixelSize: Style.materialIconMedium
+                            color: outputRow.selected
+                                ? Color.accent
+                                : Color.foregroundMuted
+                        }
 
                         Text {
                             anchors {
@@ -113,11 +149,10 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
-                            text:
-                                (outputRow.selected ? "●  " : "   ")
-                                + root.service.outputDisplayName(
-                                    outputRow.modelData
-                                )
+                            leftPadding: 28
+                            text: root.service.outputDisplayName(
+                                outputRow.modelData
+                            )
 
                             font.pixelSize: Style.fontNormal
                             color: outputRow.selected
@@ -146,6 +181,14 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
+
+                MaterialIcon {
+                    text: root.service.muted ? "volume_off" : "volume_up"
+                    font.pixelSize: Style.materialIconMedium
+                    color: root.service.available
+                        ? Color.accent
+                        : Color.foregroundMuted
+                }
 
                 Text {
                     Layout.fillWidth: true
@@ -271,9 +314,7 @@ Item {
 
                     anchors.centerIn: parent
 
-                    text: root.service.muted
-                        ? "Unmute"
-                        : "Mute"
+                    text: root.service.muted ? "Activar" : "Silenciar"
 
                     font.pixelSize: Style.fontSmall
                     color: root.service.available

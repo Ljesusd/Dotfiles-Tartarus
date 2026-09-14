@@ -5,6 +5,23 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 -- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 
+-- Workspaces per monitor
+for workspace = 1, 5 do
+    hl.workspace_rule({
+        workspace = tostring(workspace),
+        monitor = "DP-2",
+        default = workspace == 1,
+    })
+end
+
+for workspace = 6, 10 do
+    hl.workspace_rule({
+        workspace = tostring(workspace),
+        monitor = "HDMI-A-1",
+        default = workspace == 6,
+    })
+end
+
 -- Example window rules that are useful
 
 local suppressMaximizeRule = hl.window_rule({
@@ -78,6 +95,33 @@ hl.window_rule({
     },
 
     workspace = "special:gaming silent",
+})
+
+hl.window_rule({
+    name = "vesktop-to-communication",
+
+    match = {
+        initial_class = "^vesktop$",
+    },
+
+    workspace = "special:communication silent",
+})
+
+hl.window_rule({
+    name = "tartarus-imageviewer-floating",
+
+    match = {
+        initial_title = "^.* - Tartarus Image Viewer$",
+    },
+
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "tartarus-imageviewer-opaque",
+    match = { initial_title = "^.* - Tartarus Image Viewer$" },
+    opaque = true,
 })
 
 hl.on("window.active", function(window)
