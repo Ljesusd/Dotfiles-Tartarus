@@ -28,7 +28,12 @@ QtObject {
             command: "clipboard",
             description: "Open clipboard history"
         }
-    ]
+    ].concat(DockerService.installed ? [{
+        name: "Docker",
+        icon: "deployed_code",
+        command: "docker",
+        description: "Contenedores, recursos y logs"
+    }] : [])
 
     function filtered(query) {
         const normalized =

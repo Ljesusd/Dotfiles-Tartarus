@@ -10,7 +10,8 @@ QtObject {
         Applications,
         Actions,
         Schemes,
-        Wallpaper
+        Wallpaper,
+        Docker
     }
 
     required property var launcherState
@@ -19,6 +20,7 @@ QtObject {
     required property var actions
     required property var wallpapers
     required property string monitorName
+    property var dockerPage: null
 
     property int selectedIndex: 0
 
@@ -28,6 +30,8 @@ QtObject {
             .toLowerCase()
 
     readonly property int mode: {
+        if (/^>docker(?:\s|$)/.test(root.normalizedQuery))
+            return LauncherController.Mode.Docker
         if (root.normalizedQuery.startsWith(">scheme"))
             return LauncherController.Mode.Schemes
 
@@ -44,6 +48,9 @@ QtObject {
         root.mode === LauncherController.Mode.Applications
             ? root.launcherState.query
             : ""
+
+    readonly property string dockerQuery: root.mode === LauncherController.Mode.Docker
+        ? root.launcherState.query.trim().slice(7).trim() : ""
 
     readonly property string actionQuery:
         root.mode === LauncherController.Mode.Actions
@@ -77,6 +84,8 @@ QtObject {
     readonly property int currentCount: {
         let itemCount = 0
         switch (root.mode) {
+        case LauncherController.Mode.Docker:
+            return Services.DockerService.grouped(root.dockerQuery).length
         case LauncherController.Mode.Applications:
             return (
                 root.applications
@@ -258,6 +267,10 @@ QtObject {
     }
 
     function accept() {
+        if (root.mode === LauncherController.Mode.Docker) {
+            if (root.dockerPage) root.dockerPage.acceptSelection()
+            return
+        }
         if (root.selectedIndex < 0)
             return
 
@@ -316,6 +329,11 @@ QtObject {
 
     function goBack() {
         switch (root.mode) {
+        case LauncherController.Mode.Docker:
+            if (root.dockerPage && root.dockerPage.back()) return
+            root.launcherState.query = ">"
+            root.launcherState.focusSearch()
+            break
         case LauncherController.Mode.Schemes:
             root.backFromSchemes()
             break

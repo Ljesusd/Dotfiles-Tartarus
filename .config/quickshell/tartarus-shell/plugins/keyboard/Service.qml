@@ -56,7 +56,7 @@ QtObject {
     readonly property Process persistProcess: Process {}
 
     readonly property Timer pollTimer: Timer {
-        interval: 1000
+        interval: 2000
         repeat: true
         running: true
         onTriggered: root.query()

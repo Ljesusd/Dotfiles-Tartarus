@@ -18,3 +18,4 @@ singleton HardwareService 1.0 HardwareService.qml
 singleton HardwareInfoService 1.0 HardwareInfoService.qml
 singleton PeripheralService 1.0 PeripheralService.qml
 ScreenState 1.0 ScreenState.qml
+singleton DockerService 1.0 DockerService.qml

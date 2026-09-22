@@ -97,7 +97,9 @@ QtObject {
     readonly property Process openProcess: Process {}
 
     readonly property Timer pollTimer: Timer {
-        interval: 700
+        // Clipboard history does not need sub-second polling. Keeping this at
+        // 2s greatly reduces wl-paste processes while remaining responsive.
+        interval: 2000
         repeat: true
         running: true
         onTriggered: root.poll()

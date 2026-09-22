@@ -40,6 +40,7 @@ Scope {
             actions: launcherActions
             wallpapers: root.wallpapers
             monitorName: root.monitorContext.name
+            dockerPage: dockerPage
 
         onCloseRequested: {
             root.shellState.closeLauncher(
@@ -289,6 +290,15 @@ Scope {
                 active:
                     controller.mode
                     === LauncherController.Mode.Wallpaper
+            }
+
+            DockerPage {
+                id: dockerPage
+                anchors.fill: parent
+                controller: controller
+                consumerKey: root.monitorContext.name
+                active: root.monitorContext.launcherOpened
+                    && controller.mode === LauncherController.Mode.Docker
             }
         }
     }

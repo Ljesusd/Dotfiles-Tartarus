@@ -52,7 +52,9 @@ QtObject {
     }
 
     readonly property var counterTimer: Timer {
-        interval: 500
+        // Network counters are smoothed over several samples, so 1s is
+        // sufficient and avoids spawning two shell processes every second.
+        interval: 1000
         running: root.activeInterface.length > 0
         repeat: true
         onTriggered: {
