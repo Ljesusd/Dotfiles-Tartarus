@@ -25,13 +25,24 @@ Rectangle {
 
     implicitWidth: ListView.view ? ListView.view.width : 0
     implicitHeight: Style.itemHeight
-    radius: Style.radiusMedium
+    radius: Style.cardRadius
 
     color: root.selected
         ? Color.primaryContainer
         : hoverHandler.hovered
-            ? Color.surfaceVariant
-            : Color.surface
+            ? Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, Style.hoverOpacity)
+            : "transparent"
+
+    // A restrained selection marker keeps the list on the panel's surface.
+    Rectangle {
+        visible: root.selected
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        width: 3
+        height: 24
+        radius: 1.5
+        color: Color.primary
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -59,13 +70,13 @@ Rectangle {
         anchors.fill: parent
         anchors.leftMargin: Style.paddingLarge
         anchors.rightMargin: Style.paddingLarge
-        anchors.topMargin: Style.spacingMedium
-        anchors.bottomMargin: Style.spacingMedium
+        anchors.topMargin: Style.paddingSmall
+        anchors.bottomMargin: Style.paddingSmall
 
         spacing: Style.spacingMedium
 
         Item {
-            Layout.alignment: Qt.AlignTop
+            Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: Style.iconMedium
             Layout.preferredHeight: Style.iconMedium
 
@@ -85,9 +96,7 @@ Rectangle {
                 visible: root.applicationIconSource === ""
                 text: "apps"
                 iconSize: Style.materialIconMedium
-                iconColor: root.selected
-                    ? Color.onPrimaryContainer
-                    : Color.primary
+                iconColor: root.selected ? Color.onPrimaryContainer : Color.primary
             }
         }
 
@@ -103,7 +112,8 @@ Rectangle {
                 text: root.application.name
 
                 font.pixelSize: Style.fontNormal
-                color: Color.foreground
+                font.weight: root.selected ? Font.DemiBold : Font.Normal
+                color: root.selected ? Color.onPrimaryContainer : Color.foreground
 
                 elide: Text.ElideRight
                 maximumLineCount: 1
@@ -118,7 +128,7 @@ Rectangle {
                 text: root.application.comment ?? ""
 
                 font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                color: root.selected ? Color.onPrimaryContainer : Color.foregroundMuted
 
                 elide: Text.ElideRight
                 maximumLineCount: 1

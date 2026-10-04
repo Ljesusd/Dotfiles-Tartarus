@@ -37,7 +37,10 @@ Scope {
             right: Style.paddingLarge
         }
 
-        implicitWidth: 320
+        implicitWidth: Math.min(
+            360,
+            Math.max(280, (root.monitorScreen?.width ?? 1280) - Style.paddingLarge * 2)
+        )
         implicitHeight: toastStack.childrenRect.height
 
         color: "transparent"
@@ -47,7 +50,7 @@ Scope {
         Item {
             id: toastStack
 
-            width: window.implicitWidth
+            width: Math.min(window.implicitWidth, window.width)
             implicitHeight: childrenRect.height
 
             Repeater {

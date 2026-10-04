@@ -44,9 +44,9 @@ Item {
         property string title: ""
         property string icon: ""
         width: root.width
-        radius: Style.radiusMedium
-        color: Color.surfaceContainerHigh
-        border.width: 1
+        radius: Style.cardRadius
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
         border.color: Color.outlineVariant
         implicitHeight: inside.implicitHeight + Style.paddingMedium * 2
         Column {
@@ -55,17 +55,19 @@ Item {
             spacing: Style.spacingSmall
             Row {
                 width: parent.width
-                Text { text: card.icon; color: accent; font.family: Style.materialIconFont; font.pixelSize: Style.materialIconMedium; width: 30 }
+                MaterialIcon { text: card.icon; iconColor: accent; iconSize: Style.sectionIconSize; width: 30 }
                 Text { text: card.title; color: accent; font.bold: true; font.pixelSize: Style.fontSmall }
             }
         }
     }
     component Stat: RowLayout {
+        id: stat
         property string label: ""
         property string value: ""
-        width: root.width
-        Text { text: parent.label; color: muted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
-        Text { text: parent.value; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.maximumWidth: root.width * 0.58; elide: Text.ElideRight; horizontalAlignment: Text.AlignRight }
+        width: parent ? parent.width : root.width
+        spacing: Style.spacingSmall
+        Text { text: stat.label; color: muted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
+        Text { text: stat.value; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.preferredWidth: Math.min(230, Math.max(110, stat.width * 0.46)); Layout.minimumWidth: 80; elide: Text.ElideRight; horizontalAlignment: Text.AlignRight }
     }
     component FeatureGroup: Column {
         property string title: ""

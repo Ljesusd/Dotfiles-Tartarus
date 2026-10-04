@@ -11,7 +11,7 @@ Item {
 
     property bool entered: false
 
-    implicitWidth: 320
+    implicitWidth: 360
     implicitHeight:
         content.implicitHeight
         + Style.paddingMedium * 2
@@ -88,8 +88,8 @@ Item {
     Rectangle {
         anchors.fill: parent
 
-        radius: Style.radiusLarge
-        color: Color.backgroundAlt
+        radius: Style.cardRadius
+        color: Color.surfaceContainer
         border.width: Style.panelBorderWidth
         border.color: Color.outline
     }

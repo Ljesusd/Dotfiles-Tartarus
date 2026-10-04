@@ -11,7 +11,8 @@ QtObject {
         Actions,
         Schemes,
         Wallpaper,
-        Docker
+        Docker,
+        Calculator
     }
 
     required property var launcherState
@@ -32,6 +33,8 @@ QtObject {
     readonly property int mode: {
         if (/^>docker(?:\s|$)/.test(root.normalizedQuery))
             return LauncherController.Mode.Docker
+        if (/^>calc(?:\s|$)/.test(root.normalizedQuery))
+            return LauncherController.Mode.Calculator
         if (root.normalizedQuery.startsWith(">scheme"))
             return LauncherController.Mode.Schemes
 
@@ -51,6 +54,9 @@ QtObject {
 
     readonly property string dockerQuery: root.mode === LauncherController.Mode.Docker
         ? root.launcherState.query.trim().slice(7).trim() : ""
+
+    readonly property string calculatorQuery: root.mode === LauncherController.Mode.Calculator
+        ? root.launcherState.query.trim().slice(5).trim() : ""
 
     readonly property string actionQuery:
         root.mode === LauncherController.Mode.Actions
@@ -109,6 +115,8 @@ QtObject {
                 ? root.wallpapers.filtered(root.wallpaperQuery).length
                 : 0
             return itemCount
+        case LauncherController.Mode.Calculator:
+            return 0
         default:
             return 0
         }
@@ -243,6 +251,36 @@ QtObject {
             return
         }
 
+        if (action.command === "calc") {
+            root.launcherState.query = ">calc"
+            root.launcherState.focusSearch()
+            root.resetSelection()
+            return
+        }
+
+        if (action.command === "timer") {
+            Services.TimerService.startTimer(
+                root.actionQuery.slice("timer".length).trim()
+            )
+            root.launcherState.query = ""
+            root.closeRequested()
+            return
+        }
+
+        if (action.command === "pomodoro") {
+            Services.TimerService.startPomodoro(root.actionQuery)
+            root.launcherState.query = ""
+            root.closeRequested()
+            return
+        }
+
+        if (action.command === "record") {
+            Services.RecorderService.start()
+            root.launcherState.query = ""
+            root.closeRequested()
+            return
+        }
+
         root.launcherState.query =
             ">" + action.command
         root.launcherState.focusSearch()
@@ -286,6 +324,8 @@ QtObject {
             break
         case LauncherController.Mode.Wallpaper:
             root.acceptWallpaper()
+            break
+        case LauncherController.Mode.Calculator:
             break
         }
     }
@@ -342,6 +382,10 @@ QtObject {
             break
         case LauncherController.Mode.Wallpaper:
             root.backFromWallpapers()
+            break
+        case LauncherController.Mode.Calculator:
+            root.launcherState.query = ">"
+            root.launcherState.focusSearch()
             break
         case LauncherController.Mode.Applications:
         default:

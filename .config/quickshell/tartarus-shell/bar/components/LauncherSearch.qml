@@ -15,15 +15,9 @@ Rectangle {
 
     radius: Style.radiusFull
 
-    color: {
-        if (root.monitorContext.launcherOpened)
-            return Color.surfaceContainerHigh
-
-        if (input.activeFocus || hoverHandler.hovered)
-            return Color.surfaceContainerHigh
-
-        return Color.surfaceContainer
-    }
+    color: root.monitorContext.launcherOpened || input.activeFocus
+        ? Color.surfaceContainerHigh
+        : "transparent"
 
     Behavior on color {
         ColorAnimation {
@@ -31,10 +25,10 @@ Rectangle {
         }
     }
 
-    border.width: Style.panelBorderWidth
-    border.color: input.activeFocus || hoverHandler.hovered
-        ? Color.primary
-        : Color.outlineVariant
+    border.width: input.activeFocus || hoverHandler.hovered
+        ? Style.panelBorderWidth
+        : 0
+    border.color: Color.primary
 
     RowLayout {
         anchors.fill: parent
@@ -45,7 +39,7 @@ Rectangle {
         spacing: Style.barSpacingSmall
 
         MaterialIcon {
-            text: "⌕"
+            text: "search"
             iconSize: Style.barIconNormal
             iconColor: Color.foregroundMuted
         }

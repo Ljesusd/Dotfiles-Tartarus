@@ -1,11 +1,11 @@
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
-import QtQml.Models
 import Quickshell.Io
 
-import "../core"
 import "../theme"
+import "../services" as Services
+import "../core"
 import "components"
 
 PanelWindow {
@@ -15,231 +15,35 @@ PanelWindow {
     required property var monitorContext
     required property var shellState
     required property var pluginRegistry
-    property var hoveredEntry: null
     readonly property var launcherAnchor:
-        launcherSearch
-
-    HoverPanelController {
-        id: hoverPanelController
-
-        pluginRegistry: root.pluginRegistry
-    }
+        launcherPopupAnchor
 
     anchors {
-        top: true
+        bottom: true
         left: true
         right: true
     }
 
-    implicitHeight: Style.barHeight
-    exclusiveZone: implicitHeight
+    margins {
+        bottom: 0
+        left: 16
+        right: 16
+    }
+
+    // The transparent layer is taller, while barSurface keeps the original
+    // visual height so the widgets do not grow with the reserved area.
+    implicitHeight: Style.barHeight + 16
+    exclusiveZone: Style.barHeight + 16
     focusable: true
-
-    Component.onCompleted: {
-        for (const plugin of root.pluginRegistry.plugins)
-            root.addLeftBarPlugin(plugin)
-        for (const plugin of root.pluginRegistry.plugins)
-            root.addRightBarPlugin(plugin)
-    }
-
-    ListModel {
-        id: leftBarPluginModel
-    }
-
-    ListModel {
-        id: rightBarPluginModel
-    }
-
-    Connections {
-        target: root.pluginRegistry
-
-        function onPluginRegistered(plugin) {
-            root.addLeftBarPlugin(plugin)
-            root.addRightBarPlugin(plugin)
-        }
-    }
+    color: "transparent"
 
     function closeLauncherIfOpen() {
         root.shellState.closeLaunchers()
     }
 
-    function isEntry(item) {
-        return item
-            && item.isBarEntry === true
-            && typeof item.entryId === "string"
-            && item.entryId.length > 0
-    }
-
-    function findEntryAt(item, x, y) {
-        if (!item)
-            return null
-
-        const child = item.childAt(x, y)
-
-        if (!child)
-            return null
-
-        if (root.isEntry(child))
-            return child
-
-        if (typeof child.childAt !== "function")
-            return null
-
-        const point = item.mapToItem(
-            child,
-            x,
-            y
-        )
-
-        return root.findEntryAt(
-            child,
-            point.x,
-            point.y
-        )
-    }
-
-    function entryAt(sourceItem, x, y) {
-        if (!sourceItem)
-            return null
-
-        const point = sourceItem.mapToItem(
-            barLayout,
-            x,
-            y
-        )
-
-        return root.findEntryAt(
-            barLayout,
-            point.x,
-            point.y
-        )
-    }
-
-    function entryIdAt(sourceItem, x, y) {
-        const entry = root.entryAt(
-            sourceItem,
-            x,
-            y
-        )
-
-        return entry
-            ? entry.entryId
-            : ""
-    }
-
-    function routeWheel(sourceItem, x, y, angleDelta) {
-        const entry = root.entryAt(
-            sourceItem,
-            x,
-            y
-        )
-
-        if (!entry)
-            return false
-
-        return entry.handleWheel(angleDelta)
-    }
-
-    function clearHoveredEntry() {
-        if (root.hoveredEntry)
-            root.hoveredEntry.handleHover(false)
-
-        root.hoveredEntry = null
-    }
-
-    function routeHover(sourceItem, x, y) {
-        const entry = root.entryAt(
-            sourceItem,
-            x,
-            y
-        )
-
-        if (entry === root.hoveredEntry)
-            return
-
-        if (root.hoveredEntry)
-            root.hoveredEntry.handleHover(false)
-
-        root.hoveredEntry = entry
-
-        if (root.hoveredEntry)
-            root.hoveredEntry.handleHover(true)
-    }
-
-    function addLeftBarPlugin(plugin) {
-        if (
-            !plugin
-            || !plugin.capabilities
-            || !plugin.capabilities.includes("bar-widget")
-            || plugin.barSection !== "left"
-            || plugin.barWidgetComponent === undefined
-            || plugin.barWidgetComponent === null
-        ) {
-            return
-        }
-
-        for (let i = 0; i < leftBarPluginModel.count; i++) {
-            if (
-                leftBarPluginModel.get(i).pluginId
-                === plugin.pluginId
-            ) {
-                return
-            }
-        }
-
-        const order = plugin.barOrder ?? 0
-        let insertIndex = leftBarPluginModel.count
-
-        for (let i = 0; i < leftBarPluginModel.count; i++) {
-            if (order < leftBarPluginModel.get(i).barOrder) {
-                insertIndex = i
-                break
-            }
-        }
-
-        leftBarPluginModel.insert(insertIndex, {
-            pluginId: plugin.pluginId,
-            barOrder: order,
-            plugin: plugin
-        })
-    }
-
-    function addRightBarPlugin(plugin) {
-        if (
-            !plugin
-            || !plugin.capabilities
-            || !plugin.capabilities.includes("bar-widget")
-            || plugin.barSection !== "right"
-            || plugin.barWidgetComponent === undefined
-            || plugin.barWidgetComponent === null
-        ) {
-            return
-        }
-
-        for (let i = 0; i < rightBarPluginModel.count; i++) {
-            if (
-                rightBarPluginModel.get(i).pluginId
-                === plugin.pluginId
-            ) {
-                return
-            }
-        }
-
-        const order = plugin.barOrder ?? 0
-        let insertIndex = rightBarPluginModel.count
-
-        for (let i = 0; i < rightBarPluginModel.count; i++) {
-            if (order < rightBarPluginModel.get(i).barOrder) {
-                insertIndex = i
-                break
-            }
-        }
-
-        rightBarPluginModel.insert(insertIndex, {
-            pluginId: plugin.pluginId,
-            barOrder: order,
-            plugin: plugin
-        })
+    HoverPanelController {
+        id: hoverPanelController
+        pluginRegistry: root.pluginRegistry
     }
 
     Rectangle {
@@ -250,17 +54,22 @@ PanelWindow {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: Style.barFloatingMargin
+            topMargin: 10
+            bottomMargin: 10
         }
-        radius: Style.barSurfaceRadius
+        radius: Style.radiusFull
         color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outline
+        border.width: 0
+        border.color: "transparent"
 
-        HoverPanelHost {
-            hoverPanelController: hoverPanelController
-            anchorSurface: barLayout
-            barScreen: root.screen
+        Rectangle {
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            height: 0
+            color: "transparent"
         }
 
         MouseArea {
@@ -284,29 +93,6 @@ PanelWindow {
             }
             spacing: 0
 
-            HoverHandler {
-                id: hoverRouter
-
-                parent: barLayout
-                target: null
-                blocking: false
-
-                onPointChanged: {
-                    const position = hoverRouter.point.position
-
-                    root.routeHover(
-                        barLayout,
-                        position.x,
-                        position.y
-                    )
-                }
-
-                onHoveredChanged: {
-                    if (!hovered)
-                        root.clearHoveredEntry()
-                }
-            }
-
             // Izquierda
             Item {
                 Layout.fillWidth: true
@@ -320,85 +106,43 @@ PanelWindow {
 
                     spacing: Style.barSpacingNormal
 
-                    Repeater {
-                        model: leftBarPluginModel
+                    EntryWrapper {
+                        entryId: "workspaces"
 
-                        EntryWrapper {
-                            id: leftPluginSlot
+                        Loader {
+                            id: leftWorkspaceLoader
+                            sourceComponent: {
+                                const workspacePlugin = root.pluginRegistry.plugin("workspaces")
+                                return workspacePlugin ? workspacePlugin.barWidgetComponent : null
+                            }
+                            onLoaded: if (item && "barScreen" in item) item.barScreen = root.screen
 
-                            entryId: pluginId
-                            required property string pluginId
-                            required property var plugin
+                            Connections {
+                                target: leftWorkspaceLoader.item
+                                ignoreUnknownSignals: true
 
-                            Loader {
-                                id: leftPluginWidgetLoader
-
-                                anchors.centerIn: parent
-
-                                active:
-                                    plugin.barWidgetComponent !== undefined
-                                    && plugin.barWidgetComponent !== null
-
-                                sourceComponent:
-                                    active
-                                    ? plugin.barWidgetComponent
-                                    : null
-
-                                onLoaded: {
-                                    if (
-                                        item
-                                        && "panelAnchorItem" in item
-                                    ) {
-                                        item.panelAnchorItem = leftPluginSlot
-                                    }
-
-                                    if (
-                                        item
-                                        && "barScreen" in item
-                                    ) {
-                                        item.barScreen = root.screen
-                                    }
-
-                                    if (
-                                        item
-                                        && "hoverPanelController" in item
-                                    ) {
-                                        item.hoverPanelController =
-                                            hoverPanelController
-                                    }
-                                }
-
-                                Connections {
-                                    target: leftPluginWidgetLoader.item
-
-                                    ignoreUnknownSignals: true
-
-                                    function onInteracted() {
-                                        root.closeLauncherIfOpen()
-                                    }
+                                function onInteracted() {
+                                    root.closeLauncherIfOpen()
                                 }
                             }
+                        }
+                    }
 
-        MouseArea {
-            id: wheelDebugArea
+                    Item {
+                        Layout.preferredWidth: Math.min(190, activeWindow.implicitWidth + Style.barPaddingSmall * 2)
+                        Layout.preferredHeight: Style.barInnerHeight
+                        visible: activeWindow.text !== ""
+                        clip: true
 
-            anchors.fill: parent
-            hoverEnabled: false
-            acceptedButtons: Qt.NoButton
-
-            onWheel: event => {
-                const handled = root.routeWheel(
-                    wheelDebugArea,
-                    event.x,
-                    event.y,
-                    event.angleDelta
-                )
-
-                event.accepted = handled
-            }
-        }
-    }
-}
+                        ActiveWindow {
+                            id: activeWindow
+                            anchors.centerIn: parent
+                            width: parent.width - Style.barPaddingSmall * 2
+                            font.pixelSize: Style.barFontSmall
+                            elide: Text.ElideRight
+                            color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.72)
+                        }
+                    }
                 }
             }
 
@@ -407,25 +151,15 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                    EntryWrapper {
-                        anchors.centerIn: parent
-                        entryId: "launcher-search"
-
-                        LauncherSearch {
-                            id: launcherSearch
-
-                            launcherState: root.launcherState
-                            monitorContext: root.monitorContext
-                            shellState: root.shellState
-                        }
-                    }
-
-                // ActiveWindow desactivado temporalmente.
-                // Para recuperarlo: comenta LauncherSearch y descomenta este bloque.
-                //
-                // ActiveWindow {
-                //     anchors.centerIn: parent
-                // }
+                DynamicIsland {
+                    id: dynamicIsland
+                    anchors.centerIn: parent
+                    launcherState: root.launcherState
+                    monitorContext: root.monitorContext
+                    shellState: root.shellState
+                    workspaceService: root.pluginRegistry.plugin("workspaces")?.service
+                    screen: root.screen
+                }
             }
 
             // Derecha
@@ -441,124 +175,111 @@ PanelWindow {
 
                     spacing: Style.barSpacingNormal
 
-                    EntryWrapper {
-                        entryId: "system-tray"
+                    RowLayout {
+                        spacing: Style.barSpacingNormal
 
-                        SystemTray {
-                            onCloseLauncherRequested:
-                                root.closeLauncherIfOpen()
-                        }
-                    }
-
-                    Rectangle {
-                        implicitWidth: pluginGroup.implicitWidth + Style.barPaddingSmall * 2
-                        implicitHeight: Style.barControlHeight
-                        radius: 0
-                        color: "transparent"
-                        border.width: 0
-
-                        RowLayout {
-                            id: pluginGroup
-                            anchors.fill: parent
-                            anchors.leftMargin: Style.barPaddingSmall
-                            anchors.rightMargin: Style.barPaddingSmall
-                            spacing: Style.barSpacingSmall
-
-                            Repeater {
-                                model: rightBarPluginModel
-
-                                EntryWrapper {
-                                    id: pluginSlot
-
-                            entryId: pluginId
-                            required property string pluginId
-                            required property var plugin
+                        EntryWrapper {
+                            entryId: "audio"
 
                             Loader {
-                                id: pluginWidgetLoader
-
-                                anchors.centerIn: parent
-
-                                active:
-                                    plugin.barWidgetComponent !== undefined
-                                    && plugin.barWidgetComponent !== null
-
-                                sourceComponent:
-                                    active
-                                    ? plugin.barWidgetComponent
-                                    : null
-
+                                sourceComponent: root.pluginRegistry.plugin("audio")?.barWidgetComponent || null
                                 onLoaded: {
-                                    if (
-                                        item
-                                        && "panelAnchorItem" in item
-                                    ) {
-                                        item.panelAnchorItem = pluginSlot
-                                    }
-
-                                    if (
-                                        item
-                                        && "barScreen" in item
-                                    ) {
-                                        item.barScreen = root.screen
-                                    }
-
-                                    if (
-                                        item
-                                        && "hoverPanelController" in item
-                                    ) {
-                                        item.hoverPanelController =
-                                            hoverPanelController
-                                    }
-                                }
-
-                                Connections {
-                                    target: pluginWidgetLoader.item
-
-                                    ignoreUnknownSignals: true
-
-                                    function onInteracted() {
-                                        root.closeLauncherIfOpen()
-                                    }
-                                }
-                            }
-
-                                }
-                            }
-
-                            MaterialIcon {
-                                id: notificationIcon
-                                Layout.preferredWidth: Style.barControlHeight
-                                Layout.preferredHeight: Style.barControlHeight
-                                text: "notifications"
-                                iconSize: Style.barIconNormal
-                                iconColor: Color.foreground
-
-                                Process {
-                                    id: notificationProcess
-                                    command: ["qs", "-c", "tartarus-shell", "ipc", "call", "notification", "toggleCenter"]
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    hoverEnabled: false
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: notificationProcess.running = true
+                                    if (item && "hoverPanelController" in item)
+                                        item.hoverPanelController = hoverPanelController
+                                    if (item && "panelAnchorItem" in item)
+                                        item.panelAnchorItem = parent
                                 }
                             }
                         }
-                    }
 
-                    EntryWrapper {
-                        entryId: "clock"
+                        EntryWrapper {
+                            entryId: "system-tray"
 
-                        Clock {
-                            onCloseLauncherRequested:
-                                root.closeLauncherIfOpen()
+                            SystemTray {
+                                barSurface: barSurface
+                                onCloseLauncherRequested: root.closeLauncherIfOpen()
+                            }
+                        }
+
+                        MaterialIcon {
+                            id: notificationIcon
+                            Layout.preferredWidth: Style.barControlHeight
+                            Layout.preferredHeight: Style.barControlHeight
+                            text: "notifications"
+                            iconSize: Style.barIconNormal
+                            iconColor: Color.foreground
+
+                            Rectangle {
+                                id: notificationBadge
+                                anchors.left: parent.left
+                                anchors.bottom: parent.bottom
+                                width: Math.max(16, badgeText.implicitWidth + 6)
+                                height: 16
+                                radius: Style.radiusFull
+                                color: Color.primary
+                                border.width: 1
+                                border.color: Color.surfaceContainer
+                                visible: Services.NotificationService.notifications.count > 0
+
+                                Text {
+                                    id: badgeText
+                                    anchors.centerIn: parent
+                                    text: Math.min(Services.NotificationService.notifications.count, 99)
+                                        + (Services.NotificationService.notifications.count > 99 ? "+" : "")
+                                    color: Color.onPrimary
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                }
+                            }
+
+                            Process {
+                                id: notificationProcess
+                                command: ["qs", "-c", "tartarus-shell", "ipc", "call", "notification", "toggleCenter"]
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: false
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: notificationProcess.running = true
+                            }
+                        }
+
+                        ProfileButton {
+                            Layout.preferredWidth: Style.barControlHeight
+                            Layout.preferredHeight: Style.barControlHeight
                         }
                     }
                 }
             }
+        }
+
+        HoverPanelHost {
+            id: hoverPanelHost
+            hoverPanelController: hoverPanelController
+            anchorSurface: barSurface
+            barScreen: root.screen
+        }
+
+        // Anchor invisible at the roof of the bar. The launcher is positioned
+        // from here so its surface can meet the bar without a floating gap.
+        Item {
+            id: launcherPopupAnchor
+
+            x: Math.max(
+                0,
+                Math.min(
+                    barSurface.width - width,
+                    barSurface.mapFromItem(dynamicIsland, 0, 0).x
+                        + (dynamicIsland.width - width) / 2
+                )
+            )
+            // Meet the bar at its upper edge. The shared surface removes the
+            // seam without covering the controls inside the bar.
+            y: 0
+            width: Style.launcherWidth
+            height: 1
+            opacity: 0
         }
 
     }

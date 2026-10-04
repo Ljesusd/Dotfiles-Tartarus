@@ -39,6 +39,13 @@ QtObject {
     property var powerHistory: []
     property string gpuFanText: ""
     property var disks: []
+    readonly property var primaryDisk: {
+        if (!root.disks || root.disks.length === 0)
+            return null
+        return root.disks.reduce((largest, disk) =>
+            Number(disk.total) > Number(largest.total) ? disk : largest,
+            root.disks[0])
+    }
     property real diskUsed: 0
     property string diskUsedText: "N/A"
     property real diskReadMiB: -1
@@ -105,7 +112,7 @@ QtObject {
                     root.gpuHistory=root.history(root.gpuHistory,root.gpuUsage); root.disks=d.disks||[]
                     if (root.gpuPower >= 0 && root.gpuPowerLimit > 0) root.powerHistory=root.history(root.powerHistory,root.gpuPower/root.gpuPowerLimit*100)
                     root.gpuProcesses=g.processes||[]
-                    root.diskUsed=root.disks.length?root.disks[0].percent:0; root.diskUsedText=root.disks.length?root.disks[0].percent+"%":"N/A"
+                    root.diskUsed=root.primaryDisk ? root.primaryDisk.percent : 0; root.diskUsedText=root.primaryDisk ? root.primaryDisk.percent+"%":"N/A"
                     root.diskReadMiB=root.valid(d.io.read,-1); root.diskWriteMiB=root.valid(d.io.write,-1); root.smartStatus=d.smart||"No disponible"
                     root.batteryPercent=root.valid(d.battery.percent,-1); root.batteryStatus=d.battery.status||""; root.fanRpm=root.valid(d.thermal.fan,-1); root.cpuProcesses=d.processes||[]
                     if (root.cpuUsage >= 90) root.alert(root.cpuUsage,"cpu","Carga de CPU crítica")

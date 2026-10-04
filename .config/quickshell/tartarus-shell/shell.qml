@@ -62,6 +62,29 @@ ShellRoot {
         }
     }
 
+    GlobalShortcut {
+        name: "control-center"
+        description: "Toggle Tartarus control center"
+        onPressed: globalShellState.toggleControlCenter()
+    }
+
+    GlobalShortcut {
+        name: "sidebar"
+        description: "Toggle Tartarus dashboard sidebar"
+        onPressed: globalShellState.toggleSidebar(globalShellState.contextForFocusedMonitor())
+    }
+
+    GlobalShortcut {
+        name: "left-sidebar"
+        description: "Toggle Tartarus quick settings sidebar"
+        onPressed: globalShellState.toggleLeftSidebar(globalShellState.contextForFocusedMonitor())
+    }
+
+    Shell.ControlCenterWindow {
+        shellState: globalShellState
+        pluginRegistry: pluginRegistry
+    }
+
     IpcHandler {
         target: "osd"
         function showVolume(): void { OsdService.showCurrentVolume() }
@@ -74,6 +97,13 @@ ShellRoot {
         function toggle(): void { globalShellState.toggleSidebar(globalShellState.contextForFocusedMonitor()) }
         function open(): void { globalShellState.openSidebar(globalShellState.contextForFocusedMonitor()) }
         function close(): void { globalShellState.closeSidebar(globalShellState.contextForFocusedMonitor()) }
+    }
+
+    IpcHandler {
+        target: "sidebar-left"
+        function toggle(): void { globalShellState.toggleLeftSidebar(globalShellState.contextForFocusedMonitor()) }
+        function open(): void { globalShellState.openLeftSidebar(globalShellState.contextForFocusedMonitor()) }
+        function close(): void { globalShellState.closeLeftSidebar(globalShellState.contextForFocusedMonitor()) }
     }
 
     IpcHandler {

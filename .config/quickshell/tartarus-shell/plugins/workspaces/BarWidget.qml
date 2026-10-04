@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 
 import "../../theme"
+import "../../utils"
 import "components"
 
 Item {
@@ -15,8 +16,10 @@ Item {
 
     signal interacted()
 
-    readonly property int shownWorkspaces: 5
-    readonly property int maxWindowIcons: 5
+    readonly property int shownWorkspaces:
+        root.barScreen && root.barScreen.width < 1000 ? 3 : 5
+    readonly property int maxWindowIcons:
+        root.barScreen && root.barScreen.width < 1000 ? 3 : 5
     readonly property bool showOccupiedBg: true
     readonly property bool showUnoccupied: false
     readonly property bool showWindowIcons: true
@@ -201,8 +204,13 @@ Item {
         return true
     }
 
-    implicitWidth: normalLayer.implicitWidth
+    implicitWidth: root.hasActiveSpecial
+        ? Math.max(normalLayer.implicitWidth,
+            specialList.contentWidth + Style.barWorkspaceRailPaddingHorizontal * 2)
+        : normalLayer.implicitWidth
     implicitHeight: normalLayer.implicitHeight
+
+    Behavior on implicitWidth { Anim { duration: Style.motionNormal } }
 
     Rectangle {
         id: normalLayer
@@ -213,14 +221,14 @@ Item {
 
         implicitHeight: Style.barInnerHeight
 
-        width: implicitWidth
+        width: root.width
         height: implicitHeight
 
         radius: Style.radiusFull
 
+        // Keep a compact rail behind the workspace states, as in Caelestia.
         color: Color.surfaceContainerHigh
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        border.width: 0
 
         clip: true
 
@@ -315,7 +323,8 @@ Item {
 
                     radius: Style.radiusSmall
 
-                    color: Color.surfaceContainerHigh
+                    color: Color.surfaceHover
+                    opacity: 0.72
                     z: 0
                 }
             }
@@ -365,7 +374,7 @@ Item {
                 visible: !root.hasActiveSpecial
                 source: workspaceRow
                 colorization: 1.0
-                colorizationColor: Color.onPrimaryContainer
+                colorizationColor: Color.onPrimary
                 maskEnabled: true
                 maskSource: activeColourMask
                 autoPaddingEnabled: false
@@ -428,13 +437,14 @@ Item {
                 }
             }
 
-            ListView {
+            LazyListView {
                 id: specialList
 
-                x: workspaceContent.x + workspaceRow.x
-                y: workspaceContent.y + workspaceRow.y
-                width: workspaceRow.width
-                height: workspaceRow.height
+                x: (normalLayer.width - width) / 2
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(contentWidth,
+                    normalLayer.width - Style.barWorkspaceRailPaddingHorizontal * 2)
+                height: Style.barInnerHeight
 
                 clip: true
                 interactive: false
@@ -448,18 +458,16 @@ Item {
                 highlightResizeDuration: Style.motionNormal
 
                 highlight: Item {
-                    width: Style.barWorkspaceBaseSize
-                        + Style.barWorkspaceActivePaddingHorizontal * 2
+                    width: specialList.currentItem
+                        ? specialList.currentItem.width
+                        : Style.barWorkspaceBaseSize
                     height: specialList.height
 
-                    Rectangle {
-                        x: -Style.barWorkspaceActivePaddingHorizontal
-                        anchors.verticalCenter: parent.verticalCenter
-
+                    MaterialShape {
+                        anchors.centerIn: parent
                         width: parent.width
-                            + Style.barWorkspaceActivePaddingHorizontal * 2
                         height: Style.barWorkspaceActiveHeight
-                        radius: Style.radiusFull
+                        shape: MaterialShape.Pill
                         color: Color.primary
                     }
                 }
@@ -476,8 +484,13 @@ Item {
                         root.specialKey(specialName)
                     readonly property bool active:
                         index === root.activeSpecialIndex
+                    readonly property var windows:
+                        modelData?.toplevels?.values ?? []
+                    readonly property int windowCount:
+                        Math.min(windows.length, root.maxWindowIcons)
 
-                    width: Style.barWorkspaceBaseSize
+                    width: Math.max(Style.barWorkspaceBaseSize,
+                        specialContent.implicitWidth + Style.spacingSm)
                     height: specialList.height
                     opacity: specialItem.active ? 1.0 : 0.72
                     scale: specialItem.active ? 1.0 : 0.86
@@ -486,18 +499,49 @@ Item {
                     Behavior on opacity { Anim { duration: Style.motionFast } }
                     Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutBack } }
 
-                    MaterialIcon {
+                    Row {
+                        id: specialContent
                         anchors.centerIn: parent
+                        spacing: Style.barWorkspaceContentSpacing
 
-                        text: root.plugin.service.specialWorkspaceIcon(
-                            specialItem.specialKey
-                        )
-                        iconSize: Style.barWorkspaceIconSize
-                        iconColor:
-                            specialItem.active
-                                ? Color.onPrimary
-                                : Color.onSurfaceVariant
-                        opacity: 1.0
+                        Item {
+                            width: Style.barIconNormal
+                            height: Style.barIconNormal
+
+                            MaterialIcon {
+                                anchors.centerIn: parent
+                                text: root.plugin.service.specialWorkspaceIcon(
+                                    specialItem.specialKey
+                                )
+                                iconSize: Style.barIconNormal
+                                iconColor: specialItem.active
+                                    ? Color.onPrimary
+                                    : Color.onSurfaceVariant
+                            }
+                        }
+
+                        Repeater {
+                            model: specialItem.windowCount
+
+                            Item {
+                                required property int index
+                                width: Style.barIconNormal
+                                height: Style.barIconNormal
+
+                                MaterialIcon {
+                                    anchors.centerIn: parent
+                                    text: Icons.iconForWindow(
+                                        specialItem.windows[index], "apps"
+                                    )
+                                    iconSize: Style.barIconNormal
+                                    iconColor: specialItem.active
+                                        ? Color.onPrimary
+                                        : Color.onSurfaceVariant
+                                    fill: 0
+                                    grade: 0
+                                }
+                            }
+                        }
                     }
 
                     TapHandler {

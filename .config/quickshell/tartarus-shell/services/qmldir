@@ -19,3 +19,9 @@ singleton HardwareInfoService 1.0 HardwareInfoService.qml
 singleton PeripheralService 1.0 PeripheralService.qml
 ScreenState 1.0 ScreenState.qml
 singleton DockerService 1.0 DockerService.qml
+singleton QuickSettingsState 1.0 QuickSettingsState.qml
+singleton LocationService 1.0 LocationService.qml
+singleton DynamicActivityService 1.0 DynamicActivityService.qml
+singleton EasyEffectsService 1.0 EasyEffectsService.qml
+singleton TimerService 1.0 TimerService.qml
+singleton RecorderService 1.0 RecorderService.qml

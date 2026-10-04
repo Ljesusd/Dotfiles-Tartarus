@@ -29,13 +29,18 @@ Scope {
             right: Style.spacingLarge
             bottom: Style.spacingLarge
         }
-        implicitWidth: 380
-        implicitHeight: 640
+        implicitWidth: Math.min(
+            420,
+            Math.max(300, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
+        )
+        implicitHeight: Math.min(
+            720,
+            Math.max(420, (root.monitorScreen?.height ?? 800) - Style.barHeight - Style.spacingLarge * 2)
+        )
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
-        visible: root.isFocused
-            && (Services.NotificationService.centerOpen
-                || drawer.opacity > 0)
+        visible: Services.NotificationService.centerOpen
+            || drawer.opacity > 0
 
         Rectangle {
             id: drawer
@@ -48,8 +53,8 @@ Scope {
             width: parent.width
             opacity: Services.NotificationService.centerOpen ? 1 : 0
             clip: true
-            radius: Style.radiusLarge
-            color: Color.backgroundAlt
+            radius: Style.panelRadius
+            color: Color.surfaceContainer
             border.width: Style.panelBorderWidth
             border.color: Color.outlineVariant
 

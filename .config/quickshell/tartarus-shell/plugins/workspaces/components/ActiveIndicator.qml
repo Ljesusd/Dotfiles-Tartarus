@@ -32,7 +32,7 @@ Rectangle {
     height: root.pillHeight
 
     radius: Style.radiusFull
-    color: Color.primaryContainer
+    color: Color.primary
 
     function movementDuration(distance) {
         return Math.min(

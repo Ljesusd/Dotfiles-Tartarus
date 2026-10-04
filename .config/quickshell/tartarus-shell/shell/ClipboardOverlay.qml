@@ -14,6 +14,7 @@ Scope {
 
     readonly property bool isFocused:
         Hyprland.focusedMonitor
+        && root.monitorScreen
         && Hyprland.focusedMonitor.name === root.monitorScreen.name
     readonly property var visibleEntries:
         Services.ClipboardService.filteredValues()
@@ -35,11 +36,17 @@ Scope {
         Rectangle {
             id: panel
 
-            width: 720
-            height: 560
+            width: Math.min(
+                760,
+                Math.max(320, root.monitorScreen.width - Style.spacingLarge * 2)
+            )
+            height: Math.min(
+                620,
+                Math.max(420, root.monitorScreen.height - Style.barHeight - Style.spacingLarge * 2)
+            )
             anchors.centerIn: parent
             radius: Style.radiusLarge
-            color: Color.background
+            color: Color.surfaceContainer
             border.width: 1
             border.color: Color.outline
 
@@ -393,7 +400,7 @@ Scope {
                                                     onClicked:
                                                         Services.ClipboardService.openEntry(
                                                             modelData,
-                                                            root.monitorScreen.name
+                                                            root.monitorScreen?.name ?? ""
                                                         )
                                                 }
 

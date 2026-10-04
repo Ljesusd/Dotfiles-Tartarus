@@ -40,10 +40,9 @@ Item {
         anchors.fill: parent
         anchors.margins: Style.barPopupGap
 
-        radius: Style.radiusLarge
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: 0
+        color: "transparent"
+        border.width: 0
 
         HoverHandler {
             onHoveredChanged: {

@@ -1,2 +1,4 @@
 ActiveIndicator 1.0 ActiveIndicator.qml
 Workspace 1.0 Workspace.qml
+LazyListView 1.0 LazyListView.qml
+MaterialShape 1.0 MaterialShape.qml

@@ -11,7 +11,11 @@ PanelWindow {
     screen: monitorScreen
     anchors { bottom: true; left: true }
     margins { bottom: Style.barHeight + Style.spacingLarge; left: Style.spacingLarge }
-    implicitWidth: 260; implicitHeight: 58
+    implicitWidth: Math.min(
+        320,
+        Math.max(240, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
+    )
+    implicitHeight: 58
     color: "transparent"
     visible: monitorContext.osdActive
     exclusionMode: ExclusionMode.Ignore

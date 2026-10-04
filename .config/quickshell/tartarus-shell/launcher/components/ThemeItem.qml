@@ -17,13 +17,13 @@ Rectangle {
 
     implicitHeight: Style.launcherSchemeItemHeight
 
-    radius: Style.radiusMedium
+    radius: Style.cardRadius
 
     color: root.selected
         ? Color.primaryContainer
         : hoverHandler.hovered
-            ? Color.surfaceVariant
-            : Color.surface
+            ? Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, Style.hoverOpacity)
+            : "transparent"
 
     Behavior on color {
         ColorAnimation {
@@ -42,8 +42,17 @@ Rectangle {
 
         spacing: Style.spacingMedium
 
+        Rectangle {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 3
+            Layout.preferredHeight: 28
+            radius: 2
+            visible: root.selected
+            color: Color.primary
+        }
+
         MaterialIcon {
-            Layout.alignment: Qt.AlignTop
+            Layout.alignment: Qt.AlignVCenter
 
             text: "palette"
             iconSize: Style.materialIconMedium
@@ -69,7 +78,7 @@ Rectangle {
                     text: root.theme.name
 
                     font.pixelSize: Style.fontNormal
-                    color: Color.foreground
+                    color: root.selected ? Color.onPrimaryContainer : Color.foreground
 
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -119,7 +128,7 @@ Rectangle {
                 text: root.theme.mode
 
                 font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                color: root.selected ? Color.onPrimaryContainer : Color.foregroundMuted
             }
 
             Row {

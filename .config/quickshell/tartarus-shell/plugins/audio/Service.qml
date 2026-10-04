@@ -70,6 +70,41 @@ QtObject {
         })
     }
 
+    // Physical input devices (microphones, line-in and USB audio inputs).
+    // Streams are excluded because they belong to applications, not devices.
+    readonly property ScriptModel inputsModel: ScriptModel {
+        values: Pipewire.nodes.values.filter(node => {
+            return node
+                && node.audio
+                && !node.isSink
+                && !node.isStream
+        })
+    }
+
+    // Playback streams are the per-application controls exposed by PipeWire.
+    // Hardware sinks stay in outputsModel; streams such as Firefox, Steam or
+    // a media player appear here and can be changed independently.
+    readonly property ScriptModel applicationStreamsModel: ScriptModel {
+        values: Pipewire.nodes.values.filter(node => {
+            const mediaClass = String((node && node.properties || {})["media.class"] || "")
+            return node
+                && node.audio
+                && (node.isStream || mediaClass.indexOf("Stream") !== -1)
+        })
+    }
+
+    // PipeWire exposes several streams for one application (Vesktop, for
+    // example, can create separate streams for calls, notifications and the
+    // main UI). Keep the raw model for low-level consumers, but expose a
+    // grouped model for user-facing controls.
+    readonly property ScriptModel applicationGroupsModel: ScriptModel {
+        values: root.buildApplicationGroups()
+    }
+
+    readonly property PwObjectTracker applicationStreamsTracker: PwObjectTracker {
+        objects: root.applicationStreamsModel.values
+    }
+
     readonly property var sink:
         Pipewire.defaultAudioSink
 
@@ -147,6 +182,140 @@ QtObject {
             || "Unknown output"
     }
 
+    function inputDisplayName(input) {
+        if (!input)
+            return "Unknown input"
+
+        return input.description
+            || input.nickname
+            || input.name
+            || "Unknown input"
+    }
+
+    function streamDisplayName(stream) {
+        if (!stream)
+            return "Aplicación"
+
+        const properties = stream.properties || {}
+        return properties["application.name"]
+            || properties["node.description"]
+            || properties["media.name"]
+            || stream.description
+            || stream.nickname
+            || stream.name
+            || "Aplicación"
+    }
+
+    function streamDetail(stream) {
+        if (!stream)
+            return ""
+
+        const properties = stream.properties || {}
+        return properties["application.process.binary"]
+            || properties["media.name"]
+            || ""
+    }
+
+    function applicationKey(stream) {
+        const properties = stream?.properties || {}
+        return String(
+            properties["application.name"]
+            || properties["application.process.binary"]
+            || properties["node.name"]
+            || stream?.name
+            || "application"
+        ).trim().toLowerCase()
+    }
+
+    function buildApplicationGroups() {
+        const groups = []
+        const byKey = ({})
+
+        for (const stream of root.applicationStreamsModel.values || []) {
+            if (!stream)
+                continue
+
+            const key = root.applicationKey(stream)
+            let group = byKey[key]
+            if (!group) {
+                group = {
+                    key: key,
+                    name: root.streamDisplayName(stream),
+                    detail: root.streamDetail(stream),
+                    nodes: []
+                }
+                byKey[key] = group
+                groups.push(group)
+            }
+            group.nodes.push(stream)
+        }
+
+        return groups
+    }
+
+    function applicationIcon(group) {
+        const name = String(group?.name || "").toLowerCase()
+        const detail = String(group?.detail || "").toLowerCase()
+        const value = name + " " + detail
+
+        if (value.includes("vesktop") || value.includes("discord"))
+            return "chat"
+        if (value.includes("spotify") || value.includes("sung") || value.includes("music"))
+            return "music_note"
+        if (value.includes("firefox") || value.includes("zen") || value.includes("chrome") || value.includes("browser"))
+            return "language"
+        if (value.includes("steam") || value.includes("game"))
+            return "sports_esports"
+        return "apps"
+    }
+
+    function groupVolume(group) {
+        const nodes = group?.nodes || []
+        if (nodes.length === 0)
+            return 0
+        let total = 0
+        let count = 0
+        for (const node of nodes) {
+            if (node?.audio) {
+                total += Number(node.audio.volume) || 0
+                count++
+            }
+        }
+        return count > 0 ? total / count : 0
+    }
+
+    function groupMuted(group) {
+        const nodes = group?.nodes || []
+        return nodes.length > 0 && nodes.every(node => node?.audio?.muted)
+    }
+
+    function setGroupVolume(group, volume) {
+        for (const node of group?.nodes || [])
+            root.setStreamVolume(node, volume)
+    }
+
+    function toggleGroupMute(group) {
+        const muted = root.groupMuted(group)
+        for (const node of group?.nodes || []) {
+            if (node?.ready && node?.audio)
+                node.audio.muted = !muted
+        }
+    }
+
+    function setStreamVolume(stream, volume) {
+        if (!stream || !stream.ready || !stream.audio)
+            return
+
+        stream.audio.volume = Math.max(0.0, Math.min(volume, 1.0))
+    }
+
+    function toggleStreamMute(stream) {
+        if (!stream || !stream.ready || !stream.audio)
+            return
+
+        stream.audio.muted = !stream.audio.muted
+    }
+
     function selectOutput(output) {
         if (!output)
             return
@@ -156,5 +325,16 @@ QtObject {
 
         Pipewire.preferredDefaultAudioSink =
             output
+    }
+
+    function selectInput(input) {
+        if (!input)
+            return
+
+        if (input === Pipewire.defaultAudioSource)
+            return
+
+        Pipewire.preferredDefaultAudioSource =
+            input
     }
 }

@@ -49,10 +49,9 @@ Item {
             contentColumn.implicitHeight
             + Style.paddingLarge * 2
 
-        radius: Style.radiusLarge
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: 0
+        color: "transparent"
+        border.width: 0
 
         HoverHandler {
             onHoveredChanged: {

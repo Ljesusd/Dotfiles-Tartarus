@@ -18,6 +18,7 @@ QtObject {
 
     property bool launcherOpened: false
     property bool sidebarOpened: false
+    property bool leftSidebarOpened: false
     property int sidebarTab: 0
     property bool osdActive: false
     property string osdKind: ""
@@ -51,6 +52,7 @@ QtObject {
     function openLauncher() {
         root.launcherOpened = true
         root.sidebarOpened = false
+        root.leftSidebarOpened = false
     }
 
     function closeLauncher() {
@@ -66,6 +68,7 @@ QtObject {
 
     function openSidebar() {
         root.sidebarOpened = true
+        root.leftSidebarOpened = false
         root.launcherOpened = false
     }
 
@@ -78,5 +81,20 @@ QtObject {
             root.closeSidebar()
         else
             root.openSidebar()
+    }
+
+    function openLeftSidebar() {
+        root.leftSidebarOpened = true
+        root.sidebarOpened = false
+        root.launcherOpened = false
+    }
+
+    function closeLeftSidebar() { root.leftSidebarOpened = false }
+
+    function toggleLeftSidebar() {
+        if (root.leftSidebarOpened)
+            root.closeLeftSidebar()
+        else
+            root.openLeftSidebar()
     }
 }

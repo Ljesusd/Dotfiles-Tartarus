@@ -13,16 +13,16 @@ QtObject {
     readonly property string mode: themeData.mode ?? "dark"
 
     readonly property color background:
-        role("background", "#202020")
+        role("background", "#171925")
 
     readonly property color backgroundAlt:
-        role("background_alt", "#181818")
+        role("background_alt", "#12141e")
 
     readonly property color surface:
-        role("surface", "#2a2a2a")
+        role("surface", "#20243a")
 
     readonly property color surfaceHover:
-        role("surface_hover", "#444444")
+        role("surface_hover", "#303957")
 
     readonly property color surfaceContainer:
         role("surface_container", root.surface)
@@ -34,7 +34,7 @@ QtObject {
         role("surface_elevated", root.surfaceContainerHigh)
 
     readonly property color selection:
-        role("selection", "#555555")
+        role("selection", "#344263")
 
     readonly property color surfaceVariant:
         role("surface_variant", root.surfaceHover)
@@ -49,7 +49,7 @@ QtObject {
         role("tertiary_container", root.accent)
 
     readonly property color foreground:
-        role("foreground", "#ffffff")
+        role("foreground", "#d9e1ff")
 
     readonly property color onSurface:
         role("on_surface", root.foreground)
@@ -85,16 +85,16 @@ QtObject {
         role("outline_variant", root.outline)
 
     readonly property color foregroundMuted:
-        role("foreground_muted", "#999999")
+        role("foreground_muted", "#9ba7ca")
 
     readonly property color foregroundSubtle:
-        role("foreground_subtle", "#777777")
+        role("foreground_subtle", "#7180a7")
 
     readonly property color onSurfaceVariant:
         role("on_surface_variant", root.foregroundMuted)
 
     readonly property color accent:
-        role("accent", "#89b4fa")
+        role("accent", "#83aef7")
 
     readonly property color error:
         role("error", "#f38ba8")

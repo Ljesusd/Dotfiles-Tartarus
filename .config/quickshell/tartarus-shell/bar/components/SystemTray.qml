@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -10,9 +11,30 @@ Item {
     id: root
 
     signal closeLauncherRequested()
+    required property Item barSurface
+
+    function materialFallback(iconName) {
+        const name = String(iconName || "").split("/").pop().replace(/\.(svg|png)$/i, "")
+        return ({
+            "user-bookmarks-symbolic": "bookmarks",
+            "audio-input-microphone-symbolic": "mic",
+            "audio-speakers-symbolic": "speaker",
+            "input-keyboard-symbolic": "keyboard",
+            "help-contents-symbolic": "help",
+            "application-exit-symbolic": "exit_to_app"
+        })[name] || ""
+    }
 
     implicitWidth: trayLayout.implicitWidth
     implicitHeight: Style.barControlHeight
+
+    Rectangle {
+        anchors.fill: parent
+        radius: 0
+        color: "transparent"
+        border.width: 0
+    }
+
     RowLayout {
         id: trayLayout
 
@@ -32,19 +54,26 @@ Item {
             implicitWidth: Style.barControlHeight
             implicitHeight: Style.barControlHeight
 
-            radius: Style.radiusMedium
+            radius: Style.radiusFull
 
             color: "transparent"
             border.width: 0
 
-            Image {
+            IconImage {
                 anchors.centerIn: parent
+                implicitSize: Style.barIconSmall
+                visible: root.materialFallback(trayItem.modelData.icon) === ""
+                source: root.materialFallback(trayItem.modelData.icon) === ""
+                    ? trayItem.modelData.icon
+                    : ""
+            }
 
-                width: Style.barIconSmall
-                height: Style.barIconSmall
-
-                source: trayItem.modelData.icon
-                fillMode: Image.PreserveAspectFit
+            MaterialIcon {
+                anchors.centerIn: parent
+                iconSize: Style.barIconSmall
+                text: root.materialFallback(trayItem.modelData.icon)
+                visible: text !== ""
+                iconColor: Color.foreground
             }
 
             TrayMenu {
@@ -52,6 +81,7 @@ Item {
 
                 trayItem: trayItem.modelData
                 anchorItem: trayItem
+                anchorSurface: root.barSurface
             }
 
             Timer {

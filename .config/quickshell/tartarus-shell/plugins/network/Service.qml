@@ -7,6 +7,9 @@ QtObject {
 
     property real downloadSpeed: 0
     property real uploadSpeed: 0
+    property var downloadHistory: []
+    property var uploadHistory: []
+    property real pingMs: -1
     property var _lastCounters: null
     property var _samples: []
     property string detectedInterface: ""
@@ -18,7 +21,19 @@ QtObject {
     }
 
     readonly property string activeInterface:
-        root.detectedInterface || "wlan0"
+        root.connected && root.wifiDevice?.name
+        ? root.wifiDevice.name
+        : root.detectedInterface
+
+    onActiveInterfaceChanged: {
+        root._lastCounters = null
+        root._samples = []
+        root.downloadSpeed = 0
+        root.uploadSpeed = 0
+        root.downloadHistory = []
+        root.uploadHistory = []
+        root.pingMs = -1
+    }
 
     readonly property var interfaceProcess: Process {
         command: ["sh", "-c", "for i in /sys/class/net/wlan* /sys/class/net/wlp* /sys/class/net/en*; do [ -e \"$i/operstate\" ] && [ \"$(cat \"$i/operstate\")\" = up ] && { basename \"$i\"; exit; }; done"]
@@ -38,13 +53,15 @@ QtObject {
                     const dt = Math.max(0.1, (now - root._lastCounters.time) / 1000)
                     const down = Math.max(0, (values[0] - root._lastCounters.rx) / dt)
                     const up = Math.max(0, (values[1] - root._lastCounters.tx) / dt)
-                    root._samples = root._samples.concat([{ down: down, up: up }]).slice(-8)
+                    root._samples = root._samples.concat([{ down: down, up: up }]).slice(-24)
                     const total = root._samples.reduce((sum, sample) => ({
                         down: sum.down + sample.down,
                         up: sum.up + sample.up
                     }), { down: 0, up: 0 })
                     root.downloadSpeed = total.down / root._samples.length
                     root.uploadSpeed = total.up / root._samples.length
+                    root.downloadHistory = root._samples.map(sample => sample.down)
+                    root.uploadHistory = root._samples.map(sample => sample.up)
                 }
                 root._lastCounters = { rx: values[0], tx: values[1], time: now }
             }
@@ -59,6 +76,27 @@ QtObject {
         repeat: true
         onTriggered: {
             root.counterProcess.running = true
+        }
+    }
+
+    readonly property var pingProcess: Process {
+        command: ["curl", "-4", "-ksS", "--max-time", "2", "-o", "/dev/null", "-w", "latency=%{time_total}\\n", "https://1.1.1.1/cdn-cgi/trace"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const match = String(text).match(/latency=([0-9]+(?:[.,][0-9]+)?)/i)
+                const value = match ? Number(match[1].replace(",", ".")) * 1000 : -1
+                root.pingMs = value > 0 ? value : -1
+            }
+        }
+    }
+
+    readonly property var pingTimer: Timer {
+        interval: 2000
+        running: root.connected
+        repeat: true
+        onTriggered: {
+            root.pingProcess.running = false
+            root.pingProcess.running = true
         }
     }
 
@@ -180,6 +218,15 @@ QtObject {
 
     readonly property bool connected:
         root.connectedNetwork !== null
+
+    onConnectedChanged: {
+        if (root.connected) {
+            root.pingProcess.running = true
+        } else {
+            root.pingProcess.running = false
+            root.pingMs = -1
+        }
+    }
 
     readonly property bool wifiEnabled:
         Networking.wifiEnabled

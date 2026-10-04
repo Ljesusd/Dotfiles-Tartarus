@@ -27,8 +27,31 @@ QtObject {
             icon: "content_paste",
             command: "clipboard",
             description: "Open clipboard history"
+        },
+        {
+            name: "Calculator",
+            icon: "calculate",
+            command: "calc",
+            description: "Scientific calculator with Qalculate and LaTeX"
+        },
+        {
+            name: "Timer",
+            icon: "timer",
+            command: "timer",
+            description: "Start a countdown, for example >timer 10m"
+        },
+        {
+            name: "Pomodoro",
+            icon: "schedule",
+            command: "pomodoro",
+            description: "Start Pomodoro: >pomodoro 25m 5m 4"
         }
-    ].concat(DockerService.installed ? [{
+    ].concat(RecorderService.available ? [{
+        name: "Record screen",
+        icon: "fiber_manual_record",
+        command: "record",
+        description: "Start a screen recording"
+    }] : []).concat(DockerService.installed ? [{
         name: "Docker",
         icon: "deployed_code",
         command: "docker",
@@ -42,10 +65,11 @@ QtObject {
         if (normalized === "")
             return root.actions
 
+        const commandQuery = normalized.split(/\s+/)[0]
         return root.actions.filter(action => {
             return root.matchesPrefix(
                 action.name,
-                normalized
+                commandQuery
             )
         })
     }

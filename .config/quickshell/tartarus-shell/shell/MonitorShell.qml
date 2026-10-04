@@ -88,6 +88,7 @@ Scope {
 
     OsdOverlay { monitorScreen: root.screen; monitorContext: context }
     SidebarOverlay { monitorScreen: root.screen; pluginRegistry: root.pluginRegistry; monitorContext: context }
+    LeftSidebarOverlay { monitorScreen: root.screen; pluginRegistry: root.pluginRegistry; monitorContext: context }
 
     ClipboardOverlay {
         monitorScreen: root.screen

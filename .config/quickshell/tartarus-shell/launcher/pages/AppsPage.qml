@@ -84,6 +84,7 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.topMargin: Style.spacingSmall
 
             ListView {
                 id: appList

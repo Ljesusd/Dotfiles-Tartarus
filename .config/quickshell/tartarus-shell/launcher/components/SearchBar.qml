@@ -14,11 +14,13 @@ Rectangle {
     signal acceptPressed()
 
     height: Style.controlHeight
-    radius: Style.radiusMedium
+    radius: Style.radiusFull
 
-    color: Color.surface
+    color: Color.surfaceContainer
+    border.width: Style.panelBorderWidth
+    border.color: Color.outlineVariant
 
-    Text {
+    MaterialIcon {
         id: searchIcon
 
         anchors {
@@ -27,9 +29,9 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
 
-        text: "⌕"
-        font.pixelSize: Style.iconMedium
-        color: Color.foregroundMuted
+        text: "search"
+        iconSize: Style.barIconNormal
+        iconColor: Color.foregroundMuted
     }
 
     TextInput {
@@ -50,7 +52,7 @@ Rectangle {
 
         focus: true
 
-        font.pixelSize: Style.fontLarge
+        font.pixelSize: Style.fontNormal
         color: Color.foreground
 
         Keys.onEscapePressed: {
@@ -93,7 +95,7 @@ Rectangle {
         visible: input.text.length === 0
 
         text: "Search applications..."
-        font.pixelSize: Style.fontLarge
+        font.pixelSize: Style.fontNormal
         color: Color.foregroundMuted
     }
 

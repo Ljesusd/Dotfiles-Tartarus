@@ -64,7 +64,12 @@ PopupWindow {
         && root.panelImplicitHeight > 0
 
     readonly property real targetWidth:
-        Math.max(1, root.panelImplicitWidth)
+        Math.min(
+            Math.max(1, root.panelImplicitWidth),
+            root.barScreen && root.barScreen.width > 0
+                ? Math.max(260, root.barScreen.width - Style.paddingLarge * 2)
+                : 520
+        )
 
     readonly property real targetHeight:
         Math.max(1, root.panelImplicitHeight)
@@ -106,6 +111,13 @@ PopupWindow {
     property bool positionInitialized: false
     property bool sizeInitialized: false
     property bool surfacePrepared: false
+    property real presentationOpacity:
+        root.hoverPanelController.opened
+        && root.anchorEntry !== null
+        && root.panelReady
+        && root.surfacePrepared
+            ? 1.0
+            : 0.0
 
     function syncCenterPosition() {
         const target = root.targetCenterX
@@ -412,10 +424,11 @@ PopupWindow {
     }
 
     visible:
-        root.hoverPanelController.opened
-        && root.anchorEntry !== null
-        && root.panelReady
-        && root.surfacePrepared
+        root.presentationOpacity > 0
+        || (root.hoverPanelController.opened
+            && root.anchorEntry !== null
+            && root.panelReady
+            && root.surfacePrepared)
 
     implicitWidth:
         Math.max(1, root.anchorSurface ? root.anchorSurface.width : 1)
@@ -443,6 +456,27 @@ PopupWindow {
         width: root.currentWidth
         height: root.currentHeight
         clip: true
+        opacity: root.presentationOpacity
+        scale: root.presentationOpacity > 0 ? 1.0 : 0.97
+        transformOrigin: Item.Bottom
+
+        AttachedPopupSurface {
+            anchors.fill: parent
+            fillColor: Color.surfaceContainer
+            neckHeight: Style.barPopupGap * 2
+            neckCenter: root.currentCenterX - panelSurface.x
+        }
+
+        Behavior on opacity {
+            Anim { duration: Style.motionFast }
+        }
+
+        Behavior on scale {
+            Anim {
+                duration: Style.motionPopup
+                easing.type: Easing.OutCubic
+            }
+        }
 
         Loader {
             id: contentLoaderA

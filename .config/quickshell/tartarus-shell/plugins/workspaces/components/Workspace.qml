@@ -42,11 +42,13 @@ Rectangle {
         root.showWindowIcons && windowCount > 0
     readonly property bool shouldShow:
         root.showUnoccupied || root.active || root.occupied
+    // Caelestia's compact shape language: active is represented by the
+    // moving pill, occupied workspaces by a rounded square and empty ones by
+    // a small dot.
     readonly property color contentColor:
-        root.active
-            ? Color.onPrimaryContainer
-            : Color.onSurfaceVariant
-    readonly property real contentOpacity: 1.0
+        root.active ? Color.onPrimary : Color.foregroundMuted
+    readonly property real contentOpacity:
+        root.active || root.occupied ? 1.0 : 0.42
 
     implicitWidth: root.shouldShow ? Math.max(
         root.baseSize,
@@ -55,7 +57,7 @@ Rectangle {
     implicitHeight: root.baseSize
     opacity: root.shouldShow ? 1 : 0
 
-    radius: Style.radiusSmall
+    radius: Style.radiusFull
 
     color:
             root.interactive
@@ -83,13 +85,11 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-
                 text: root.workspaceId
-
-                font.pixelSize: Style.barFontSmall
                 color: root.contentColor
                 opacity: root.contentOpacity
-
+                font.pixelSize: Style.barFontSmall
+                font.bold: root.active
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
@@ -112,16 +112,13 @@ Rectangle {
 
                     MaterialIcon {
                         anchors.centerIn: parent
-
                         text: Icons.iconForWindow(
                             root.windows[index],
                             "apps"
                         )
-
                         iconSize: Style.barWorkspaceIconSize
                         iconColor: root.contentColor
                         opacity: root.contentOpacity
-
                         fill: 0
                         grade: 0
                     }

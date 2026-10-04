@@ -7,10 +7,15 @@ QtObject {
     readonly property var players: Mpris.players.values
     property var preferredPlayer: null
     readonly property var activePlayer: players.includes(preferredPlayer)
-        ? preferredPlayer : (players[0] ?? null)
+        ? preferredPlayer
+        : (players.find(player => player.isPlaying)
+            ?? players.find(player => String(player.identity || "").toLowerCase().includes("sung"))
+            ?? players[0]
+            ?? null)
     readonly property bool available: activePlayer !== null
     readonly property string title: activePlayer?.trackTitle || ""
     readonly property string artist: activePlayer?.trackArtist || ""
+    readonly property string artUrl: activePlayer?.trackArtUrl || ""
     readonly property string identity: activePlayer?.identity || ""
     readonly property bool playing: activePlayer?.isPlaying ?? false
     readonly property bool canToggle: activePlayer?.canTogglePlaying ?? false

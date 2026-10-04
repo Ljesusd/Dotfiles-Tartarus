@@ -147,9 +147,9 @@ Item {
         property string alert: ""
         default property alias content: inside.data
         width: body.width
-        radius: Style.radiusMedium
-        color: Color.surfaceContainerHigh
-        border.width: 1
+        radius: Style.cardRadius
+        color: Color.surfaceContainer
+        border.width: Style.panelBorderWidth
         border.color: card.alert !== "" ? Color.error : Qt.rgba(line.r,line.g,line.b,0.35)
         implicitHeight: inside.implicitHeight + Style.paddingMedium * 2
         Column {
@@ -158,7 +158,7 @@ Item {
             spacing: Style.spacingSmall
             Row {
                 width: parent.width
-                Text { text: card.icon; color: accent; font.family: Style.materialIconFont; font.pixelSize: Style.materialIconMedium; width: 30 }
+                MaterialIcon { text: card.icon; iconColor: accent; iconSize: Style.sectionIconSize; width: 30 }
                 Text { text: card.title; color: accent; font.bold: true; font.pixelSize: Style.fontSmall; verticalAlignment: Text.AlignVCenter; width: parent.width - (card.value !== "" ? valueText.width + 40 : 30) }
                 Text { id: valueText; text: card.value; color: Color.foreground; font.bold: true; font.pixelSize: Style.fontLarge; verticalAlignment: Text.AlignVCenter }
                 Text { visible: card.alert !== ""; text: card.alert; color: Color.error; font.bold: true; font.pixelSize: 10; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
@@ -173,11 +173,29 @@ Item {
         Rectangle { width: value >= 0 ? Math.max(4,parent.width * Math.min(100,value)/100) : 0; height: parent.height; radius: 3; color: accent; Behavior on width { NumberAnimation { duration: 180 } } }
     }
     component Stat: RowLayout {
+        id: stat
         property string label: ""
         property string value: ""
-        width: body.width
-        Text { text: parent.label; color: muted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
-        Text { text: parent.value; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.maximumWidth: root.width * 0.58; elide: Text.ElideRight; horizontalAlignment: Text.AlignRight }
+        width: parent ? parent.width : body.width
+        spacing: Style.spacingSmall
+        Text {
+            text: stat.label
+            color: muted
+            font.pixelSize: Style.fontSmall
+            Layout.fillWidth: true
+            Layout.minimumWidth: 0
+            elide: Text.ElideRight
+        }
+        Text {
+            id: statValue
+            text: stat.value
+            color: Color.foreground
+            font.pixelSize: Style.fontSmall
+            Layout.preferredWidth: Math.min(230, Math.max(110, stat.width * 0.46))
+            Layout.minimumWidth: 80
+            elide: Text.ElideRight
+            horizontalAlignment: Text.AlignRight
+        }
     }
     component Sparkline: Canvas {
         property var values: []

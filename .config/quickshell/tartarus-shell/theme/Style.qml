@@ -38,17 +38,28 @@ QtObject {
     readonly property int materialIconLarge: 24
     readonly property int materialIconExtraLarge: 36
 
-    readonly property int controlHeight: 50
-    readonly property int itemHeight: 56
+    // Shared visual rhythm inspired by the rounded reference shells. Keep
+    // these separate from the bar metrics so panels, menus and launcher pages
+    // use the same compact language.
+    readonly property int panelRadius: 22
+    readonly property int cardRadius: 16
+    readonly property int cardPadding: 14
+    readonly property int controlRadius: 13
+    readonly property int iconButtonSize: 36
+    readonly property int iconButtonIconSize: 18
+    readonly property int sectionIconSize: 18
 
-    readonly property int barHeight: 56
+    readonly property int controlHeight: 48
+    readonly property int itemHeight: 54
+
+    readonly property int barHeight: 50
     readonly property int barInnerHeight: 28
-    readonly property int barControlHeight: 38
-    readonly property int barControlRadius: 12
-    readonly property int barSurfaceRadius: 20
+    readonly property int barControlHeight: 34
+    readonly property int barControlRadius: 17
+    readonly property int barSurfaceRadius: 18
     // Debe dejar aire dentro de la barra flotante (44 px útiles).
-    readonly property int barSearchHeight: 34
-    readonly property int barFloatingMargin: 6
+    readonly property int barSearchHeight: 36
+    readonly property int barFloatingMargin: 4
     readonly property int barContentHorizontalPadding: 12
     readonly property int panelBorderWidth: 1
 
@@ -68,13 +79,13 @@ QtObject {
 
     readonly property int barWorkspaceIconSize: 16
     readonly property int barWorkspaceBaseSize:
-        barInnerHeight - spacingLg
+        barInnerHeight - spacingMd
     readonly property int barWorkspaceActiveHeight:
         barInnerHeight - spacingMd
-    readonly property int barWorkspaceRailPaddingHorizontal: 11
+    readonly property int barWorkspaceRailPaddingHorizontal: 7
     readonly property int barWorkspaceSpacing: spacingXs
-    readonly property int barWorkspaceContentSpacing: 2
-    readonly property int barWorkspaceActivePaddingHorizontal: 3
+    readonly property int barWorkspaceContentSpacing: 3
+    readonly property int barWorkspaceActivePaddingHorizontal: 5
 
     readonly property int barWorkspaceTrailBaseDuration: 100
     readonly property int barWorkspaceTrailMaxDuration: 180
@@ -109,4 +120,8 @@ QtObject {
     readonly property int motionFast: 140
     readonly property int motionNormal: 180
     readonly property int motionSlow: 240
+    readonly property int motionPopup: 220
+    readonly property int motionPanel: 260
+    readonly property real hoverOpacity: 0.08
+    readonly property real selectedOpacity: 0.16
 }

@@ -5,6 +5,7 @@ import Quickshell.Hyprland
 import QtQuick
 import "../services"
 import "../theme"
+import "../bar/components"
 import "components"
 import "pages"
 
@@ -29,7 +30,8 @@ Scope {
     readonly property int panelWidth: controller.mode === LauncherController.Mode.Wallpaper
         ? Math.min(root.wallpaperSlots * 272 + 176,
             (root.barWindow.screen?.width ?? 1280) - 64)
-        : Style.launcherWidth
+        : Math.min(Style.launcherWidth,
+            Math.max(320, (root.barWindow.screen?.width ?? 1280) - 64))
 
         LauncherController {
             id: controller
@@ -79,14 +81,24 @@ Scope {
         anchor.item:
             root.launcherAnchor
 
-        anchor.edges: Edges.Bottom
-        anchor.gravity: Edges.Bottom
+        // La barra vive en el borde inferior: el launcher se despliega hacia arriba.
+        anchor.edges: Edges.Top
+        anchor.gravity: Edges.Top
 
         implicitWidth: root.panelWidth
-        implicitHeight: controller.mode
-            === LauncherController.Mode.Wallpaper
-                ? 236
-                : Style.launcherHeight
+        implicitHeight: {
+            const available = Math.max(
+                280,
+                (root.barWindow.screen?.height ?? 800)
+                    - Style.barHeight
+                    - Style.paddingLarge * 2
+            )
+            const desired = controller.mode
+                === LauncherController.Mode.Wallpaper
+                    ? 236
+                    : Style.launcherHeight
+            return Math.min(desired, available) + Style.barPopupGap * 2
+        }
 
         color: "transparent"
 
@@ -213,24 +225,29 @@ Scope {
             height: launcherWindow.contentOpened
                 ? controller.mode
                     === LauncherController.Mode.Wallpaper
-                        ? 236
-                        : Style.launcherHeight
+                        ? 236 + Style.barPopupGap * 2
+                        : Style.launcherHeight + Style.barPopupGap * 2
                 : 0
 
             anchors {
-                top: parent.top
+                bottom: parent.bottom
                 horizontalCenter: parent.horizontalCenter
-                topMargin: Style.barPopupGap
+                bottomMargin: 0
             }
 
             opacity: launcherWindow.contentOpened
                 ? 1
                 : 0
+            scale: launcherWindow.contentOpened ? 1 : 0.97
+            transformOrigin: Item.Bottom
 
-            radius: Style.radiusLarge
-            color: Color.backgroundAlt
-            border.width: Style.panelBorderWidth
-            border.color: Color.outline
+            color: "transparent"
+
+            AttachedPopupSurface {
+                anchors.fill: parent
+                neckHeight: Style.barPopupGap * 2
+                fillColor: Color.surfaceContainer
+            }
 
             Behavior on width {
                 NumberAnimation {
@@ -245,8 +262,13 @@ Scope {
             }
 
             Behavior on opacity {
-                NumberAnimation {
-                    duration: Style.animationFast
+                Anim { duration: Style.motionFast }
+            }
+
+            Behavior on scale {
+                Anim {
+                    duration: Style.motionPopup
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -299,6 +321,14 @@ Scope {
                 consumerKey: root.monitorContext.name
                 active: root.monitorContext.launcherOpened
                     && controller.mode === LauncherController.Mode.Docker
+            }
+
+            CalculatorPage {
+                anchors.fill: parent
+                controller: controller
+                active:
+                    controller.mode
+                    === LauncherController.Mode.Calculator
             }
         }
     }

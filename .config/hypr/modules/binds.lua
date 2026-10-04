@@ -26,6 +26,9 @@ hl.bind(
     hl.dsp.global("quickshell:notification-center"),
     { description = "[TartarusShell] Toggle notification center" }
 )
+hl.bind(mainMod .. " + I", hl.dsp.global("quickshell:control-center"), { description = "[TartarusShell] Toggle control center" })
+hl.bind(mainMod .. " + SHIFT + I", hl.dsp.global("quickshell:sidebar"), { description = "[TartarusShell] Toggle sidebar" })
+hl.bind(mainMod .. " + CTRL + I", hl.dsp.global("quickshell:left-sidebar"), { description = "[TartarusShell] Toggle quick settings sidebar" })
 hl.bind(
     mainMod .. " + SHIFT + N",
     hl.dsp.global("quickshell:notification-dnd"),
@@ -81,13 +84,10 @@ hl.bind(mainMod .. " + SHIFT + O", hl.dsp.window.move({ workspace = "special:com
 hl.bind(
     mainMod .. " + G",
     hl.dsp.exec_cmd(
-        "if ! flatpak ps --columns=application | grep -Fxq 'com.valvesoftware.Steam'; "
-        .. "then flatpak run com.valvesoftware.Steam -gamepadui >/tmp/steam-gamepad.log 2>&1 & "
-        .. "fi; "
-        .. "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"gaming\")'"
-    )
+        "bash \"$HOME/.config/hypr/scripts/steam-gaming-mode.sh\""
+    ),
+    { non_consuming = false }
 )
-hl.bind(mainMod .. " + SHIFT + G", hl.dsp.window.move({ workspace = "special:gaming" }))
 hl.bind(
     mainMod .. " + PRINT",
     hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh area")

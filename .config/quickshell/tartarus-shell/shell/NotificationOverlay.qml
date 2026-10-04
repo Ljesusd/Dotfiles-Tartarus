@@ -31,7 +31,10 @@ Scope {
         screen: root.monitorScreen
         anchors { top: true; right: true }
         margins { top: Style.barHeight + Style.spacingLarge; right: Style.paddingLarge }
-        implicitWidth: 360
+        implicitWidth: Math.min(
+            380,
+            Math.max(280, (root.monitorScreen?.width ?? 1280) - Style.paddingLarge * 2)
+        )
         implicitHeight: stack.childrenRect.height
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
@@ -42,7 +45,7 @@ Scope {
 
         Column {
             id: stack
-            width: 360
+            width: parent.width
             spacing: Style.spacingMedium
 
             Repeater {
@@ -56,10 +59,21 @@ Scope {
                         .indexOf(notificationId) !== -1
                     width: stack.width
                     height: content.implicitHeight + Style.paddingLarge * 2
+                    opacity: visible ? 1 : 0
+                    scale: visible ? 1 : 0.97
+                    transformOrigin: Item.Top
                     radius: Style.radiusLarge
-                    color: Color.backgroundAlt
+                    color: Color.surfaceContainer
                     border.width: Style.panelBorderWidth
                     border.color: Color.outlineVariant
+
+                    Behavior on opacity { Anim { duration: Style.motionFast } }
+                    Behavior on scale {
+                        Anim {
+                            duration: Style.motionPopup
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
                     function closeNotification() {
                         Services.NotificationService.close(notificationId)

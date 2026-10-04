@@ -21,10 +21,9 @@ Item {
         anchors.fill: parent
         anchors.margins: Style.barPopupGap
 
-        radius: Style.radiusLarge
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: 0
+        color: "transparent"
+        border.width: 0
 
         HoverHandler {
             onHoveredChanged: {
@@ -173,6 +172,154 @@ Item {
                                 root.service.selectOutput(
                                     outputRow.modelData
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+
+                Text {
+                    Layout.fillWidth: true
+
+                    text: "Aplicaciones"
+
+                    font.pixelSize: Style.fontSmall
+                    color: Color.foregroundMuted
+                }
+
+                Text {
+                    visible: root.service.applicationStreamsModel.values.length === 0
+                    Layout.fillWidth: true
+
+                    text: "No hay aplicaciones reproduciendo audio"
+
+                    font.pixelSize: Style.fontSmall
+                    color: Color.foregroundMuted
+                }
+
+                Repeater {
+                    model: root.service.applicationGroupsModel
+
+                    delegate: ColumnLayout {
+                        id: applicationRow
+
+                        required property var modelData
+
+                        Layout.fillWidth: true
+                        spacing: Style.spacingSmall
+
+                        readonly property string applicationName: modelData.name
+                        readonly property string detail:
+                            modelData.detail
+                        readonly property real applicationVolume:
+                            root.service.groupVolume(modelData)
+                        readonly property bool applicationMuted:
+                            root.service.groupMuted(modelData)
+
+                        RowLayout {
+                            Layout.fillWidth: true
+
+                            Rectangle {
+                                implicitWidth: 28
+                                implicitHeight: 28
+                                enabled: applicationRow.modelData.nodes.length > 0
+                                radius: Style.controlRadius
+                                color: muteButton.hovered
+                                    ? Color.surfaceHover : Color.surface
+
+                                MaterialIcon {
+                                    anchors.centerIn: parent
+                                    text: root.service.applicationIcon(applicationRow.modelData)
+                                    font.pixelSize: Style.materialIconMedium
+                                    color: applicationRow.applicationMuted
+                                        ? Color.foregroundMuted : Color.accent
+                                }
+
+                                HoverHandler { id: muteButton }
+                                TapHandler {
+                                    onTapped: root.service.toggleGroupMute(
+                                        applicationRow.modelData)
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 0
+
+                                Text {
+                                    Layout.fillWidth: true
+
+                                    text: applicationRow.applicationName
+                                    font.pixelSize: Style.fontNormal
+                                    color: Color.foreground
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
+
+                                Text {
+                                    visible: applicationRow.detail !== ""
+                                    Layout.fillWidth: true
+
+                                    text: applicationRow.detail
+                                    font.pixelSize: Style.fontSmall
+                                    color: Color.foregroundMuted
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
+                            }
+
+                            Text {
+                                text: Math.round(applicationRow.applicationVolume * 100) + "%"
+                                font.pixelSize: Style.fontSmall
+                                color: Color.foregroundMuted
+                            }
+
+                        }
+
+                        Rectangle {
+                            id: applicationTrack
+
+                            Layout.fillWidth: true
+                            implicitHeight: 24
+                            color: "transparent"
+                            enabled: applicationRow.modelData.nodes.length > 0
+
+                            Rectangle {
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                }
+                                height: 4
+                                radius: height / 2
+                                color: Color.surface
+                            }
+
+                            Rectangle {
+                                anchors {
+                                    left: parent.left
+                                    verticalCenter: parent.verticalCenter
+                                }
+                                width: parent.width * Math.max(0, Math.min(1,
+                                    applicationRow.applicationVolume))
+                                height: 4
+                                radius: height / 2
+                                color: applicationRow.applicationMuted
+                                    ? Color.foregroundMuted : Color.accent
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onPressed: mouse => root.service.setGroupVolume(
+                                    applicationRow.modelData, mouse.x / width)
+                                onPositionChanged: mouse => {
+                                    if (pressed)
+                                        root.service.setGroupVolume(
+                                            applicationRow.modelData, mouse.x / width)
+                                }
                             }
                         }
                     }

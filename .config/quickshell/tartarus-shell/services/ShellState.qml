@@ -7,6 +7,7 @@ QtObject {
 
     property var monitorContexts: []
     property bool launcherFocusCloseSuppressed: false
+    property bool controlCenterOpen: false
 
     readonly property Connections osdConnections: Connections {
         target: Services.OsdService
@@ -132,8 +133,20 @@ QtObject {
     }
 
     function closeSidebars() {
-        for (const context of root.monitorContexts)
+        for (const context of root.monitorContexts) {
             context.closeSidebar()
+            context.closeLeftSidebar()
+        }
+    }
+
+    function toggleControlCenter() {
+        root.controlCenterOpen = !root.controlCenterOpen
+        if (root.controlCenterOpen)
+            root.closeSidebars()
+    }
+
+    function closeControlCenter() {
+        root.controlCenterOpen = false
     }
 
     function closePanels() {
@@ -216,6 +229,21 @@ QtObject {
             return
 
         context.toggleSidebar()
+    }
+
+    function openLeftSidebar(context) {
+        if (context)
+            context.openLeftSidebar()
+    }
+
+    function toggleLeftSidebar(context) {
+        if (context)
+            context.toggleLeftSidebar()
+    }
+
+    function closeLeftSidebar(context) {
+        if (context)
+            context.closeLeftSidebar()
     }
 
     function closeSidebar(context) {
