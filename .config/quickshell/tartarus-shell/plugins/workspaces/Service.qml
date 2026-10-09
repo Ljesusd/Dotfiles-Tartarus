@@ -1,5 +1,6 @@
 import Quickshell.Hyprland
 import QtQml
+import "WorkspaceModel.js" as WorkspaceModel
 
 QtObject {
     id: root
@@ -34,11 +35,17 @@ QtObject {
         target: Hyprland
 
         function onRawEvent(event) {
-            if (event.name !== "activespecial")
-                return
-
-            Hyprland.refreshMonitors()
+            if (event.name === "activespecial") Hyprland.refreshMonitors()
+            if (["monitoradded", "monitoraddedv2", "monitorremoved", "monitorremovedv2",
+                "moveworkspace", "moveworkspacev2", "configreloaded"].includes(event.name))
+                topologyRefresh.restart()
         }
+    }
+
+    readonly property Timer topologyRefresh: Timer {
+        id: topologyRefresh
+        interval: 50
+        onTriggered: { Hyprland.refreshMonitors(); Hyprland.refreshWorkspaces() }
     }
 
     function monitorForScreen(screen) {
@@ -81,6 +88,12 @@ QtObject {
         return typeof base === "number" && base > 0
             ? base
             : 1
+    }
+
+    function workspaceIdsForScreen(screen, count, showEmpty) {
+        const monitor = root.monitorForScreen(screen)
+        return WorkspaceModel.idsForScreen(root.workspaces, monitor?.name ?? screen?.name ?? "",
+            root.activeWorkspaceIdForScreen(screen), root.firstWorkspaceForScreen(screen), count, showEmpty)
     }
 
     function activeSpecialWorkspaceNameForScreen(screen) {

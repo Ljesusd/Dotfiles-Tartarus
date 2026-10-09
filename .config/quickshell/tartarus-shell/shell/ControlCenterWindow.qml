@@ -1,11 +1,13 @@
 import Quickshell
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell.Services.Pipewire
 import Quickshell.Io
 import "../services" as Services
 import "../theme"
+import "../launcher/components" as LauncherComponents
 
 FloatingWindow {
     id: root
@@ -32,6 +34,7 @@ FloatingWindow {
     property int pageHistoryIndex: -1
     property int appearanceSchemeIndex: 0
     property string fastfetchPackageCount: "—"
+    property string profileImageSource: ""
     readonly property color lyneBackground: "#171925"
     readonly property color lyneSurface: "#20243a"
     readonly property color lyneSurfaceHigh: "#282e48"
@@ -86,7 +89,22 @@ FloatingWindow {
         blockLoading: true
     }
 
-    Component.onCompleted: root.fastfetchPackagesProcess.running = true
+    readonly property Process profileImageProcess: Process {
+        command: ["sh", "-c", "find \"$HOME/.face\" -maxdepth 2 -type f 2>/dev/null | sort | head -n 1"]
+        stdout: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                const path = this.text.trim()
+                if (path !== "")
+                    root.profileImageSource = "file://" + path
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        root.fastfetchPackagesProcess.running = true
+        root.profileImageProcess.running = true
+    }
 
     Connections {
         target: root.shellState
@@ -266,24 +284,35 @@ FloatingWindow {
                     subtitle: "Se usa para el clima y el reloj de la Dynamic Island"
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: "Lugar"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120 }
-                        TextField {
+                        Text { text: "Ubicación del PC"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
+                        StyledSwitch {
+                            checked: Services.QuickSettingsState.weatherAutoLocation
+                            onToggled: Services.QuickSettingsState.setWeatherAutoLocation(checked)
+                        }
+                    }
+                    Text {
+                        text: Services.QuickSettingsState.weatherAutoLocation
+                            ? "Ciudad aproximada por IP: " + (Services.WeatherService.location || "Detectando…")
+                            : "Ciudad fijada: " + (Services.QuickSettingsState.weatherPlace?.label || Services.WeatherService.location || Services.QuickSettingsState.weatherLocation)
+                        color: root.lyneMuted
+                        font.pixelSize: 12
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text { text: "Lugar"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120; Layout.alignment: Qt.AlignTop; topPadding: 10 }
+                        LauncherComponents.WeatherLocationPicker {
                             id: locationField
+                            enabled: !Services.QuickSettingsState.weatherAutoLocation
+                            active: root.visible && root.page === 0 && !Services.QuickSettingsState.weatherAutoLocation
                             Layout.fillWidth: true
-                            text: Services.QuickSettingsState.weatherLocation
-                            placeholderText: "Madrid, Buenos Aires, Tokyo…"
-                            color: root.lyneText
-                            placeholderTextColor: root.lyneMuted
-                            selectByMouse: true
-                            leftPadding: 12
-                            rightPadding: 12
-                            background: Rectangle {
-                                radius: Style.controlRadius
-                                color: root.lyneSurfaceHigh
-                                border.width: locationField.activeFocus ? 1 : 0
-                                border.color: root.lyneAccent
-                            }
-                            onEditingFinished: Services.QuickSettingsState.setWeatherLocation(text)
+                            text: Services.QuickSettingsState.weatherPlace?.label || Services.QuickSettingsState.weatherLocation
+                            textColor: root.lyneText
+                            mutedColor: root.lyneMuted
+                            surfaceColor: root.lyneSurfaceHigh
+                            accentColor: root.lyneAccent
+                            onLocationSelected: place => Services.QuickSettingsState.setWeatherPlace(place)
                         }
                     }
                     RowLayout {
@@ -320,7 +349,7 @@ FloatingWindow {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        implicitHeight: fastfetchContent.implicitHeight + Style.paddingMedium * 2
+                        implicitHeight: Math.max(188, fastfetchContent.implicitHeight + Style.paddingMedium * 2)
                         radius: Style.controlRadius
                         color: root.lyneBackground
                         border.width: 1
@@ -337,7 +366,7 @@ FloatingWindow {
                             Text {
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
-                                Layout.preferredHeight: 132
+                                Layout.preferredHeight: 164
                                 Layout.preferredWidth: fastfetchContent.columns === 2
                                     ? fastfetchContent.width * 0.52 : fastfetchContent.width
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
@@ -352,7 +381,11 @@ FloatingWindow {
                                 lineHeightMode: Text.ProportionalHeight
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
-                                scale: Math.min(1, 126 / Math.max(1, implicitHeight))
+                                scale: Math.min(
+                                    1,
+                                    158 / Math.max(1, implicitHeight),
+                                    (fastfetchContent.width * 0.48) / Math.max(1, implicitWidth)
+                                )
                             }
 
                             ColumnLayout {
@@ -737,17 +770,104 @@ FloatingWindow {
 
     component ProfileHeader: Rectangle {
         Layout.fillWidth: true
-        implicitHeight: 92
+        implicitHeight: 104
         radius: Style.cardRadius
-        color: root.lyneSurface
-        border.width: 0
+        color: root.lyneSurfaceHigh
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12)
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
+            anchors.leftMargin: Style.paddingLarge
+            anchors.rightMargin: Style.paddingLarge
+            anchors.topMargin: Style.paddingMedium
+            anchors.bottomMargin: Style.paddingMedium
             spacing: Style.spacingMedium
-            Rectangle { Layout.preferredWidth: 52; Layout.preferredHeight: 52; radius: Style.radiusFull; color: root.lyneAccent; MaterialIcon { anchors.centerIn: parent; text: "person"; iconSize: Style.materialIconLarge; iconColor: root.lyneBackground } }
-            ColumnLayout { Layout.fillWidth: true; Text { text: "Tartarus"; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true } Text { text: "Arch Linux · Quickshell"; color: root.lyneMuted; font.pixelSize: Style.fontSmall } }
-            MaterialIcon { text: "check_circle"; iconSize: Style.materialIconMedium; iconColor: root.lyneAccent }
+            Rectangle {
+                Layout.preferredWidth: 68
+                Layout.preferredHeight: 68
+                radius: Style.radiusFull
+                color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.18)
+                border.width: 2
+                border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
+                clip: true
+                Image {
+                    id: profileImage
+                    anchors.fill: parent
+                    anchors.margins: 2
+                    source: root.profileImageSource
+                    sourceSize: Qt.size(144, 144)
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    smooth: true
+                    visible: false
+                }
+                Rectangle {
+                    id: profileImageMask
+                    anchors.fill: profileImage
+                    radius: width / 2
+                    color: "white"
+                    visible: false
+                    layer.enabled: true
+                }
+                MultiEffect {
+                    anchors.fill: profileImage
+                    source: profileImage
+                    visible: profileImage.status === Image.Ready
+                    maskEnabled: true
+                    maskSource: profileImageMask
+                    autoPaddingEnabled: false
+                }
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: "person"
+                    iconSize: Style.materialIconLarge
+                    iconColor: root.lyneAccent
+                    visible: profileImage.status !== Image.Ready
+                }
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 3
+                Text { text: "Leandro"; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true }
+                Text { text: "Tartarus · Arch Linux · Quickshell"; color: root.lyneMuted; font.pixelSize: Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
+                Text { text: "Sesión activa"; color: root.lyneAccent; font.pixelSize: 12; font.bold: true }
+            }
+            Rectangle {
+                Layout.preferredWidth: 34
+                Layout.preferredHeight: 34
+                radius: Style.radiusFull
+                color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.14)
+                MaterialIcon { anchors.centerIn: parent; text: "check"; iconSize: Style.materialIconSmall; iconColor: root.lyneAccent }
+            }
+        }
+    }
+
+    component StyledSwitch: Switch {
+        id: styledSwitch
+        implicitWidth: 48
+        implicitHeight: 28
+        indicator: Rectangle {
+            x: styledSwitch.leftPadding
+            y: styledSwitch.topPadding + (styledSwitch.availableHeight - height) / 2
+            implicitWidth: 48
+            implicitHeight: 28
+            radius: height / 2
+            color: styledSwitch.checked ? root.lyneAccent : root.lyneSurfaceHigh
+            border.width: 1
+            border.color: styledSwitch.checked
+                ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.9)
+                : Qt.rgba(root.lyneMuted.r, root.lyneMuted.g, root.lyneMuted.b, 0.42)
+            Behavior on color { ColorAnimation { duration: Style.motionFast } }
+            Rectangle {
+                width: 20
+                height: 20
+                y: 3
+                x: styledSwitch.checked ? parent.width - width - 3 : 3
+                radius: Style.radiusFull
+                color: styledSwitch.checked ? root.lyneBackground : root.lyneMuted
+                Behavior on x { NumberAnimation { duration: Style.motionFast; easing.type: Easing.OutCubic } }
+                Behavior on color { ColorAnimation { duration: Style.motionFast } }
+            }
         }
     }
 
@@ -762,7 +882,8 @@ FloatingWindow {
         implicitHeight: cardBody.implicitHeight + Style.paddingMedium * 2
         radius: Style.cardRadius
         color: root.lyneSurface
-        border.width: 0
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.08)
         ColumnLayout {
             id: cardBody
             anchors.fill: parent

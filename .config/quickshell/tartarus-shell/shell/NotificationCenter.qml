@@ -5,6 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../services" as Services
 import "../theme"
+import "../services/NotificationMedia.js" as Media
 
 Scope {
     id: root
@@ -163,6 +164,7 @@ Scope {
                         required property string appName
                         required property string summary
                         required property string body
+                        required property string image
                         required property double timestamp
                         required property int index
 
@@ -265,13 +267,17 @@ Scope {
 
                             Text {
                                 width: parent.width
-                                text: body
+                                text: Media.textBody(body)
                                 color: Color.foregroundMuted
                                 font.pixelSize: Style.fontSmall
                                 wrapMode: Text.Wrap
                                 maximumLineCount: 4
                                 elide: Text.ElideRight
                                 visible: text.length > 0
+                            }
+                            NotificationPreview {
+                                width: parent.width
+                                imageSource: Media.preview(image, body)
                             }
                         }
                     }

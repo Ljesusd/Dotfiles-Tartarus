@@ -15,10 +15,13 @@ Item {
     required property var workspaceService
     required property var screen
 
-    property string weatherText: "—°"
-    property string weatherLocation: "Clima"
-    property string weatherIcon: "cloud"
-    property bool weatherLoading: false
+    readonly property string weatherText: Services.WeatherService.current
+        ? Services.WeatherService.current.temp + "°" : "—°"
+    readonly property string weatherLocation: Services.WeatherService.location || "Clima"
+    readonly property string weatherIcon: Services.WeatherService.current
+        ? Services.WeatherService.icon(Services.WeatherService.current.code, Services.WeatherService.current.isDay)
+        : "cloud"
+    readonly property bool weatherLoading: Services.WeatherService.loading
     property string currentTime: Qt.formatTime(new Date(), "HH:mm")
     readonly property bool primaryActivityActive:
         Services.TimerService.active || Services.RecorderService.active
@@ -325,64 +328,4 @@ Item {
         }
     }
 
-    Timer {
-        interval: 30 * 60 * 1000
-        repeat: true
-        running: true
-        onTriggered: root.refreshWeather()
-    }
-
-    Timer {
-        id: weatherTimeout
-        interval: 7000
-        onTriggered: {
-            root.weatherLoading = false
-            root.weatherText = "—°"
-        }
-    }
-
-    Process {
-        id: weatherProcess
-        command: ["sh", "-c", "curl -fsSL --max-time 6 'https://wttr.in/" + encodeURIComponent(Services.QuickSettingsState.weatherLocation) + "?format=j1'"]
-
-        stdout: StdioCollector {
-            waitForEnd: true
-
-            onStreamFinished: {
-                weatherTimeout.stop()
-                root.weatherLoading = false
-
-                try {
-                    const data = JSON.parse(String(text))
-                    const current = data.current_condition?.[0]
-                    if (!current)
-                        throw new Error("empty weather response")
-
-                    root.weatherText = (current.temp_C || "—") + "°"
-                    root.weatherIcon = Number(current.weatherCode) < 300
-                        ? "partly_cloudy_day"
-                        : "rainy"
-                } catch (error) {
-                    root.weatherText = "—°"
-                    root.weatherIcon = "cloud"
-                }
-            }
-        }
-    }
-
-    function refreshWeather() {
-        if (weatherProcess.running || root.weatherLoading)
-            return
-
-        root.weatherLoading = true
-        weatherTimeout.restart()
-        weatherProcess.running = true
-    }
-
-    Connections {
-        target: Services.QuickSettingsState
-        function onWeatherLocationChanged() { root.refreshWeather() }
-    }
-
-    Component.onCompleted: root.refreshWeather()
 }

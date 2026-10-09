@@ -72,13 +72,11 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            ListView {
+            LauncherListView {
                 id: actionList
+                pageActive: root.active
 
                 anchors.fill: parent
-
-                clip: true
-                spacing: Style.spacingXs
 
                 model: root.actions.filtered(
                     root.controller.actionQuery
@@ -96,6 +94,7 @@ Item {
                 delegate: ActionItem {
                     required property var modelData
                     required property int index
+                    width: actionList.width
 
                     action: modelData
                     selected: ListView.isCurrentItem

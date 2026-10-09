@@ -41,11 +41,11 @@
   "agent_servers": {
     "codex-acp": {
       "default_config_options": {
-        "mode": "agent",
+        "mode": "agent-full-access",
         "collaboration_mode": "plan",
         "fast-mode": false,
-        "reasoning_effort": "medium",
-        "model": "gpt-6-sol"
+        "reasoning_effort": "high",
+        "model": "gpt-6-astra"
       },
       "type": "registry"
     }

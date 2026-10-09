@@ -12,7 +12,8 @@ QtObject {
         Schemes,
         Wallpaper,
         Docker,
-        Calculator
+        Calculator,
+        Weather
     }
 
     required property var launcherState
@@ -35,6 +36,8 @@ QtObject {
             return LauncherController.Mode.Docker
         if (/^>calc(?:\s|$)/.test(root.normalizedQuery))
             return LauncherController.Mode.Calculator
+        if (/^>weather(?:\s|$)/.test(root.normalizedQuery))
+            return LauncherController.Mode.Weather
         if (root.normalizedQuery.startsWith(">scheme"))
             return LauncherController.Mode.Schemes
 
@@ -275,7 +278,28 @@ QtObject {
         }
 
         if (action.command === "record") {
-            Services.RecorderService.start()
+            Services.RecorderService.start(root.monitorName)
+            root.launcherState.query = ""
+            root.closeRequested()
+            return
+        }
+
+        if (action.command === "whisp") {
+            Services.WhispService.open()
+            root.launcherState.query = ""
+            root.closeRequested()
+            return
+        }
+
+        if (action.command === "weather") {
+            root.launcherState.query = ">weather"
+            root.launcherState.focusSearch()
+            root.resetSelection()
+            return
+        }
+
+        if (action.command === "whisp-export") {
+            Services.WhispService.exportToObsidian()
             root.launcherState.query = ""
             root.closeRequested()
             return
@@ -326,6 +350,7 @@ QtObject {
             root.acceptWallpaper()
             break
         case LauncherController.Mode.Calculator:
+        case LauncherController.Mode.Weather:
             break
         }
     }
@@ -384,6 +409,7 @@ QtObject {
             root.backFromWallpapers()
             break
         case LauncherController.Mode.Calculator:
+        case LauncherController.Mode.Weather:
             root.launcherState.query = ">"
             root.launcherState.focusSearch()
             break

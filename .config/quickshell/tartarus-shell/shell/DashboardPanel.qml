@@ -8,10 +8,14 @@ import "../theme"
 Item {
     id: root
     required property var monitorScreen
-    property string weatherText: "Clima no disponible"
-    property string weatherLocation: ""
-    property string weatherIcon: "cloud"
-    property bool weatherLoading: false
+    readonly property string weatherText: Services.WeatherService.current
+        ? Services.WeatherService.current.temp + "°C · " + Services.WeatherService.description(Services.WeatherService.current.code)
+        : "Clima no disponible"
+    readonly property string weatherLocation: Services.WeatherService.location
+    readonly property string weatherIcon: Services.WeatherService.current
+        ? Services.WeatherService.icon(Services.WeatherService.current.code, Services.WeatherService.current.isDay)
+        : "cloud"
+    readonly property bool weatherLoading: Services.WeatherService.loading
     readonly property date today: new Date()
     property int shownMonth: today.getMonth()
     property int shownYear: today.getFullYear()
@@ -39,50 +43,7 @@ Item {
         root.shownMonth = next.getMonth()
         root.shownYear = next.getFullYear()
     }
-    function refreshWeather() {
-        if (weatherProcess.running) return
-        root.weatherLoading = true
-        weatherTimeout.restart()
-        weatherProcess.running = true
-    }
-    Timer {
-        id: weatherTimeout
-        interval: 7000
-        onTriggered: {
-            root.weatherLoading = false
-            root.weatherText = "Clima no disponible"
-        }
-    }
-
-    Process {
-        id: weatherProcess
-        command: ["sh", "-c", "curl -fsSL --max-time 6 'https://wttr.in/" + encodeURIComponent(Services.QuickSettingsState.weatherLocation) + "?format=j1'"]
-        stdout: StdioCollector {
-            waitForEnd: true
-            onStreamFinished: {
-                weatherTimeout.stop()
-                root.weatherLoading = false
-                try {
-                    const data = JSON.parse(String(text))
-                    const current = data.current_condition?.[0]
-                    const area = data.nearest_area?.[0]
-                    if (!current) throw new Error("empty weather response")
-                    root.weatherText = (current.temp_C || "—") + "°C · " + (current.weatherDesc?.[0]?.value || "")
-                    root.weatherLocation = area?.areaName?.[0]?.value || Services.QuickSettingsState.weatherLocation
-                    root.weatherIcon = Number(current.weatherCode) < 300 ? "partly_cloudy_day" : "rainy"
-                } catch (error) {
-                    root.weatherText = "Clima no disponible"
-                    root.weatherLocation = ""
-                }
-            }
-        }
-    }
-    Timer { interval: 30 * 60 * 1000; repeat: true; running: true; onTriggered: root.refreshWeather() }
-    Connections {
-        target: Services.QuickSettingsState
-        function onWeatherLocationChanged() { root.refreshWeather() }
-    }
-    Component.onCompleted: root.refreshWeather()
+    function refreshWeather() { Services.WeatherService.refresh(true) }
 
     Flickable {
         anchors.fill: parent

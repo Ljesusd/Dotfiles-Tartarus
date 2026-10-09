@@ -120,6 +120,16 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name = "whisp-scratchpad-floating",
+    match = {
+        initial_class = "^io\\.github\\.tanaybhomia\\.Whisp$",
+    },
+
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
     name = "tartarus-imageviewer-floating",
 
     match = {

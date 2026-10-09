@@ -92,12 +92,11 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            ListView {
+            LauncherListView {
                 id: schemeList
+                pageActive: root.active
 
                 anchors.fill: parent
-
-                clip: true
 
                 model: root.themes.filtered(
                     root.controller.schemeQuery

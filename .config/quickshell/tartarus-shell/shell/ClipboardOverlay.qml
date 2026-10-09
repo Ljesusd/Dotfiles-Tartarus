@@ -38,11 +38,11 @@ Scope {
 
             width: Math.min(
                 760,
-                Math.max(320, root.monitorScreen.width - Style.spacingLarge * 2)
+                Math.max(320, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
             )
             height: Math.min(
                 620,
-                Math.max(420, root.monitorScreen.height - Style.barHeight - Style.spacingLarge * 2)
+                Math.max(420, (root.monitorScreen?.height ?? 800) - Style.barHeight - Style.spacingLarge * 2)
             )
             anchors.centerIn: parent
             radius: Style.radiusLarge

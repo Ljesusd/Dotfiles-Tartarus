@@ -23,6 +23,9 @@ Item {
     readonly property bool showOccupiedBg: true
     readonly property bool showUnoccupied: false
     readonly property bool showWindowIcons: true
+    readonly property var workspaceIds: root.plugin.service.workspaceIdsForScreen(
+        root.barScreen, root.shownWorkspaces, root.showUnoccupied)
+    readonly property int workspaceCount: root.workspaceIds.length
     readonly property int activeWorkspaceId:
         root.plugin.service.activeWorkspaceIdForScreen(
             root.barScreen
@@ -88,31 +91,28 @@ Item {
         )
 
     readonly property int activeIndex:
-        root.activeWorkspaceId - root.groupStart
+        root.workspaceIds.indexOf(root.activeWorkspaceId)
 
-    readonly property Item activeWorkspaceItem: {
-        if (
-            root.activeIndex < 0
-            || root.activeIndex >= workspaceRepeater.count
-        ) {
-            return null
-        }
+    property Item activeWorkspaceItem: null
 
-        return workspaceRepeater.itemAt(
-            root.activeIndex
-        )
+    function syncActiveWorkspaceItem() {
+        root.activeWorkspaceItem = root.activeIndex >= 0
+            && root.activeIndex < workspaceRepeater.count
+            ? workspaceRepeater.itemAt(root.activeIndex) : null
     }
+
+    onActiveIndexChanged: Qt.callLater(root.syncActiveWorkspaceItem)
 
     function isOccupiedAt(index) {
         if (
             index < 0
-            || index >= root.shownWorkspaces
+            || index >= root.workspaceCount
         ) {
             return false
         }
 
         const workspaceId =
-            root.groupStart + index
+            root.workspaceIds[index]
 
         return root.plugin.service.isOccupied(
             workspaceId
@@ -124,7 +124,7 @@ Item {
 
         for (
             let index = 0;
-            index < root.shownWorkspaces;
+            index < root.workspaceCount;
             index++
         ) {
             const occupied =
@@ -158,7 +158,7 @@ Item {
         let end = start
 
         while (
-            end + 1 < root.shownWorkspaces
+            end + 1 < root.workspaceCount
             && root.isOccupiedAt(end + 1)
         ) {
             end++
@@ -275,7 +275,7 @@ Item {
             Repeater {
                 id: occupiedRunRepeater
 
-                model: root.shownWorkspaces
+                model: root.workspaceCount
 
                 Rectangle {
                     required property int index
@@ -390,12 +390,15 @@ Item {
                 Repeater {
                     id: workspaceRepeater
 
-                    model: root.shownWorkspaces
+                    model: root.workspaceIds
+                    onItemAdded: Qt.callLater(root.syncActiveWorkspaceItem)
+                    onItemRemoved: Qt.callLater(root.syncActiveWorkspaceItem)
 
                     Workspace {
                         required property int index
+                        required property int modelData
 
-                        workspaceId: root.groupStart + index
+                        workspaceId: modelData
                         barScreen: root.barScreen
                         service: root.plugin.service
                         maxWindowIcons: root.maxWindowIcons

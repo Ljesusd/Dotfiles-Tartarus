@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQml
+import "WeatherLocation.js" as Places
 
 QtObject {
     id: root
@@ -11,6 +12,8 @@ QtObject {
     property int nightTemperature: 4000
     property bool nightPreferred: false
     property string weatherLocation: "Madrid"
+    property bool weatherAutoLocation: true
+    property var weatherPlace: null
     property string timeZone: "Europe/Madrid"
     readonly property var pages: ["", "wifi", "bluetooth", "audio", "microphone", "brightness", "dnd", "night", "power"]
 
@@ -31,6 +34,11 @@ QtObject {
             root.nightPreferred = saved.nightPreferred === true
             if (typeof saved.weatherLocation === "string" && saved.weatherLocation.trim() !== "")
                 root.weatherLocation = saved.weatherLocation.trim()
+            if (typeof saved.weatherAutoLocation === "boolean")
+                root.weatherAutoLocation = saved.weatherAutoLocation
+            const place = Places.normalize(saved.weatherPlace)
+            if (place && place.name === root.weatherLocation)
+                root.weatherPlace = place
             if (typeof saved.timeZone === "string" && saved.timeZone.trim() !== "")
                 root.timeZone = saved.timeZone.trim()
         } catch (error) {
@@ -44,6 +52,8 @@ QtObject {
             nightTemperature: root.nightTemperature,
             nightPreferred: root.nightPreferred,
             weatherLocation: root.weatherLocation,
+            weatherAutoLocation: root.weatherAutoLocation,
+            weatherPlace: root.weatherPlace,
             timeZone: root.timeZone
         }))
     }
@@ -62,7 +72,23 @@ QtObject {
     function setWeatherLocation(value) {
         const location = String(value || "").trim()
         if (location === "") return
+        root.weatherPlace = null
         root.weatherLocation = location
+        root.weatherAutoLocation = false
+        root.save()
+    }
+
+    function setWeatherPlace(value) {
+        const place = Places.normalize(value)
+        if (!place) return
+        root.weatherLocation = place.name
+        root.weatherPlace = place
+        root.weatherAutoLocation = false
+        root.save()
+    }
+
+    function setWeatherAutoLocation(value) {
+        root.weatherAutoLocation = !!value
         root.save()
     }
 

@@ -8,6 +8,8 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const source = readFileSync(join(__dirname, '../services/NotificationService.qml'), 'utf8');
+const Media = createContext({});
+runInContext(readFileSync(join(__dirname, '../services/NotificationMedia.js'), 'utf8'), Media);
 
 class Model {
     rows = [];
@@ -37,7 +39,7 @@ function fixture() {
         root, historyModel, notificationModel, historyFile, Hyprland,
         notificationObjects: root.notificationObjects,
         notificationActionObjects: root.notificationActionObjects,
-        Date: { now: () => ++time }, console,
+        Date: { now: () => ++time }, console, Media,
     });
     for (const match of source.matchAll(/^    function (\w+)\([^]*?^    }/gm)) {
         runInContext(match[0], context);

@@ -15,13 +15,12 @@ Rectangle {
     signal activated()
     signal hovered()
 
-    implicitHeight: Style.launcherSchemeItemHeight
+    implicitHeight: Math.max(Style.launcherSchemeItemHeight,
+        themeContent.implicitHeight + Style.paddingSmall * 2)
 
     radius: Style.cardRadius
 
-    color: root.selected
-        ? Color.primaryContainer
-        : hoverHandler.hovered
+    color: hoverHandler.hovered && !root.selected
             ? Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, Style.hoverOpacity)
             : "transparent"
 
@@ -33,32 +32,28 @@ Rectangle {
     }
 
     RowLayout {
+        id: themeContent
         anchors.fill: parent
 
         anchors.leftMargin: Style.paddingLarge
         anchors.rightMargin: Style.paddingLarge
-        anchors.topMargin: Style.spacingMedium
-        anchors.bottomMargin: Style.spacingMedium
+        anchors.topMargin: Style.paddingSmall
+        anchors.bottomMargin: Style.paddingSmall
 
         spacing: Style.spacingMedium
 
-        Rectangle {
+        Item {
             Layout.alignment: Qt.AlignVCenter
-            Layout.preferredWidth: 3
-            Layout.preferredHeight: 28
-            radius: 2
-            visible: root.selected
-            color: Color.primary
-        }
-
-        MaterialIcon {
-            Layout.alignment: Qt.AlignVCenter
-
-            text: "palette"
-            iconSize: Style.materialIconMedium
-            iconColor: root.selected
-                ? Color.onPrimaryContainer
-                : Color.primary
+            Layout.preferredWidth: 36
+            Layout.minimumWidth: 36
+            Layout.maximumWidth: 36
+            Layout.preferredHeight: 36
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: "palette"
+                iconSize: 26
+                iconColor: Color.foregroundMuted
+            }
         }
 
         ColumnLayout {
@@ -78,7 +73,7 @@ Rectangle {
                     text: root.theme.name
 
                     font.pixelSize: Style.fontNormal
-                    color: root.selected ? Color.onPrimaryContainer : Color.foreground
+                    color: Color.foreground
 
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -86,13 +81,12 @@ Rectangle {
 
                 Rectangle {
                     radius: Style.radiusFull
-                    color: root.selected
-                        ? Color.secondaryContainer
-                        : Color.secondary
+                    color: Qt.alpha(Color.primary, 0.12)
                     implicitHeight: Style.launcherSchemeBadgeHeight
                     implicitWidth:
                         currentText.implicitWidth
-                        + Style.spacingMedium * 2
+                        + Style.paddingSmall * 2
+                    visible: root.current
                     opacity: root.current ? 1.0 : 0.0
                     scale: root.current ? 1.0 : 0.96
 
@@ -117,9 +111,7 @@ Rectangle {
 
                         text: "Current"
                         font.pixelSize: Style.fontSmall
-                        color: root.selected
-                            ? Color.onSurface
-                            : Color.onSecondary
+                        color: Color.primary
                     }
                 }
             }
@@ -128,7 +120,7 @@ Rectangle {
                 text: root.theme.mode
 
                 font.pixelSize: Style.fontSmall
-                color: root.selected ? Color.onPrimaryContainer : Color.foregroundMuted
+                color: Color.foregroundMuted
             }
 
             Row {

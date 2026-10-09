@@ -74,6 +74,21 @@ focused_mode() {
         || printf '%s\n' "$fallback"
 }
 
+normalize_refresh() {
+    local value="${1:-}" rounded
+    # Hyprland JSON uses a decimal point regardless of the session locale.
+    # Capture printf before emitting anything: on error it can still output
+    # a partial number, which must never be concatenated with the fallback.
+    if [[ "$value" =~ ^[0-9]+([.][0-9]+)?$ ]] \
+        && rounded="$(LC_ALL=C printf '%.0f' "$value" 2>/dev/null)" \
+        && [[ "$rounded" =~ ^[0-9]{1,4}$ ]] \
+        && (( 10#$rounded >= 1 && 10#$rounded <= 1000 )); then
+        printf '%s\n' "$rounded"
+    else
+        printf '100\n'
+    fi
+}
+
 if managed_session_running; then
     toggle_gaming_workspace
     exit 0
@@ -95,7 +110,7 @@ mkdir -p -- "$runtime_dir"
 output_width="$(focused_mode width 1920)"
 output_height="$(focused_mode height 1080)"
 output_refresh="$(focused_mode refreshRate 100)"
-output_refresh="$(printf '%.0f' "$output_refresh" 2>/dev/null || printf '100\n')"
+output_refresh="$(normalize_refresh "$output_refresh")"
 gamescope \
     -e \
     -f \

@@ -45,13 +45,32 @@ QtObject {
             icon: "schedule",
             command: "pomodoro",
             description: "Start Pomodoro: >pomodoro 25m 5m 4"
+        },
+        {
+            name: "Whisp",
+            icon: "edit_note",
+            command: "whisp",
+            description: "Open the Whisp scratchpad"
+        },
+        {
+            name: "Weather",
+            icon: "partly_cloudy_day",
+            command: "weather",
+            description: "Clima actual, hoy, mañana y calidad del aire"
+        },
+        {
+            name: "Export Whisp note",
+            icon: "upload_file",
+            command: "whisp-export",
+            description: "Export the active note to the Obsidian Inbox"
         }
-    ].concat(RecorderService.available ? [{
+    ].concat([{
         name: "Record screen",
         icon: "fiber_manual_record",
         command: "record",
-        description: "Start a screen recording"
-    }] : []).concat(DockerService.installed ? [{
+        aliases: ["grabador", "grabar", "grabacion", "grabación"],
+        description: "Grabar este monitor a 60 FPS, sin audio"
+    }]).concat(DockerService.installed ? [{
         name: "Docker",
         icon: "deployed_code",
         command: "docker",
@@ -67,10 +86,9 @@ QtObject {
 
         const commandQuery = normalized.split(/\s+/)[0]
         return root.actions.filter(action => {
-            return root.matchesPrefix(
-                action.name,
-                commandQuery
-            )
+            return root.matchesPrefix(action.name, commandQuery)
+                || action.command.startsWith(commandQuery)
+                || (action.aliases || []).some(alias => alias.startsWith(commandQuery))
         })
     }
 

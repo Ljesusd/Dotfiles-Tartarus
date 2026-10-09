@@ -2,6 +2,7 @@ pragma Singleton
 
 import Quickshell
 import Quickshell.Services.Notifications
+import "NotificationMedia.js" as Media
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQml
@@ -109,17 +110,9 @@ QtObject {
     }
 
     function historyImage(notification) {
-        if (!notification || notification.image === undefined)
-            return ""
-
-        if (typeof notification.image !== "string")
-            return ""
-
         // image:// is owned by the current Quickshell process and cannot be
         // restored after a reload. Keep stable file/data URLs only.
-        return notification.image.startsWith("image://")
-            ? ""
-            : notification.image
+        return notification ? Media.persistentImage(notification.image, notification.body) : ""
     }
 
     function recordHistory(notification) {

@@ -86,13 +86,11 @@ Item {
             Layout.fillHeight: true
             Layout.topMargin: Style.spacingSmall
 
-            ListView {
+            LauncherListView {
                 id: appList
+                pageActive: root.active
 
                 anchors.fill: parent
-
-                clip: true
-                spacing: Style.spacingXs
 
                 model: root.applications.applications
                 currentIndex: root.active
@@ -107,6 +105,7 @@ Item {
                 delegate: AppItem {
                     required property var modelData
                     required property int index
+                    width: appList.width
 
                     application: modelData
                     selected: ListView.isCurrentItem

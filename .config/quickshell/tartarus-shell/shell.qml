@@ -23,6 +23,18 @@ ShellRoot {
     readonly property var sharedLauncherState: launcherState
     readonly property var sharedPluginRegistry: pluginRegistry
 
+    // Qt can expose a placeholder while Wayland has no outputs. Wait for a
+    // screen present in both models before creating any per-monitor panels.
+    readonly property var monitorScreens: screensForMonitors(
+        Quickshell.screens, Hyprland.monitors.values)
+
+    function screensForMonitors(screens, monitors) {
+        const names = monitors.filter(monitor => monitor && monitor.name && monitor.name !== "FALLBACK")
+            .map(monitor => monitor.name)
+        return screens.filter(screen => screen && screen.name && screen.name !== "FALLBACK"
+            && screen.width > 0 && screen.height > 0 && names.includes(screen.name))
+    }
+
     function closePluginPanels() {
         // Paneles hover compartidos:
         // el cierre se resuelve en cada Bar.
@@ -228,7 +240,7 @@ ShellRoot {
     }
 
     Variants {
-        model: Quickshell.screens
+        model: root.monitorScreens
 
         Shell.MonitorShell {
             required property var modelData

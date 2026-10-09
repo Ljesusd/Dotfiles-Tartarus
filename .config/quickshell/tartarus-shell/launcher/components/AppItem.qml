@@ -1,138 +1,21 @@
 import Quickshell
-import QtQuick
-import QtQuick.Layouts
+import "../../utils"
 
-import "../../theme"
-
-Rectangle {
+LauncherRow {
     id: root
-
     required property var application
-    required property bool selected
-    readonly property string applicationIconSource: {
-        const icon = root.application?.icon ?? ""
-
-        if (!icon)
-            return ""
-
-        return Quickshell.iconPath(icon, true)
-    }
-    readonly property bool highlighted:
-        root.selected || hoverHandler.hovered
-
-    signal activated()
-    signal hovered()
-
-    implicitWidth: ListView.view ? ListView.view.width : 0
-    implicitHeight: Style.itemHeight
-    radius: Style.cardRadius
-
-    color: root.selected
-        ? Color.primaryContainer
-        : hoverHandler.hovered
-            ? Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, Style.hoverOpacity)
-            : "transparent"
-
-    // A restrained selection marker keeps the list on the panel's surface.
-    Rectangle {
-        visible: root.selected
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        width: 3
-        height: 24
-        radius: 1.5
-        color: Color.primary
-    }
-
-    Behavior on color {
-        ColorAnimation {
-            duration: Style.motionFast
-            easing.type: Easing.OutCubic
-        }
-    }
-
-    HoverHandler {
-        id: hoverHandler
-
-        onHoveredChanged: {
-            if (hovered)
-                root.hovered()
-        }
-    }
-
-    TapHandler {
-        onTapped: {
-            root.activated()
-        }
-    }
-
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: Style.paddingLarge
-        anchors.rightMargin: Style.paddingLarge
-        anchors.topMargin: Style.paddingSmall
-        anchors.bottomMargin: Style.paddingSmall
-
-        spacing: Style.spacingMedium
-
-        Item {
-            Layout.alignment: Qt.AlignVCenter
-            Layout.preferredWidth: Style.iconMedium
-            Layout.preferredHeight: Style.iconMedium
-
-            Image {
-                id: appIcon
-
-                anchors.fill: parent
-
-                source: root.applicationIconSource
-                visible: root.applicationIconSource !== ""
-                fillMode: Image.PreserveAspectFit
-            }
-
-            MaterialIcon {
-                anchors.centerIn: parent
-
-                visible: root.applicationIconSource === ""
-                text: "apps"
-                iconSize: Style.materialIconMedium
-                iconColor: root.selected ? Color.onPrimaryContainer : Color.primary
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignVCenter
-
-            spacing: Style.spacingXs
-
-            Text {
-                Layout.fillWidth: true
-
-                text: root.application.name
-
-                font.pixelSize: Style.fontNormal
-                font.weight: root.selected ? Font.DemiBold : Font.Normal
-                color: root.selected ? Color.onPrimaryContainer : Color.foreground
-
-                elide: Text.ElideRight
-                maximumLineCount: 1
-            }
-
-            Text {
-                Layout.fillWidth: true
-
-                visible: root.application.comment
-                    && root.application.comment.length > 0
-
-                text: root.application.comment ?? ""
-
-                font.pixelSize: Style.fontSmall
-                color: root.selected ? Color.onPrimaryContainer : Color.foregroundMuted
-
-                elide: Text.ElideRight
-                maximumLineCount: 1
-            }
-        }
+    title: application?.name ?? ""
+    description: application?.comment || application?.genericName || ""
+    symbol: Icons.appCategoryIcon(application?.id ?? "", "apps")
+    iconSource: {
+        const icon = String(root.application?.icon ?? "")
+        if (icon.startsWith("/") || icon.startsWith("file://"))
+            return icon.startsWith("/") ? "file://" + icon : icon
+        const resolved = icon ? Quickshell.iconPath(icon, true) : ""
+        if (resolved) return resolved
+        // Fall back to the application's own hicolor icon when its desktop
+        // entry names an icon unavailable in the current theme (e.g. Nemo).
+        const id = String(root.application?.id ?? "").replace(/\.desktop$/, "")
+        return id ? Quickshell.iconPath(id, true) : ""
     }
 }

@@ -4,6 +4,7 @@ import Quickshell.Widgets
 import QtQuick.Layouts
 
 import "../../theme"
+import "../../launcher/components" as LauncherComponents
 
 PopupWindow {
     id: root
@@ -36,31 +37,38 @@ PopupWindow {
     }
 
     required property Item anchorItem
-    anchor.item: root.anchorSurface
-    // Anchor the popup to the whole bar, while retaining the tray icon's
-    // horizontal position as the attachment point.
-    anchor.edges: Edges.Bottom
-    anchor.gravity: Edges.Bottom
+    // Same geometry as the launcher: the native popup starts at the roof of
+    // the bar and its surface grows upward, leaving the bar uncovered.
+    anchor.item: root.anchorItem
+    anchor.edges: Edges.Top
+    anchor.gravity: Edges.Top
     anchor.adjustment: PopupAdjustment.Slide
-    anchor.rect: root.anchorSurface && root.anchorItem
-        ? Qt.rect(
-            root.anchorItem.mapToItem(root.anchorSurface, 0, 0).x,
-            0,
-            root.anchorItem.width,
-            root.anchorSurface.height + Style.barPopupGap
-        )
-        : Qt.rect(0, 0, 1, 1)
 
-    implicitWidth: Math.min(
-        360,
-        Math.max(260, (root.anchorSurface?.width ?? 1280) * 0.42)
+    readonly property real maxMenuHeight: Math.max(
+        220,
+        Math.min(
+            560,
+            (root.anchorSurface?.screen?.height ?? 800)
+                - (root.anchorSurface?.height ?? Style.barHeight)
+                - Style.paddingLarge * 2
+        )
     )
-    implicitHeight: Math.min(
-        520,
-        menuColumn.implicitHeight + Style.paddingMedium * 2 + Style.barPopupGap * 2
+    readonly property real menuWidth: Math.min(
+        340,
+        Math.max(240, (root.anchorSurface?.width ?? 1280) * 0.24)
     )
+    readonly property real menuHeight: Math.min(
+        root.maxMenuHeight,
+        Math.max(96, menuColumn.implicitHeight + Style.paddingMedium * 2 + Style.barPopupGap * 2)
+    )
+    // As in the launcher, only the inner surface animates. Reserve space for
+    // the curves/shadow and avoid native-window resizing for every submenu.
+    implicitWidth: Math.min(root.menuWidth + surface.horizontalInset * 2,
+        Math.max(1, root.anchorSurface?.width ?? 1280))
+    implicitHeight: root.maxMenuHeight + surface.shadowPadding
     color: "transparent"
-    visible: (root.popupOpen || surface.opacity > 0) && trayItem && trayItem.hasMenu
+    visible: (root.popupOpen || surface.reveal > 0) && trayItem && trayItem.hasMenu
+    mask: Region { item: surface.maskItem }
 
     QsMenuOpener {
         id: opener
@@ -68,37 +76,40 @@ PopupWindow {
             : (root.trayItem ? root.trayItem.menu : null)
     }
 
-    Rectangle {
+    LauncherComponents.LauncherSurface {
         id: surface
         anchors.fill: parent
-        color: "transparent"
-        clip: true
+        opened: root.popupOpen
+        contentWidth: Math.max(1, root.width - horizontalInset * 2)
+        contentHeight: root.menuHeight
 
-        AttachedPopupSurface {
-            anchors.fill: parent
-            fillColor: Color.surfaceContainer
-            neckHeight: Style.barPopupGap * 2
-        }
         HoverHandler {
+            parent: surface.contentItem
             onHoveredChanged: {
                 root.menuHovered = hovered
                 if (hovered) root.popupOpen = true
             }
         }
-        opacity: root.popupOpen ? 1 : 0
-        scale: root.popupOpen ? 1 : 0.94
-        transformOrigin: Item.Bottom
-
-        Behavior on opacity { Anim { duration: Style.motionFast } }
-        Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutBack } }
+        Flickable {
+            id: menuViewport
+            parent: surface.contentItem
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: Style.paddingMedium
+            anchors.rightMargin: Style.paddingMedium
+            anchors.topMargin: Style.paddingSmall
+            anchors.bottomMargin: Style.paddingMedium + Style.barPopupGap * 2
+            clip: true
+            contentWidth: width
+            contentHeight: menuColumn.implicitHeight
+            boundsBehavior: Flickable.StopAtBounds
+            flickableDirection: Flickable.VerticalFlick
 
         ColumnLayout {
             id: menuColumn
-            anchors.fill: parent
-            anchors.leftMargin: Style.paddingLarge
-            anchors.rightMargin: Style.paddingLarge
-            anchors.topMargin: Style.paddingMedium
-            anchors.bottomMargin: Style.paddingMedium + Style.barPopupGap * 2
+            width: menuViewport.width
             spacing: Style.spacingXs
 
             Text {
@@ -116,7 +127,7 @@ PopupWindow {
                 delegate: Rectangle {
                     required property var modelData
                     Layout.fillWidth: true
-                    implicitHeight: modelData.isSeparator ? 1 : Style.controlHeight
+                    implicitHeight: modelData.isSeparator ? 1 : 36
                     radius: Style.controlRadius
                     color: modelData.isSeparator
                         ? Color.outlineVariant
@@ -175,6 +186,7 @@ PopupWindow {
                     }
                 }
             }
+        }
         }
     }
 }

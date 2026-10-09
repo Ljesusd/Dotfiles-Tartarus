@@ -30,8 +30,13 @@ Scope {
     readonly property int panelWidth: controller.mode === LauncherController.Mode.Wallpaper
         ? Math.min(root.wallpaperSlots * 272 + 176,
             (root.barWindow.screen?.width ?? 1280) - 64)
-        : Math.min(Style.launcherWidth,
+        : Math.min(controller.mode === LauncherController.Mode.Weather ? 680 : Style.launcherWidth,
             Math.max(320, (root.barWindow.screen?.width ?? 1280) - 64))
+    readonly property int panelHeight: Math.min(
+        controller.mode === LauncherController.Mode.Weather ? 660
+            : controller.mode === LauncherController.Mode.Wallpaper ? 236 : Style.launcherHeight,
+        Math.max(180, (root.barWindow.screen?.height ?? 800) - Style.barHeight - Style.paddingLarge * 2)
+    ) + Style.barPopupGap * 2
 
         LauncherController {
             id: controller
@@ -85,20 +90,19 @@ Scope {
         anchor.edges: Edges.Top
         anchor.gravity: Edges.Top
 
-        implicitWidth: root.panelWidth
-        implicitHeight: {
-            const available = Math.max(
-                280,
-                (root.barWindow.screen?.height ?? 800)
-                    - Style.barHeight
-                    - Style.paddingLarge * 2
-            )
-            const desired = controller.mode
-                === LauncherController.Mode.Wallpaper
-                    ? 236
-                    : Style.launcherHeight
-            return Math.min(desired, available) + Style.barPopupGap * 2
-        }
+        // Reserve a stable envelope for every launcher page. Animating a native
+        // Wayland popup's size also makes the compositor reposition it per frame.
+        // Only the surface inside this transparent window changes geometry.
+        implicitWidth: Math.min(Math.max(Style.launcherWidth, 680, 5 * 272 + 176)
+                + launcherSurface.horizontalInset * 2,
+            Math.max(1, (root.barWindow.screen?.width ?? 1280) - Style.paddingLarge * 2))
+        implicitHeight: Math.min(Math.max(Style.launcherHeight, 660)
+                + Style.barPopupGap * 2 + launcherSurface.shadowPadding,
+            Math.max(1, (root.barWindow.screen?.height ?? 800) - Style.barHeight - Style.paddingLarge))
+        anchor.adjustment: PopupAdjustment.Slide
+
+        // Transparent space must not intercept clicks destined for applications.
+        mask: Region { item: launcherSurface.maskItem }
 
         color: "transparent"
 
@@ -118,17 +122,6 @@ Scope {
             LauncherActions {
                 id: launcherActions
             }
-
-        Timer {
-            id: closeTimer
-
-            interval: Style.animationNormal
-            repeat: false
-
-            onTriggered: {
-                launcherWindow.visible = false
-            }
-        }
 
         Timer {
             id: outsideClickArmTimer
@@ -194,12 +187,11 @@ Scope {
         }
 
         function openLauncher() {
-            closeTimer.stop()
-
             launcherWindow.visible = true
             launcherWindow.contentOpened = false
 
             Qt.callLater(() => {
+                if (!root.monitorContext.launcherOpened) return
                 launcherWindow.contentOpened = true
 
                 controller.resetSelection()
@@ -209,68 +201,24 @@ Scope {
 
         function closeLauncher() {
             launcherWindow.contentOpened = false
-            closeTimer.restart()
+            if (launcherSurface.reveal === 0) launcherWindow.visible = false
         }
 
-        Rectangle {
-            id: launcherContent
+        LauncherSurface {
+            id: launcherSurface
+            anchors.fill: parent
+            contentWidth: Math.max(0, Math.min(root.panelWidth, width - horizontalInset * 2))
+            contentHeight: Math.max(0, Math.min(root.panelHeight, height - shadowPadding))
+            opened: launcherWindow.contentOpened
+            onClosed: launcherWindow.visible = false
+        }
 
+        Item {
+            id: launcherContent
+            parent: launcherSurface.contentItem
+            anchors.fill: parent
             clip: true
             enabled: root.monitorContext.launcherOpened
-
-            width: launcherWindow.contentOpened
-                ? root.panelWidth - Style.barPopupGap * 2
-                : Style.launcherSearchWidth - Style.barPopupGap * 2
-
-            height: launcherWindow.contentOpened
-                ? controller.mode
-                    === LauncherController.Mode.Wallpaper
-                        ? 236 + Style.barPopupGap * 2
-                        : Style.launcherHeight + Style.barPopupGap * 2
-                : 0
-
-            anchors {
-                bottom: parent.bottom
-                horizontalCenter: parent.horizontalCenter
-                bottomMargin: 0
-            }
-
-            opacity: launcherWindow.contentOpened
-                ? 1
-                : 0
-            scale: launcherWindow.contentOpened ? 1 : 0.97
-            transformOrigin: Item.Bottom
-
-            color: "transparent"
-
-            AttachedPopupSurface {
-                anchors.fill: parent
-                neckHeight: Style.barPopupGap * 2
-                fillColor: Color.surfaceContainer
-            }
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: Style.animationNormal
-                }
-            }
-
-            Behavior on height {
-                NumberAnimation {
-                    duration: Style.animationNormal
-                }
-            }
-
-            Behavior on opacity {
-                Anim { duration: Style.motionFast }
-            }
-
-            Behavior on scale {
-                Anim {
-                    duration: Style.motionPopup
-                    easing.type: Easing.OutCubic
-                }
-            }
 
             AppsPage {
                 anchors.fill: parent
@@ -329,6 +277,11 @@ Scope {
                 active:
                     controller.mode
                     === LauncherController.Mode.Calculator
+            }
+
+            WeatherPage {
+                anchors.fill: parent
+                active: root.monitorContext.launcherOpened && controller.mode === LauncherController.Mode.Weather
             }
         }
     }
