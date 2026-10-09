@@ -464,7 +464,7 @@ PopupWindow {
             anchors.fill: parent
             fillColor: Color.surfaceContainer
             neckHeight: Style.barPopupGap * 2
-            neckCenter: root.currentCenterX - panelSurface.x
+            surfaceInset: 14
         }
 
         Behavior on opacity {

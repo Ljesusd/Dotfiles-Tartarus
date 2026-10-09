@@ -15,6 +15,7 @@ PanelWindow {
     anchors { top: true; right: true; bottom: true; left: true }
     color: "transparent"
     property real offsetScale: monitorContext.sidebarOpened ? 0 : 1
+    Behavior on offsetScale { Anim { duration: Style.motionPanel } }
     // Keep the window alive while the drawer animates out.  The drawer is
     // owned by this monitor; changing focus must not reparent or hide it.
     visible: monitorContext.sidebarOpened || offsetScale < 1
@@ -32,9 +33,6 @@ PanelWindow {
             opacity: 1 - root.offsetScale
             scale: 0.97 + (1 - root.offsetScale) * 0.03
             transformOrigin: Item.Right
-            Behavior on anchors.rightMargin { Anim { duration: Style.motionSlow } }
-            Behavior on opacity { Anim { duration: Style.motionFast } }
-            Behavior on scale { Anim { duration: Style.motionPanel; easing.type: Easing.OutCubic } }
             color: Color.surfaceContainer
             border.width: Style.panelBorderWidth
             border.color: Color.outlineVariant

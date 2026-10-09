@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 
 import "../../theme"
 
@@ -11,6 +12,9 @@ Rectangle {
     readonly property bool isCurrent: root.current
     property int cardWidth: 300
     property int cardHeight: 185
+    // Keep the decode size stable while the popup resizes. As in Caelestia,
+    // use card-sized previews at the screen's device pixel ratio.
+    readonly property real previewDpr: (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1
 
     readonly property real pathScale:
         PathView.onPath
@@ -61,21 +65,21 @@ Rectangle {
 
     Behavior on scale {
         NumberAnimation {
-            duration: Style.motionSlow
+            duration: Style.launcherMotionPanel
             easing.type: Easing.OutCubic
         }
     }
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Style.motionSlow
+            duration: Style.launcherMotionFast
             easing.type: Easing.OutCubic
         }
     }
 
     Behavior on border.width {
         NumberAnimation {
-            duration: Style.motionFast
+            duration: Style.launcherMotionFast
             easing.type: Easing.OutCubic
         }
     }
@@ -86,9 +90,10 @@ Rectangle {
         source: root.wallpaper.path
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
-
-        sourceSize.width: 768
-        sourceSize.height: 432
+        cache: true
+        smooth: !(root.PathView.view?.moving ?? false)
+        sourceSize.width: Math.ceil(280 * root.previewDpr)
+        sourceSize.height: Math.ceil(158 * root.previewDpr)
     }
 
     Rectangle {
@@ -102,7 +107,7 @@ Rectangle {
 
         Behavior on opacity {
             NumberAnimation {
-                duration: Style.motionFast
+                duration: Style.launcherMotionFast
                 easing.type: Easing.OutCubic
             }
         }
@@ -119,7 +124,7 @@ Rectangle {
 
     Behavior on border.color {
         ColorAnimation {
-            duration: Style.motionFast
+            duration: Style.launcherMotionFast
             easing.type: Easing.OutCubic
         }
     }
@@ -141,7 +146,7 @@ Rectangle {
 
         Behavior on opacity {
             NumberAnimation {
-                duration: Style.motionFast
+                duration: Style.launcherMotionFast
                 easing.type: Easing.OutCubic
             }
         }

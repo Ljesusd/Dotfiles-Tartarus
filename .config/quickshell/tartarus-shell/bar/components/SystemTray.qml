@@ -86,7 +86,7 @@ Item {
 
             Timer {
                 id: menuHoverDelay
-                interval: Style.motionFast
+                interval: Style.trayHoverDelay
                 repeat: false
                 onTriggered: {
                     if (mouseArea.containsMouse && trayItem.modelData.hasMenu)
@@ -96,7 +96,7 @@ Item {
 
             Timer {
                 id: menuCloseDelay
-                interval: Style.motionFast
+                interval: Style.trayHoverDelay
                 repeat: false
                 onTriggered: {
                     if (!mouseArea.containsMouse && !menuAnchor.menuHovered)

@@ -18,6 +18,8 @@ PanelWindow {
     readonly property var brightness: pluginRegistry.plugin("brightness")?.service
     readonly property var mic: Pipewire.defaultAudioSource
     property real offsetScale: monitorContext.leftSidebarOpened ? 0 : 1
+    // One progress animation drives the drawer and keeps it alive until closed.
+    Behavior on offsetScale { Anim { duration: Style.motionPanel } }
     property string detailPage: ""
     property string pendingWifiSsid: ""
     property string wifiMessage: ""
@@ -158,9 +160,6 @@ PanelWindow {
             border.color: Color.outlineVariant
             radius: Style.panelRadius
             clip: true
-            Behavior on anchors.leftMargin { Anim { duration: Style.motionSlow } }
-            Behavior on opacity { Anim { duration: Style.motionFast } }
-            Behavior on scale { Anim { duration: Style.motionPanel; easing.type: Easing.OutCubic } }
             MouseArea { anchors.fill: parent; onClicked: event => event.accepted = true }
             Flickable {
                 anchors.fill: parent

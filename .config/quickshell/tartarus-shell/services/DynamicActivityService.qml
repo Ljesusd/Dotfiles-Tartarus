@@ -33,7 +33,7 @@ QtObject {
     property Process probe: Process {
         command: ["sh", "-c", ""
             + "recording=0; "
-            + "(pgrep -x wf-recorder >/dev/null || pgrep -x gpu-screen-recorder >/dev/null || "
+            + "(pgrep -x wf-recorder >/dev/null || pgrep -f '^([^ ]*/)?gpu-screen-recorder( |$)' >/dev/null || "
             + "pgrep -x obs >/dev/null || pgrep -x kooha >/dev/null) && recording=1; "
             + "vpn=0; command -v nmcli >/dev/null && "
             + "nmcli -t -f TYPE,STATE dev 2>/dev/null | grep -q '^vpn:connected$' && vpn=1; "

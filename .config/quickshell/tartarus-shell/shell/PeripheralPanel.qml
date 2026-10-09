@@ -332,7 +332,7 @@ Item {
                         && device.modelData.kind === "Micrófono"
                     visible: active
                     opacity: active ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { Anim { duration: Style.motionFast } }
                     sourceComponent: Component {
                         MicrophoneControls { deviceName: device.modelData.name || "" }
                     }
@@ -344,7 +344,7 @@ Item {
                         && device.modelData.controller === "logitech-g"
                     visible: active
                     opacity: active ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { Anim { duration: Style.motionFast } }
                     sourceComponent: Component {
                         MouseControls { }
                     }

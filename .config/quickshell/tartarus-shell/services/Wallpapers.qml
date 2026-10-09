@@ -36,8 +36,17 @@ QtObject {
     }
 
     function refresh() {
-        root.listProcess.running = false
-        root.listProcess.running = true
+        if (!root.listProcess.running)
+            root.listProcess.running = true
+    }
+
+    function updateList(items) {
+        if (!Array.isArray(items))
+            return
+        // Preserve model/delegate identity across reopening the same directory.
+        // Replacing an unchanged JS array resets PathView and reloads previews.
+        if (JSON.stringify(items) !== JSON.stringify(root.wallpapers))
+            root.wallpapers = items
     }
 
     function matchesPrefix(text, query) {
@@ -89,7 +98,7 @@ QtObject {
                     return
 
                 try {
-                    root.wallpapers = JSON.parse(text)
+                    root.updateList(JSON.parse(text))
                 } catch (error) {
                     console.warn(
                         "Wallpapers: no se pudo interpretar la lista:",

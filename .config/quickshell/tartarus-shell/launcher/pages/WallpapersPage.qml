@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -20,7 +22,7 @@ Item {
     readonly property int wallpaperCardWidth: Math.max(1, Math.min(280,
         Math.floor((wallpaperList.width / root.carouselItemCount - 20) / 0.9)))
     readonly property int wallpaperCardHeight: Math.round(root.wallpaperCardWidth * 9 / 16)
-    readonly property int carouselDuration: Style.motionSlow
+    readonly property int carouselDuration: Style.launcherMotionPanel
     readonly property int carouselItemCount: root.visibleSlots
     readonly property string monitorWallpaperPath:
         root.wallpapers.currentPathForMonitor(root.monitorName)
@@ -322,14 +324,14 @@ Item {
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: Style.motionFast
+                        duration: Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
 
                 Behavior on border.color {
                     ColorAnimation {
-                        duration: Style.motionFast
+                        duration: Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -374,14 +376,14 @@ Item {
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: Style.motionFast
+                        duration: Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
 
                 Behavior on border.color {
                     ColorAnimation {
-                        duration: Style.motionFast
+                        duration: Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }

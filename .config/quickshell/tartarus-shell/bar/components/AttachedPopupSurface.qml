@@ -6,15 +6,24 @@ Canvas {
     id: root
 
     property color fillColor: Color.surfaceContainer
-    property real neckCenter: width / 2
-    property real neckWidth: width
-    property real neckHeight: 10
+    // Caelestia's BlobInvertedRect keeps the whole lower edge attached to
+    // the bar. The shoulders, rather than a small centred tab, create the
+    // connected-drawer silhouette shared with the launcher.
+    property real surfaceInset: 14
+    property real joinRadius: 18
+    property real neckHeight: Style.barPopupGap * 2
     property real cornerRadius: Style.panelRadius
+    property color outlineColor: Qt.alpha(Color.foreground, 0.12)
+    property color shadowColor: Qt.rgba(0, 0, 0, Color.mode === "light" ? 0.16 : 0.32)
 
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
     onFillColorChanged: requestPaint()
-    onNeckCenterChanged: requestPaint()
+    onSurfaceInsetChanged: requestPaint()
+    onJoinRadiusChanged: requestPaint()
+    onNeckHeightChanged: requestPaint()
+    onOutlineColorChanged: requestPaint()
+    onShadowColorChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d")
@@ -22,38 +31,47 @@ Canvas {
 
         const w = width
         const h = height
-        const bottom = h - neckHeight
-        const r = Math.min(cornerRadius, w / 4, bottom / 4)
-        const join = Math.min(10, neckHeight)
-        const fullWidthBase = neckWidth >= w - 2 * r
-        const left = Math.max(r + join, Math.min(w - r - join - neckWidth, neckCenter - neckWidth / 2))
-        const right = left + neckWidth
+        const bottom = Math.max(0, h - neckHeight)
+        const inset = Math.min(
+            Math.max(0, surfaceInset),
+            Math.max(0, (w - 2) / 2)
+        )
+        const left = inset
+        const right = w - inset
+        const r = Math.min(cornerRadius, (right - left) / 4, bottom / 3)
+        const join = Math.min(
+            joinRadius,
+            neckHeight,
+            inset,
+            Math.max(1, (right - left) / 8)
+        )
 
         ctx.beginPath()
-        ctx.moveTo(r, 0)
-        ctx.lineTo(w - r, 0)
-        ctx.quadraticCurveTo(w, 0, w, r)
-        if (fullWidthBase) {
-            ctx.lineTo(w, bottom)
-            ctx.lineTo(w, h)
-            ctx.lineTo(0, h)
-            ctx.lineTo(0, bottom)
-        } else {
-            ctx.lineTo(w, bottom - r)
-            ctx.quadraticCurveTo(w, bottom, w - r, bottom)
-            ctx.lineTo(right + join, bottom)
-            ctx.quadraticCurveTo(right, bottom, right, bottom + join)
-            ctx.lineTo(right, h)
-            ctx.lineTo(left, h)
-            ctx.lineTo(left, bottom + join)
-            ctx.quadraticCurveTo(left, bottom, left - join, bottom)
-            ctx.lineTo(r, bottom)
-            ctx.quadraticCurveTo(0, bottom, 0, bottom - r)
-        }
-        ctx.lineTo(0, r)
-        ctx.quadraticCurveTo(0, 0, r, 0)
+        ctx.moveTo(left + r, 0)
+        ctx.lineTo(right - r, 0)
+        ctx.quadraticCurveTo(right, 0, right, r)
+        ctx.lineTo(right, bottom - r)
+        ctx.quadraticCurveTo(right, bottom, right - r, bottom)
+        // The lower bridge is intentionally wide: this is the same shared
+        // edge that Caelestia's SDF group forms against its bar.
+        ctx.quadraticCurveTo(right + join, bottom, right + join, bottom + join)
+        ctx.lineTo(right + join, h)
+        ctx.lineTo(left - join, h)
+        ctx.lineTo(left - join, bottom + join)
+        ctx.quadraticCurveTo(left - join, bottom, left, bottom)
+        ctx.quadraticCurveTo(left, bottom, left, bottom - r)
+        ctx.lineTo(left, r)
+        ctx.quadraticCurveTo(left, 0, left + r, 0)
         ctx.closePath()
+        ctx.shadowColor = shadowColor
+        ctx.shadowBlur = 12
+        ctx.shadowOffsetY = -1
         ctx.fillStyle = fillColor
         ctx.fill()
+        ctx.shadowColor = "transparent"
+        ctx.shadowBlur = 0
+        ctx.lineWidth = 1
+        ctx.strokeStyle = outlineColor
+        ctx.stroke()
     }
 }

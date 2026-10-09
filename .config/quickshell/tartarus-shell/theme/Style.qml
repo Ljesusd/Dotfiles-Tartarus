@@ -113,15 +113,19 @@ QtObject {
     readonly property int launcherSchemePreviewHeight: 8
     readonly property int launcherSchemePreviewRadius: 4
 
-    readonly property int animationFast: 100
-    readonly property int animationNormal: 180
-    readonly property int animationSlow: 300
+    // Interaction timings; telemetry smoothing and timers stay independent.
+    readonly property int animationFast: motionFast
+    readonly property int animationNormal: motionNormal
+    readonly property int animationSlow: motionSlow
 
-    readonly property int motionFast: 140
-    readonly property int motionNormal: 180
-    readonly property int motionSlow: 240
-    readonly property int motionPopup: 220
-    readonly property int motionPanel: 260
+    readonly property int motionFast: 80
+    readonly property int motionNormal: 100
+    readonly property int motionSlow: 140
+    readonly property int motionPopup: 100
+    readonly property int motionPanel: 140
+    readonly property int trayHoverDelay: 140
+    readonly property int launcherMotionFast: 60
+    readonly property int launcherMotionPanel: 80
     readonly property real hoverOpacity: 0.08
     readonly property real selectedOpacity: 0.16
 }
