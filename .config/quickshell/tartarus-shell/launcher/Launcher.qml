@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Hyprland
 import QtQuick
 import "../services"
+import "../services" as Services
 import "../theme"
 import "../bar/components"
 import "components"
@@ -17,6 +18,8 @@ Scope {
     required property var shellState
     required property var launcherAnchor
     required property var barWindow
+    required property var sharedApplications
+    required property var sharedLauncherActions
     readonly property var wallpapers: Wallpapers
 
     readonly property int wallpaperSlots: {
@@ -30,10 +33,11 @@ Scope {
     readonly property int panelWidth: controller.mode === LauncherController.Mode.Wallpaper
         ? Math.min(root.wallpaperSlots * 272 + 176,
             (root.barWindow.screen?.width ?? 1280) - 64)
-        : Math.min(controller.mode === LauncherController.Mode.Weather ? 680 : Style.launcherWidth,
+        : Math.min(controller.mode === LauncherController.Mode.Weather || controller.mode === LauncherController.Mode.Installer ? 680 : Style.launcherWidth,
             Math.max(320, (root.barWindow.screen?.width ?? 1280) - 64))
     readonly property int panelHeight: Math.min(
         controller.mode === LauncherController.Mode.Weather ? 660
+            : controller.mode === LauncherController.Mode.Installer ? 430
             : controller.mode === LauncherController.Mode.Wallpaper ? 236 : Style.launcherHeight,
         Math.max(180, (root.barWindow.screen?.height ?? 800) - Style.barHeight - Style.paddingLarge * 2)
     ) + Style.barPopupGap * 2
@@ -42,9 +46,9 @@ Scope {
             id: controller
 
             launcherState: root.launcherState
-            applications: applications
-            themes: themes
-            actions: launcherActions
+            applications: root.sharedApplications
+            themes: Services.Themes
+            actions: root.sharedLauncherActions
             wallpapers: root.wallpapers
             monitorName: root.monitorContext.name
             dockerPage: dockerPage
@@ -108,20 +112,6 @@ Scope {
 
         visible: false
         grabFocus: false
-
-        Applications {
-            id: applications
-
-            query: controller.applicationQuery
-        }
-
-            Themes {
-                id: themes
-            }
-
-            LauncherActions {
-                id: launcherActions
-            }
 
         Timer {
             id: outsideClickArmTimer
@@ -223,7 +213,7 @@ Scope {
             AppsPage {
                 anchors.fill: parent
 
-                applications: applications
+                applications: root.sharedApplications
                 controller: controller
                 active:
                     controller.mode
@@ -233,7 +223,7 @@ Scope {
             ActionsPage {
                 anchors.fill: parent
 
-                actions: launcherActions
+                actions: root.sharedLauncherActions
                 controller: controller
                 active:
                     controller.mode
@@ -243,7 +233,7 @@ Scope {
             SchemesPage {
                 anchors.fill: parent
 
-                themes: themes
+                themes: Services.Themes
                 controller: controller
                 active:
                     controller.mode
@@ -282,6 +272,12 @@ Scope {
             WeatherPage {
                 anchors.fill: parent
                 active: root.monitorContext.launcherOpened && controller.mode === LauncherController.Mode.Weather
+            }
+
+            InstallerPage {
+                anchors.fill: parent
+                controller: controller
+                active: root.monitorContext.launcherOpened && controller.mode === LauncherController.Mode.Installer
             }
         }
     }

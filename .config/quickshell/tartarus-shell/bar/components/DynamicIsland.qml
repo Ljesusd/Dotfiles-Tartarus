@@ -14,6 +14,7 @@ Item {
     required property var shellState
     required property var workspaceService
     required property var screen
+    signal musicRequested()
 
     readonly property string weatherText: Services.WeatherService.current
         ? Services.WeatherService.current.temp + "°" : "—°"
@@ -26,7 +27,8 @@ Item {
     readonly property bool primaryActivityActive:
         Services.TimerService.active || Services.RecorderService.active
     readonly property bool musicActive: !root.primaryActivityActive
-        && Services.DynamicActivityService.mediaActive
+        && Services.MediaService.available
+        && (Services.DynamicActivityService.mediaActive || Services.MediaService.title !== "")
 
     Timer {
         interval: 1000
@@ -111,7 +113,7 @@ Item {
                 visualizer: false
                 onActivated: {
                     if (modelData.label === "Media")
-                        Services.MediaService.command("play-pause")
+                        root.musicRequested()
                 }
             }
         }
@@ -265,7 +267,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
 
                     SequentialAnimation on height {
-                        running: Services.MediaService.playing
+                        running: root.musicActive && !root.monitorContext.launcherOpened && Services.MediaService.playing
                         loops: Animation.Infinite
                         NumberAnimation { to: 6 + ((index + 2) % 4) * 3; duration: 190 + index * 45; easing.type: Easing.InOutSine }
                         NumberAnimation { to: 5 + (index % 3) * 3; duration: 230 + index * 35; easing.type: Easing.InOutSine }
@@ -274,7 +276,7 @@ Item {
             }
         }
 
-        TapHandler { onTapped: Services.MediaService.command("play-pause") }
+        TapHandler { onTapped: root.musicRequested() }
     }
 
     RowLayout {

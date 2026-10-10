@@ -72,9 +72,10 @@ QtObject {
         root.settingsWrite.running=true
     }
     property var metricSettings: ({})
-    function setConsumerActive(name, active) {
+    function setConsumerActive(name, active, allowNotifications) {
         var next = Object.assign({}, root.consumers)
-        if (active) next[name] = true; else delete next[name]
+        // A false value still requests polling, but never enables alerts.
+        if (active) next[name] = allowNotifications !== false; else delete next[name]
         root.consumers = next
         root.monitoringEnabled = Object.keys(next).length > 0
         if (root.monitoringEnabled) root.refresh()
@@ -83,6 +84,7 @@ QtObject {
     function valid(v, fallback) { return typeof v === "number" && isFinite(v) ? v : fallback }
     function history(h, v) { if (v < 0) return h; var n=h.slice(); n.push(v); return n.slice(-60) }
     function alert(v, key, title) {
+        if (!Object.values(root.consumers).some(allowed => allowed === true)) return
         if (v < 0 || root.alertCooldown[key] > Date.now()) return
         root.alertCooldown[key]=Date.now()+60000
         root.alertProc.command=["notify-send","-a","Tartarus Hardware","Hardware",title]

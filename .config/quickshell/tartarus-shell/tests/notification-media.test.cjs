@@ -6,6 +6,15 @@ const test = require('node:test');
 const model = createContext({});
 runInContext(readFileSync(join(__dirname, '../services/NotificationMedia.js'), 'utf8'), model);
 
+test('reminder icons are not previews while screenshots and chat avatars remain intact', () => {
+    assert.equal(model.notificationPreview('image://icon/appointment-soon', 'test2 · 22:50', 'Tartarus'), '');
+    assert.equal(model.notificationPreview('', 'test2 · 22:50', 'Tartarus'), '');
+    assert.equal(model.notificationPreview('image://icon/app-icon', 'Saved: /tmp/screenshot.png', 'notify-send'), 'file:///tmp/screenshot.png');
+    assert.equal(model.notificationPreview('image://icon//tmp/photo.png', '', 'notify-send'), 'file:///tmp/photo.png');
+    assert.equal(model.notificationPreview('/tmp/avatar.png', 'Hola', 'Vesktop'), '');
+    assert.equal(model.avatar('/tmp/avatar.png', 'Vesktop'), 'file:///tmp/avatar.png');
+});
+
 test('preserves supported URL schemes instead of prepending file to HTTP', () => {
     for (const url of ['https://example.com/picture.png', 'http://example.com/a.jpg',
         'file:///tmp/image.png', 'image://quickshell/notification/1', 'data:image/png;base64,abc'])

@@ -1,11 +1,9 @@
 import Quickshell
-import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../services" as Services
 import "../theme"
-import "../services/NotificationMedia.js" as Media
 
 Scope {
     id: root
@@ -13,10 +11,7 @@ Scope {
     required property ShellScreen monitorScreen
     required property var monitorContext
 
-    readonly property var history:
-        Services.NotificationService.history
-
-    readonly property bool isFocused: root.monitorContext.notificationCenterOpen
+    readonly property var groups: Services.NotificationService.groupedHistory
 
     PanelWindow {
         screen: root.monitorScreen
@@ -31,24 +26,21 @@ Scope {
             bottom: Style.spacingLarge
         }
         implicitWidth: Math.min(
-            420,
+            440,
             Math.max(300, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
         )
         implicitHeight: Math.min(
             720,
-            Math.max(420, (root.monitorScreen?.height ?? 800) - Style.barHeight - Style.spacingLarge * 2)
+            Math.max(420, (root.monitorScreen?.height ?? 800)
+                - Style.barHeight - Style.spacingLarge * 2)
         )
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
-        visible: Services.NotificationService.centerOpen
-            || drawer.opacity > 0
+        visible: Services.NotificationService.centerOpen || drawer.opacity > 0
 
         Rectangle {
             id: drawer
-
-            x: Services.NotificationService.centerOpen
-                ? 0
-                : width
+            x: Services.NotificationService.centerOpen ? 0 : width
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: parent.width
@@ -65,7 +57,6 @@ Scope {
                     easing.type: Easing.OutCubic
                 }
             }
-
             Behavior on opacity {
                 NumberAnimation {
                     duration: Style.motionFast
@@ -81,20 +72,28 @@ Scope {
                 RowLayout {
                     Layout.fillWidth: true
 
-                    Text {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: "Notifications"
-                        color: Color.foreground
-                        font.pixelSize: Style.fontNormal
-                        font.bold: true
+                        spacing: 0
+                        Text {
+                            text: "Notificaciones"
+                            color: Color.foreground
+                            font.pixelSize: Style.fontNormal
+                            font.bold: true
+                        }
+                        Text {
+                            text: `${historyList.count} aplicaciones · ${Services.NotificationService.history.count} avisos`
+                            color: Color.foregroundMuted
+                            font.pixelSize: Style.fontSmall
+                        }
                     }
 
                     ToolButton {
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
                         ToolTip.text: Services.NotificationService.dnd
-                            ? "Disable Do Not Disturb"
-                            : "Enable Do Not Disturb"
+                            ? "Desactivar no molestar"
+                            : "Activar no molestar"
                         contentItem: MaterialIcon {
                             text: Services.NotificationService.dnd
                                 ? "notifications_off"
@@ -112,7 +111,7 @@ Scope {
                     ToolButton {
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
-                        ToolTip.text: "Clear history"
+                        ToolTip.text: "Limpiar historial"
                         contentItem: MaterialIcon {
                             text: "delete_sweep"
                             color: Color.foregroundMuted
@@ -124,7 +123,7 @@ Scope {
                     ToolButton {
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
-                        ToolTip.text: "Close"
+                        ToolTip.text: "Cerrar"
                         contentItem: MaterialIcon {
                             text: "close"
                             color: Color.foregroundMuted
@@ -149,7 +148,7 @@ Scope {
                     Layout.fillHeight: true
                     clip: true
                     spacing: Style.spacingSmall
-                    model: root.history
+                    model: root.groups
                     verticalLayoutDirection: ListView.TopToBottom
 
                     Connections {
@@ -160,131 +159,108 @@ Scope {
                         }
                     }
 
-                    delegate: Rectangle {
+                    delegate: Item {
+                        id: groupItem
                         required property string appName
-                        required property string summary
-                        required property string body
-                        required property string image
-                        required property double timestamp
-                        required property int index
+                        required property int count
+                        required property string itemsJson
+                        required property string latestAppName
+                        required property string latestSummary
+                        required property string latestBody
+                        required property string latestImage
+                        required property double latestTimestamp
+                        required property int latestHistoryIndex
+                        property bool expanded: false
+
+                        function olderItems() {
+                            try {
+                                return JSON.parse(itemsJson || "[]")
+                            } catch (error) {
+                                return []
+                            }
+                        }
 
                         width: historyList.width
-                        implicitHeight: historyContent.implicitHeight
-                            + Style.paddingMedium * 2
-                        radius: Style.radiusMedium
-                        color: Color.surfaceElevated
-                        border.width: 1
-                        border.color: Color.outlineVariant
+                        implicitHeight: groupContent.implicitHeight
 
                         Column {
-                            id: historyContent
-                            anchors.fill: parent
-                            anchors.margins: Style.paddingMedium
-                            spacing: Style.spacingXs
+                            id: groupContent
+                            width: parent.width
+                            spacing: Style.spacingSmall
 
-                            Row {
+                            NotificationCard {
+                                width: parent.width
+                                appName: groupItem.latestAppName || groupItem.appName
+                                summary: groupItem.latestSummary
+                                body: groupItem.latestBody
+                                image: groupItem.latestImage
+                                timestampLabel: root.relativeTime(groupItem.latestTimestamp)
+                                groupCount: groupItem.count
+                                showActions: false
+                                showRemove: true
+                                historyIndex: groupItem.latestHistoryIndex
+                                screenName: root.monitorScreen.name
+                                onRemoveRequested: index =>
+                                    Services.NotificationService.removeHistory(index)
+                            }
+
+                            ToolButton {
+                                visible: groupItem.count > 1
+                                width: parent.width
+                                height: 32
+                                text: groupItem.expanded
+                                    ? "Ocultar avisos anteriores"
+                                    : `Ver ${groupItem.count - 1} avisos anteriores`
+                                onClicked: groupItem.expanded = !groupItem.expanded
+
+                                background: Rectangle {
+                                    radius: Style.controlRadius
+                                    color: parent.hovered
+                                        ? Color.surfaceHover
+                                        : Color.surfaceElevated
+                                    border.width: 1
+                                    border.color: Color.outlineVariant
+                                }
+                                contentItem: Text {
+                                    text: parent.text
+                                    color: Color.foregroundMuted
+                                    font.pixelSize: Style.fontSmall
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                            }
+
+                            Column {
                                 width: parent.width
                                 spacing: Style.spacingSmall
+                                visible: groupItem.expanded
 
-                                MaterialIcon {
-                                    text: {
-                                        const name = appName.toLowerCase()
-
-                                        if (
-                                            name.includes("discord")
-                                            || name.includes("vesktop")
+                                Repeater {
+                                    model: groupItem.olderItems()
+                                    delegate: NotificationCard {
+                                        width: groupContent.width
+                                        appName: modelData.appName
+                                        summary: modelData.summary
+                                        body: modelData.body
+                                        image: modelData.image
+                                        timestampLabel: root.relativeTime(
+                                            modelData.timestamp
                                         )
-                                            return "chat"
-
-                                        if (name.includes("steam"))
-                                            return "sports_esports"
-
-                                        if (
-                                            name.includes("firefox")
-                                            || name.includes("chrome")
-                                            || name.includes("browser")
-                                        )
-                                            return "language"
-
-                                        if (name.includes("spotify"))
-                                            return "music_note"
-
-                                        return "notifications"
+                                        showActions: false
+                                        showRemove: true
+                                        historyIndex: modelData.historyIndex
+                                        screenName: root.monitorScreen.name
+                                        onRemoveRequested: index =>
+                                            Services.NotificationService.removeHistory(index)
                                     }
-                                    color: Color.tertiaryContainer
-                                    font.pixelSize: Style.materialIconSmall
                                 }
-
-                                Text {
-                                    width: parent.width - timeLabel.width
-                                        - dismissButton.width
-                                        - Style.spacingSmall * 3
-                                    text: appName.length > 0
-                                        ? appName
-                                        : "Notification"
-                                    color: Color.foregroundMuted
-                                    font.pixelSize: Style.fontSmall
-                                    elide: Text.ElideRight
-                                }
-
-                                Text {
-                                    id: timeLabel
-                                    text: root.relativeTime(timestamp)
-                                    color: Color.foregroundMuted
-                                    font.pixelSize: Style.fontSmall
-                                }
-
-                                ToolButton {
-                                    id: dismissButton
-                                    display: AbstractButton.IconOnly
-                                    width: Style.barIconSmall
-                                    height: Style.barIconSmall
-                                    padding: 0
-                                    ToolTip.visible: hovered
-                                    ToolTip.text: "Remove"
-                                    contentItem: MaterialIcon {
-                                        text: "close"
-                                        color: dismissButton.hovered
-                                            ? Color.foreground
-                                            : Color.foregroundMuted
-                                        font.pixelSize: Style.materialIconSmall
-                                    }
-                                    onClicked:
-                                        Services.NotificationService.removeHistory(
-                                            index
-                                        )
-                                }
-                            }
-
-                            Text {
-                                width: parent.width
-                                text: summary
-                                color: Color.foreground
-                                font.pixelSize: Style.fontSmall
-                                font.bold: true
-                                wrapMode: Text.Wrap
-                            }
-
-                            Text {
-                                width: parent.width
-                                text: Media.textBody(body)
-                                color: Color.foregroundMuted
-                                font.pixelSize: Style.fontSmall
-                                wrapMode: Text.Wrap
-                                maximumLineCount: 4
-                                elide: Text.ElideRight
-                                visible: text.length > 0
-                            }
-                            NotificationPreview {
-                                width: parent.width
-                                imageSource: Media.preview(image, body)
                             }
                         }
                     }
 
                     Text {
                         anchors.centerIn: parent
-                        text: "No notifications"
+                        text: "No hay notificaciones"
                         color: Color.foregroundMuted
                         font.pixelSize: Style.fontSmall
                         visible: historyList.count === 0
@@ -293,7 +269,6 @@ Scope {
 
                 RowLayout {
                     Layout.fillWidth: true
-
                     MaterialIcon {
                         text: Services.NotificationService.dnd
                             ? "notifications_off"
@@ -303,18 +278,11 @@ Scope {
                             : Color.foregroundMuted
                         font.pixelSize: Style.materialIconSmall
                     }
-
                     Text {
                         Layout.fillWidth: true
                         text: Services.NotificationService.dnd
-                            ? "Do Not Disturb enabled"
-                            : "Notifications enabled"
-                        color: Color.foregroundMuted
-                        font.pixelSize: Style.fontSmall
-                    }
-
-                    Text {
-                        text: `${historyList.count}`
+                            ? "No molestar activo"
+                            : "Notificaciones activas"
                         color: Color.foregroundMuted
                         font.pixelSize: Style.fontSmall
                     }
@@ -324,24 +292,12 @@ Scope {
     }
 
     function relativeTime(timestamp) {
-        const seconds = Math.max(
-            0,
-            Math.floor((Date.now() - timestamp) / 1000)
-        )
-
-        if (seconds < 60)
-            return "now"
-
+        const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000))
+        if (seconds < 60) return "ahora"
         const minutes = Math.floor(seconds / 60)
-
-        if (minutes < 60)
-            return `${minutes}m`
-
+        if (minutes < 60) return `${minutes} min`
         const hours = Math.floor(minutes / 60)
-
-        if (hours < 24)
-            return `${hours}h`
-
-        return `${Math.floor(hours / 24)}d`
+        if (hours < 24) return `${hours} h`
+        return `${Math.floor(hours / 24)} d`
     }
 }

@@ -9,7 +9,6 @@ QtObject {
     property real uploadSpeed: 0
     property var downloadHistory: []
     property var uploadHistory: []
-    property real pingMs: -1
     property var _lastCounters: null
     property var _samples: []
     property string detectedInterface: ""
@@ -32,7 +31,6 @@ QtObject {
         root.uploadSpeed = 0
         root.downloadHistory = []
         root.uploadHistory = []
-        root.pingMs = -1
     }
 
     readonly property var interfaceProcess: Process {
@@ -76,27 +74,6 @@ QtObject {
         repeat: true
         onTriggered: {
             root.counterProcess.running = true
-        }
-    }
-
-    readonly property var pingProcess: Process {
-        command: ["curl", "-4", "-ksS", "--max-time", "2", "-o", "/dev/null", "-w", "latency=%{time_total}\\n", "https://1.1.1.1/cdn-cgi/trace"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const match = String(text).match(/latency=([0-9]+(?:[.,][0-9]+)?)/i)
-                const value = match ? Number(match[1].replace(",", ".")) * 1000 : -1
-                root.pingMs = value > 0 ? value : -1
-            }
-        }
-    }
-
-    readonly property var pingTimer: Timer {
-        interval: 2000
-        running: root.connected
-        repeat: true
-        onTriggered: {
-            root.pingProcess.running = false
-            root.pingProcess.running = true
         }
     }
 
@@ -218,15 +195,6 @@ QtObject {
 
     readonly property bool connected:
         root.connectedNetwork !== null
-
-    onConnectedChanged: {
-        if (root.connected) {
-            root.pingProcess.running = true
-        } else {
-            root.pingProcess.running = false
-            root.pingMs = -1
-        }
-    }
 
     readonly property bool wifiEnabled:
         Networking.wifiEnabled

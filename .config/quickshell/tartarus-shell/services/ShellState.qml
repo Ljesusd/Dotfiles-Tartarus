@@ -8,6 +8,7 @@ QtObject {
     property var monitorContexts: []
     property bool launcherFocusCloseSuppressed: false
     property bool controlCenterOpen: false
+    property int controlCenterPageRequest: -1
 
     readonly property Connections osdConnections: Connections {
         target: Services.OsdService
@@ -143,6 +144,12 @@ QtObject {
         root.controlCenterOpen = !root.controlCenterOpen
         if (root.controlCenterOpen)
             root.closeSidebars()
+    }
+
+    function openControlCenterPage(page) {
+        root.controlCenterOpen = true
+        root.closeSidebars()
+        root.controlCenterPageRequest = page
     }
 
     function closeControlCenter() {

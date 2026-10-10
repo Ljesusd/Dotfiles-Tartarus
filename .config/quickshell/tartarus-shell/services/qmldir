@@ -4,7 +4,7 @@ Applications 1.0 Applications.qml
 LauncherActions 1.0 LauncherActions.qml
 LauncherState 1.0 LauncherState.qml
 ShellState 1.0 ShellState.qml
-Themes 1.0 Themes.qml
+singleton Themes 1.0 Themes.qml
 singleton ImageViewerService 1.0 ImageViewerService.qml
 singleton ToastService 1.0 ToastService.qml
 singleton NotificationService 1.0 NotificationService.qml
@@ -28,3 +28,8 @@ singleton EasyEffectsService 1.0 EasyEffectsService.qml
 singleton TimerService 1.0 TimerService.qml
 singleton RecorderService 1.0 RecorderService.qml
 singleton WhispService 1.0 WhispService.qml
+singleton MonitorService 1.0 MonitorService.qml
+singleton CalendarService 1.0 CalendarService.qml
+singleton InstallerService 1.0 InstallerService.qml
+singleton DesktopWidgets 1.0 DesktopWidgets.qml
+singleton DesktopNotesService 1.0 DesktopNotesService.qml

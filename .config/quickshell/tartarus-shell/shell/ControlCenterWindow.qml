@@ -18,6 +18,7 @@ FloatingWindow {
     readonly property var audio: pluginRegistry.plugin("audio")?.service
     readonly property var mic: Pipewire.defaultAudioSource
     readonly property var hardware: Services.HardwareInfoService
+    readonly property var settingsThemes: Services.Themes
     readonly property var effects: Services.EasyEffectsService
     readonly property var effectsSource: {
         const inputs = root.audio?.inputsModel?.values || []
@@ -35,6 +36,12 @@ FloatingWindow {
     property int appearanceSchemeIndex: 0
     property string fastfetchPackageCount: "—"
     property string profileImageSource: ""
+    property string speedTestPhase: "idle"
+    property string speedTestError: ""
+    property bool speedTestResultReady: false
+    property real speedTestDownload: -1
+    property real speedTestUpload: -1
+    property real speedTestPing: -1
     readonly property color lyneBackground: "#171925"
     readonly property color lyneSurface: "#20243a"
     readonly property color lyneSurfaceHigh: "#282e48"
@@ -55,6 +62,8 @@ FloatingWindow {
         { label: "Atajos", icon: "keyboard", page: 7 },
         { header: "SYSTEM" },
         { label: "Hardware", icon: "memory", page: 6 },
+        { label: "Monitores", icon: "monitor", page: 9 },
+        { label: "Calendario", icon: "calendar_month", page: 10 },
         { label: "Sesión", icon: "power_settings_new", page: 8 }
     ]
     property real presentationOpacity: shellState.controlCenterOpen ? 1 : 0
@@ -64,23 +73,71 @@ FloatingWindow {
     implicitHeight: Math.min(750, Math.max(520, (root.screen?.height ?? 800) - 32))
     minimumSize: Qt.size(640, 520)
     color: "transparent"
-    Services.Themes {
-        id: settingsThemes
-    }
     PwObjectTracker { objects: [root.mic] }
     onVisibleChanged: if (visible) shellState.closeSidebars()
 
     function syncHardwareMonitoring() {
         Services.HardwareService.setConsumerActive("control-center-hardware",
             Boolean(root.shellState?.controlCenterOpen && root.page === 6))
+        Services.MonitorService.active = Boolean(root.shellState?.controlCenterOpen && root.page === 9)
     }
 
-    Component.onDestruction: Services.HardwareService.setConsumerActive("control-center-hardware", false)
+    function startSpeedTest() {
+        if (root.speedTestProcess.running)
+            return
+        root.speedTestDownload = -1
+        root.speedTestUpload = -1
+        root.speedTestPing = -1
+        root.speedTestPhase = "starting"
+        root.speedTestError = ""
+        root.speedTestProcess.command = [Quickshell.env("HOME") + "/.local/bin/fast", "--json"]
+        root.speedTestProcess.running = true
+    }
+
+    Component.onDestruction: {
+        Services.HardwareService.setConsumerActive("control-center-hardware", false)
+        Services.MonitorService.active = false
+    }
 
     readonly property Process fastfetchPackagesProcess: Process {
         command: ["sh", "-c", "pacman -Qq 2>/dev/null | wc -l"]
         stdout: StdioCollector {
             onStreamFinished: root.fastfetchPackageCount = this.text.trim() || "—"
+        }
+    }
+    readonly property Process speedTestProcess: Process {
+        stdout: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                try {
+                    const value = JSON.parse(String(text || "{}"))
+                    root.speedTestDownload = Number(value.download_mbps)
+                    root.speedTestUpload = Number(value.upload_mbps)
+                    root.speedTestPing = Number(value.ping_ms)
+                    if ([root.speedTestDownload, root.speedTestUpload, root.speedTestPing].every(value => isFinite(value))) {
+                        root.speedTestResultReady = true
+                        root.speedTestPhase = "done"
+                        root.speedTestError = ""
+                    }
+                } catch (error) {
+                    root.speedTestError = "La salida del test no era válida"
+                }
+            }
+        }
+        stderr: StdioCollector {
+            id: speedTestStderr
+            waitForEnd: true
+        }
+        onStarted: {
+            root.speedTestPhase = "running"
+            root.speedTestResultReady = false
+            root.speedTestError = ""
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0 && !root.speedTestResultReady) {
+                root.speedTestPhase = "error"
+                root.speedTestError = String(speedTestStderr.text || "No se pudo ejecutar Fast CLI").trim()
+            }
         }
     }
 
@@ -116,6 +173,15 @@ FloatingWindow {
                 root.pageHistoryIndex = 0
             }
             root.syncHardwareMonitoring()
+        }
+        function onControlCenterPageRequestChanged() {
+            const requestedPage = Number(root.shellState.controlCenterPageRequest)
+            if (requestedPage < 0 || !root.shellState.controlCenterOpen)
+                return
+            root.page = requestedPage
+            root.pageHistory = [0, requestedPage]
+            root.pageHistoryIndex = 1
+            root.shellState.controlCenterPageRequest = -1
         }
     }
 
@@ -157,8 +223,8 @@ FloatingWindow {
     }
 
     function syncAppearanceSchemeIndex() {
-        const themes = settingsThemes.themes || []
-        const current = themes.findIndex(theme => theme.slug === settingsThemes.currentSlug)
+        const themes = root.settingsThemes.themes || []
+        const current = themes.findIndex(theme => theme.slug === root.settingsThemes.currentSlug)
         if (current >= 0)
             root.appearanceSchemeIndex = current
         else if (themes.length > 0)
@@ -166,7 +232,7 @@ FloatingWindow {
     }
 
     Connections {
-        target: settingsThemes
+        target: root.settingsThemes
         function onThemesChanged() { root.syncAppearanceSchemeIndex() }
         function onCurrentSlugChanged() { root.syncAppearanceSchemeIndex() }
     }
@@ -208,8 +274,14 @@ FloatingWindow {
         opacity: root.presentationOpacity
         scale: root.presentationOpacity > 0 ? 1 : 0.985
         transformOrigin: Item.Center
-        Behavior on opacity { Anim { duration: Style.motionFast } }
-        Behavior on scale { Anim { duration: Style.motionPopup; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Anim { duration: Motion.fast } }
+        Behavior on scale {
+            Anim {
+                duration: Motion.popupOpen
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Motion.popupOpenCurve
+            }
+        }
 
         Rectangle {
             Layout.fillHeight: true
@@ -263,6 +335,8 @@ FloatingWindow {
                 Nav { label: "Atajos"; icon: "keyboard"; visible: root.matchesNavigation(label); selected: root.page === 7; onClicked: root.navigate(7) }
                 Text { text: "SYSTEM"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
                 Nav { label: "Hardware"; icon: "memory"; visible: root.matchesNavigation(label); selected: root.page === 6; onClicked: root.navigate(6) }
+                Nav { label: "Monitores"; icon: "monitor"; visible: root.matchesNavigation(label); selected: root.page === 9; onClicked: root.navigate(9) }
+                Nav { label: "Calendario"; icon: "calendar_month"; visible: root.matchesNavigation(label); selected: root.page === 10; onClicked: root.navigate(10) }
                 Nav { label: "Sesión"; icon: "power_settings_new"; visible: root.matchesNavigation(label); selected: root.page === 8; onClicked: root.navigate(8) }
                 Item { Layout.fillHeight: true }
                 Nav { label: "Cerrar"; icon: "close"; onClicked: root.shellState.closeControlCenter() }
@@ -438,7 +512,6 @@ FloatingWindow {
                     title: "Actividad de red"
                     icon: "swap_vert"
                     subtitle: "Velocidad actual · " + (root.net?.activeInterface || "Wi‑Fi")
-                    headerInfo: root.net?.pingMs >= 0 ? "Ping " + root.net.pingMs.toFixed(0) + " ms" : "Ping …"
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: Style.spacingMedium
@@ -484,6 +557,40 @@ FloatingWindow {
                         }
                     }
                 }
+                SettingCard {
+                    visible: Boolean(root.net?.connected || root.net?.wired)
+                    title: "Test de velocidad"
+                    icon: "speed"
+                    subtitle: "Fast CLI · descarga, subida y ping"
+                    Text {
+                        text: root.speedTestPhase === "running" || root.speedTestPhase === "starting"
+                            ? "Midiendo conexión… puede tardar unos segundos"
+                            : "Mide tu conexión usando Fast.com sin salir del centro de control."
+                        color: root.lyneMuted
+                        font.pixelSize: Style.fontSmall
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        SpeedTestMetric { label: "↓ Download"; value: root.speedTestDownload >= 0 ? root.speedTestDownload.toFixed(1) + " Mbps" : "—"; accent: "#f26d78" }
+                        SpeedTestMetric { label: "↑ Upload"; value: root.speedTestUpload >= 0 ? root.speedTestUpload.toFixed(1) + " Mbps" : "—"; accent: root.lyneAccent }
+                        SpeedTestMetric { label: "Ping"; value: root.speedTestPing >= 0 ? Math.round(root.speedTestPing) + " ms" : "—"; accent: "#f2b36d" }
+                    }
+                    Text {
+                        visible: root.speedTestPhase === "error" && root.speedTestError !== ""
+                        text: root.speedTestError
+                        color: Color.error
+                        font.pixelSize: 12
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+                    ActionButton {
+                        text: root.speedTestProcess.running ? "Midiendo…" : root.speedTestResultReady ? "Repetir test" : "Ejecutar test"
+                        enabled: !root.speedTestProcess.running
+                        onClicked: root.startSpeedTest()
+                    }
+                }
                 SettingCard { visible: !root.net?.wifiDevice; title: "Adaptador Wi‑Fi"; icon: "error_outline"; subtitle: "No se detectó un adaptador inalámbrico" }
             }
             Page {
@@ -521,9 +628,9 @@ FloatingWindow {
                 title: "Apariencia"
                 subtitle: "Temas, fondos y presentación del shell"
                 SettingCard {
-                    title: "Schemes"; icon: "palette"; subtitle: settingsThemes.currentSlug || "Selecciona un scheme"
+                    title: "Schemes"; icon: "palette"; subtitle: root.settingsThemes.currentSlug || "Selecciona un scheme"
                     Text {
-                        visible: settingsThemes.themes.length === 0
+                        visible: root.settingsThemes.themes.length === 0
                         text: "No se encontraron schemes"
                         color: root.lyneMuted
                         font.pixelSize: Style.fontSmall
@@ -539,7 +646,7 @@ FloatingWindow {
                             acceptedButtons: Qt.NoButton
                             hoverEnabled: true
                             onWheel: event => {
-                                if (!settingsThemes.themes || settingsThemes.themes.length === 0)
+                                if (!root.settingsThemes.themes || root.settingsThemes.themes.length === 0)
                                     return
                                 if (event.angleDelta.y > 0 || event.angleDelta.x < 0)
                                     schemeCarousel.currentIndex = Math.max(0, schemeCarousel.currentIndex - 1)
@@ -555,7 +662,7 @@ FloatingWindow {
                             anchors.leftMargin: 38
                             anchors.rightMargin: 38
                             clip: true
-                            model: settingsThemes.themes || []
+                            model: root.settingsThemes.themes || []
                             currentIndex: root.appearanceSchemeIndex
                             pathItemCount: 3
                             cacheItemCount: 4
@@ -579,7 +686,7 @@ FloatingWindow {
                                 z: PathView.carouselZ
                                 onClicked: {
                                     schemeCarousel.currentIndex = index
-                                    settingsThemes.setTheme(theme.slug)
+                                    root.settingsThemes.setTheme(theme.slug)
                                 }
                             }
 
@@ -628,8 +735,8 @@ FloatingWindow {
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: settingsThemes.themes.length + " schemes disponibles"; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true }
-                        ActionButton { text: "Actualizar schemes"; onClicked: settingsThemes.listProcess.running = true }
+                        Text { text: root.settingsThemes.themes.length + " schemes disponibles"; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true }
+                        ActionButton { text: "Actualizar schemes"; onClicked: root.settingsThemes.listProcess.running = true }
                     }
                 }
                 SettingCard {
@@ -662,10 +769,14 @@ FloatingWindow {
                         label: "CPU"
                         icon: "memory"
                         description: Services.HardwareService.cpuModel
+                            + " · " + Services.HardwareService.cpuCores
+                            + " núcleos · " + Services.HardwareService.cpuThreads
+                            + " hilos"
                         usage: Services.HardwareService.cpuUsage
                         history: Services.HardwareService.cpuHistory
                         detail: Services.HardwareService.cpuTemperature >= 0 ? Services.HardwareService.cpuTemperature.toFixed(0) + " °C" : "Sin sensor"
                         extra: Services.HardwareService.cpuFrequencyGHz > 0 ? Services.HardwareService.cpuFrequencyGHz.toFixed(2) + " GHz" : ""
+                        showCoreUsage: true
                     }
                     HardwareHero {
                         Layout.fillWidth: true
@@ -689,7 +800,7 @@ FloatingWindow {
                     HardwareGaugeCard {
                         Layout.fillWidth: true
                         Layout.columnSpan: 1
-                        label: "Almacenamiento"
+                        label: Services.HardwareService.diskUsed >= 90 ? "Almacenamiento · Casi lleno" : "Almacenamiento"
                         icon: "hard_drive"
                         value: Services.HardwareService.diskUsed
                         detail: Services.HardwareService.primaryDisk ? Services.HardwareService.primaryDisk.used.toFixed(1) + " / " + Services.HardwareService.primaryDisk.total.toFixed(1) + " GiB · " + Services.HardwareService.primaryDisk.mount : "Sin discos detectados"
@@ -704,6 +815,7 @@ FloatingWindow {
                 SettingCard { title: "Centro de control"; icon: "settings"; subtitle: "SUPER + I" }
                 SettingCard { title: "Barra lateral"; icon: "view_sidebar"; subtitle: "SUPER + SHIFT + I" }
                 SettingCard { title: "Launcher"; icon: "apps"; subtitle: "SUPER + SPACE" }
+                SettingCard { title: "Portapapeles"; icon: "content_paste"; subtitle: "SUPER + CTRL + V" }
                 SettingCard { title: "Modo gaming"; icon: "sports_esports"; subtitle: "SUPER + G" }
             }
             Page {
@@ -712,7 +824,55 @@ FloatingWindow {
                 subtitle: "Notificaciones y acciones de energía"
                 SettingCard { title: "No molestar"; icon: "notifications_off"; subtitle: Services.NotificationService.dnd ? "Activo" : "Desactivado"; ActionButton { text: Services.NotificationService.dnd ? "Desactivar" : "Activar"; onClicked: Services.NotificationService.toggleDnd() } }
                 SettingCard { title: "Modo nocturno"; icon: "nightlight"; subtitle: "Se controla desde la sidebar rápida"; Text { text: "El control aparece en la sidebar cuando hay un backend compatible disponible."; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true } }
-                SettingCard { title: "Energía y sesión"; icon: "power_settings_new"; subtitle: "Las acciones destructivas requieren confirmación"; Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: "Bloquear"; onClicked: Services.PowerService.lock() } ActionButton { text: "Suspender"; onClicked: Services.SidebarService.requestPower("suspend") } ActionButton { text: "Cerrar sesión"; onClicked: Services.SidebarService.requestPower("logout") } ActionButton { text: "Reiniciar"; onClicked: Services.SidebarService.requestPower("reboot") } ActionButton { text: "Apagar"; onClicked: Services.SidebarService.requestPower("shutdown") } } RowLayout { visible: Services.SidebarService.pendingPower !== ""; Text { text: "¿Confirmar " + Services.SidebarService.pendingPower + "?"; color: Color.warning; Layout.fillWidth: true } ActionButton { text: "Cancelar"; onClicked: Services.SidebarService.cancelPower() } ActionButton { text: "Confirmar"; onClicked: Services.SidebarService.confirmPower() } } }
+                    SettingCard { title: "Energía y sesión"; icon: "power_settings_new"; subtitle: "Las acciones destructivas requieren confirmación"; Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: "Bloquear"; onClicked: Services.PowerService.lock() } ActionButton { text: "Suspender"; onClicked: Services.SidebarService.requestPower("suspend") } ActionButton { text: "Cerrar sesión"; onClicked: Services.SidebarService.requestPower("logout") } ActionButton { text: "Reiniciar"; onClicked: Services.SidebarService.requestPower("reboot") } ActionButton { text: "Apagar"; onClicked: Services.SidebarService.requestPower("shutdown") } } RowLayout { visible: Services.SidebarService.pendingPower !== ""; Text { text: "¿Confirmar " + Services.SidebarService.pendingPower + "?"; color: Color.warning; Layout.fillWidth: true } ActionButton { text: "Cancelar"; onClicked: Services.SidebarService.cancelPower() } ActionButton { text: "Confirmar"; onClicked: Services.SidebarService.confirmPower() } } }
+            }
+            Page {
+                icon: "monitor"
+                title: "Monitores"
+                subtitle: "Organiza las pantallas y ajusta su configuración"
+                MonitorPanel {
+                    service: Services.MonitorService
+                    backgroundColor: root.lyneBackground
+                    surfaceColor: root.lyneSurface
+                    surfaceHighColor: root.lyneSurfaceHigh
+                    surfaceHoverColor: root.lyneSurfaceHover
+                    accentColor: root.lyneAccent
+                    textColor: root.lyneText
+                    mutedColor: root.lyneMuted
+                }
+            }
+            Page {
+                icon: "calendar_month"
+                title: "Calendario"
+                subtitle: "Agenda privada mediante un feed iCalendar"
+                SettingCard {
+                    title: "Feed iCalendar"
+                    icon: "event"
+                    subtitle: Services.CalendarService.configured ? "Configurado · se actualiza cada 5 minutos" : "No configurado"
+                    Text { text: "Usa la dirección privada HTTPS de tu calendario. Se guarda localmente y no se muestra en la barra."; color: root.lyneMuted; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        TextField {
+                            id: calendarUrlField
+                            Layout.fillWidth: true
+                            text: Services.CalendarService.feedUrl
+                            placeholderText: "https://…/basic.ics"
+                            echoMode: TextInput.Password
+                            color: root.lyneText
+                            placeholderTextColor: root.lyneMuted
+                            leftPadding: 12
+                            rightPadding: 12
+                            background: Rectangle { radius: Style.controlRadius; color: root.lyneSurfaceHigh; border.width: calendarUrlField.activeFocus ? 1 : 0; border.color: root.lyneAccent }
+                        }
+                        ActionButton { text: "Guardar"; onClicked: Services.CalendarService.configure(calendarUrlField.text, "Calendario") }
+                    }
+                    Text { visible: Services.CalendarService.errorMessage !== ""; text: Services.CalendarService.errorMessage; color: "#ffb4ab"; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text { text: Services.CalendarService.events.length + " eventos cargados"; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true }
+                        ActionButton { text: "Actualizar"; onClicked: Services.CalendarService.refresh() }
+                    }
+                }
             }
         }
     }
@@ -871,6 +1031,24 @@ FloatingWindow {
         }
     }
 
+    component SpeedTestMetric: Rectangle {
+        id: speedMetric
+        property string label: ""
+        property string value: "—"
+        property color accent: root.lyneAccent
+        Layout.fillWidth: true
+        implicitHeight: 70
+        radius: Style.controlRadius
+        color: root.lyneSurfaceHigh
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Style.paddingSmall
+            spacing: 2
+            Text { text: speedMetric.label; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true }
+            Text { text: speedMetric.value; color: speedMetric.accent; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
+        }
+    }
+
     component SettingCard: Rectangle {
         id: card
         property string title: ""
@@ -1026,8 +1204,9 @@ FloatingWindow {
         property var history: []
         property string detail: ""
         property string extra: ""
+        property bool showCoreUsage: false
         readonly property color accent: usage < 0 ? root.lyneMuted : usage >= 90 ? "#f26d78" : usage >= 70 ? "#f2b36d" : root.lyneAccent
-        implicitHeight: 172
+        implicitHeight: hero.showCoreUsage ? 246 : 172
         radius: Style.cardRadius
         color: root.lyneSurface
         ColumnLayout {
@@ -1052,6 +1231,50 @@ FloatingWindow {
                 Text { text: hero.detail; color: root.lyneMuted; font.pixelSize: Style.fontSmall }
                 Item { Layout.fillWidth: true }
                 Text { text: hero.extra; color: root.lyneMuted; font.pixelSize: Style.fontSmall; elide: Text.ElideRight; Layout.maximumWidth: hero.width * 0.48 }
+            }
+            Text {
+                visible: hero.showCoreUsage
+                text: "Uso por núcleo"
+                color: root.lyneMuted
+                font.pixelSize: 12
+                Layout.topMargin: 2
+            }
+            Flow {
+                visible: hero.showCoreUsage
+                Layout.fillWidth: true
+                Layout.preferredHeight: hero.showCoreUsage ? 42 : 0
+                spacing: 6
+                Repeater {
+                    model: hero.showCoreUsage ? Services.HardwareService.coreUsages : []
+                    delegate: ColumnLayout {
+                        id: coreUsage
+                        required property var modelData
+                        required property int index
+                        width: 42
+                        spacing: 3
+                        Accessible.name: "Núcleo " + (index + 1) + ": " + Math.round(Number(modelData)) + "%"
+                        Text {
+                            Layout.fillWidth: true
+                            text: Math.round(Number(coreUsage.modelData)) + "%"
+                            color: root.lyneText
+                            font.pixelSize: 11
+                            font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: 5
+                            radius: 3
+                            color: root.lyneSurfaceHigh
+                            Rectangle {
+                                width: parent.width * Math.max(0, Math.min(100, Number(coreUsage.modelData))) / 100
+                                height: parent.height
+                                radius: parent.radius
+                                color: Number(coreUsage.modelData) >= 90 ? "#f26d78" : Number(coreUsage.modelData) >= 70 ? "#f2b36d" : root.lyneAccent
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -1157,8 +1380,8 @@ FloatingWindow {
         implicitWidth: 190
         implicitHeight: 82
         radius: Style.controlRadius
-        color: themeChoice.theme.slug === settingsThemes.currentSlug ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.22) : root.lyneSurfaceHigh
-        border.width: themeChoice.theme.slug === settingsThemes.currentSlug ? 1 : 0
+        color: themeChoice.theme.slug === root.settingsThemes.currentSlug ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.22) : root.lyneSurfaceHigh
+        border.width: themeChoice.theme.slug === root.settingsThemes.currentSlug ? 1 : 0
         border.color: root.lyneAccent
         ColumnLayout {
             anchors.fill: parent
@@ -1167,7 +1390,7 @@ FloatingWindow {
             RowLayout {
                 Layout.fillWidth: true
                 Rectangle { Layout.preferredWidth: 28; Layout.preferredHeight: 28; radius: Style.radiusFull; color: root.lyneAccent; MaterialIcon { anchors.centerIn: parent; text: "palette"; iconSize: Style.materialIconSmall; iconColor: root.lyneBackground } }
-                ColumnLayout { Layout.fillWidth: true; Text { text: themeChoice.theme.name; color: root.lyneText; font.pixelSize: Style.fontSmall; font.bold: true; elide: Text.ElideRight; Layout.fillWidth: true } Text { text: themeChoice.theme.slug === settingsThemes.currentSlug ? "Activo" : "Disponible"; color: root.lyneMuted; font.pixelSize: 12 } }
+                ColumnLayout { Layout.fillWidth: true; Text { text: themeChoice.theme.name; color: root.lyneText; font.pixelSize: Style.fontSmall; font.bold: true; elide: Text.ElideRight; Layout.fillWidth: true } Text { text: themeChoice.theme.slug === root.settingsThemes.currentSlug ? "Activo" : "Disponible"; color: root.lyneMuted; font.pixelSize: 12 } }
             }
             Row {
                 Layout.fillWidth: true

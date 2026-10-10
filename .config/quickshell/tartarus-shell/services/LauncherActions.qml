@@ -35,6 +35,13 @@ QtObject {
             description: "Scientific calculator with Qalculate and LaTeX"
         },
         {
+            name: "Instalar aplicación",
+            icon: "download",
+            command: "install",
+            aliases: ["instalar", "installer", "app"],
+            description: "Arrastra un AppImage, Flatpak o paquete local"
+        },
+        {
             name: "Timer",
             icon: "timer",
             command: "timer",

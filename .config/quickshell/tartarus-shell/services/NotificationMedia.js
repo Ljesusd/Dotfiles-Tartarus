@@ -6,6 +6,8 @@ function source(value) {
     if (url.startsWith("image://icon/")) {
         const original = url.slice("image://icon/".length)
         if (original.startsWith("/") || /^(https?:\/\/|file:\/\/)/i.test(original)) return source(original)
+        // Theme icon names are not image attachments (and may not exist).
+        return ""
     }
     if (/^(https?:\/\/|file:\/\/|image:\/\/|data:image\/)/i.test(url)) return url
     return url.startsWith("/") ? "file://" + url : ""
@@ -21,6 +23,36 @@ function bodyImage(body) {
         if (url) return url
     }
     return ""
+}
+
+function appNameIsChat(appName) {
+    const name = String(appName || "").toLowerCase()
+    return name.includes("discord") || name.includes("vesktop")
+}
+
+function fileImage(body) {
+    if (typeof body !== "string") return ""
+
+    // notify-send screenshot messages usually contain the saved path rather
+    // than a notification image hint. Keep the path up to the image suffix.
+    const match = body.match(/(\/[^<>\n]*?\.(?:png|jpe?g|webp|gif|bmp|tiff?))(?:\s|$)/i)
+    return match ? source(match[1]) : ""
+}
+
+function avatar(image, appName) {
+    return appNameIsChat(appName) ? source(image) : ""
+}
+
+function notificationPreview(image, body, appName) {
+    const embedded = bodyImage(body)
+    if (embedded) return embedded
+
+    const attachedFile = fileImage(body)
+    if (attachedFile) return attachedFile
+
+    // Chat profile images belong in the circular avatar, not in the large
+    // content preview.
+    return appNameIsChat(appName) ? "" : source(image)
 }
 
 function preview(image, body) { return bodyImage(body) || source(image) }

@@ -14,6 +14,8 @@ Scope {
     required property var launcherState
     required property var shellState
     required property var pluginRegistry
+    required property var sharedApplications
+    required property var sharedLauncherActions
     readonly property string screenName:
         root.screen ? root.screen.name : ""
 
@@ -46,6 +48,10 @@ Scope {
         screen: root.screen
     }
 
+    DesktopWidgetLayer {
+        monitorScreen: root.screen
+    }
+
     Component.onCompleted: {
         root.shellState.registerContext(context)
     }
@@ -70,6 +76,8 @@ Scope {
         shellState: root.shellState
         launcherAnchor: bar.launcherAnchor
         barWindow: bar
+        sharedApplications: root.sharedApplications
+        sharedLauncherActions: root.sharedLauncherActions
     }
 
     ToastOverlay {

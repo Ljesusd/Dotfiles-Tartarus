@@ -159,6 +159,7 @@ PanelWindow {
                     shellState: root.shellState
                     workspaceService: root.pluginRegistry.plugin("workspaces")?.service
                     screen: root.screen
+                    onMusicRequested: musicPopup.toggle()
                 }
             }
 
@@ -197,6 +198,16 @@ PanelWindow {
 
                             SystemTray {
                                 barSurface: barSurface
+                                onCloseLauncherRequested: root.closeLauncherIfOpen()
+                            }
+                        }
+
+                        EntryWrapper {
+                            entryId: "calendar"
+
+                            CalendarWidget {
+                                anchorSurface: barSurface
+                                shellState: root.shellState
                                 onCloseLauncherRequested: root.closeLauncherIfOpen()
                             }
                         }
@@ -248,6 +259,9 @@ PanelWindow {
                         ProfileButton {
                             Layout.preferredWidth: Style.barControlHeight
                             Layout.preferredHeight: Style.barControlHeight
+                            shellState: root.shellState
+                            anchorSurface: barSurface
+                            barWindow: root
                         }
                     }
                 }
@@ -259,6 +273,21 @@ PanelWindow {
             hoverPanelController: hoverPanelController
             anchorSurface: barSurface
             barScreen: root.screen
+        }
+
+        Item {
+            id: musicAnchor
+            x: barSurface.mapFromItem(dynamicIsland, dynamicIsland.width / 2, 0).x - width / 2
+            y: 0
+            width: 360
+            height: 1
+        }
+
+        MusicPopup {
+            id: musicPopup
+            anchorItem: musicAnchor
+            barWindow: root
+            monitorContext: root.monitorContext
         }
 
         // Anchor invisible at the roof of the bar. The launcher is positioned
@@ -280,6 +309,47 @@ PanelWindow {
             width: Style.launcherWidth
             height: 1
             opacity: 0
+        }
+
+        // Ryoku's stash accepts a file at the shell edge and routes it to the
+        // installer. Keep the drop target small and explicit: normal bar
+        // clicks keep their existing handlers, while a drag gets a clear
+        // visual landing zone and opens the installer with the file selected.
+        DropArea {
+            id: installerDropArea
+            anchors.fill: barSurface
+            z: 20
+
+            onDropped: drop => {
+                if (!drop.urls || drop.urls.length === 0)
+                    return
+
+                const droppedUrl = drop.urls[0]
+                root.shellState.openLauncher(root.monitorContext)
+                Qt.callLater(() => {
+                    root.launcherState.query = ">install"
+                    Services.InstallerService.inspect(droppedUrl)
+                    root.launcherState.focusSearch()
+                })
+            }
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: Math.min(360, parent.width - Style.paddingLarge * 2)
+                height: 44
+                radius: Style.radiusFull
+                visible: installerDropArea.containsDrag
+                color: Color.primaryContainer
+                border.width: 1
+                border.color: Color.primary
+                Text {
+                    anchors.centerIn: parent
+                    text: "Suelta aquí para instalar"
+                    color: Color.foreground
+                    font.pixelSize: Style.fontSmall
+                    font.bold: true
+                }
+            }
         }
 
     }

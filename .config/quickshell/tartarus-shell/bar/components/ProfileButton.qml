@@ -11,6 +11,9 @@ Item {
     implicitWidth: Style.barControlHeight
     implicitHeight: Style.barControlHeight
     property string avatarPath: ""
+    required property var shellState
+    required property Item anchorSurface
+    required property var barWindow
 
     Process {
         id: avatarFinder
@@ -83,6 +86,25 @@ Item {
             iconSize: Style.barIconSmall
             iconColor: Color.foreground
             visible: avatar.status !== Image.Ready
+        }
+    }
+
+    ProfileMenu {
+        id: profileMenu
+
+        anchorItem: root
+        anchorSurface: root.anchorSurface
+        barWindow: root.barWindow
+        shellState: root.shellState
+    }
+
+    TapHandler {
+        onTapped: {
+            root.barWindow.closeLauncherIfOpen()
+            if (profileMenu.popupOpen)
+                profileMenu.close()
+            else
+                profileMenu.open()
         }
     }
 

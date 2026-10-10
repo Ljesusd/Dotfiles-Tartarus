@@ -92,7 +92,9 @@ Item {
 
                 anchors.fill: parent
 
-                model: root.applications.applications
+                model: root.applications.filtered(
+                    root.controller.applicationQuery
+                )
                 currentIndex: root.active
                     ? root.controller.selectedIndex
                     : -1

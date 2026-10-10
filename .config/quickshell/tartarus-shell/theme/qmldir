@@ -5,3 +5,4 @@ Anim 1.0 Anim.qml
 ColorAnim 1.0 ColorAnim.qml
 singleton Style 1.0 Style.qml
 singleton Color 1.0 Color.qml
+singleton Motion 1.0 Motion.qml

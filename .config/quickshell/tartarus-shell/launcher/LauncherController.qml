@@ -13,7 +13,8 @@ QtObject {
         Wallpaper,
         Docker,
         Calculator,
-        Weather
+        Weather,
+        Installer
     }
 
     required property var launcherState
@@ -38,6 +39,8 @@ QtObject {
             return LauncherController.Mode.Calculator
         if (/^>weather(?:\s|$)/.test(root.normalizedQuery))
             return LauncherController.Mode.Weather
+        if (/^>install(?:er)?(?:\s|$)/.test(root.normalizedQuery))
+            return LauncherController.Mode.Installer
         if (root.normalizedQuery.startsWith(">scheme"))
             return LauncherController.Mode.Schemes
 
@@ -60,6 +63,9 @@ QtObject {
 
     readonly property string calculatorQuery: root.mode === LauncherController.Mode.Calculator
         ? root.launcherState.query.trim().slice(5).trim() : ""
+
+    readonly property string installerQuery: root.mode === LauncherController.Mode.Installer
+        ? root.launcherState.query.trim().replace(/^>install(?:er)?\s*/, "") : ""
 
     readonly property string actionQuery:
         root.mode === LauncherController.Mode.Actions
@@ -96,12 +102,8 @@ QtObject {
         case LauncherController.Mode.Docker:
             return Services.DockerService.grouped(root.dockerQuery).length
         case LauncherController.Mode.Applications:
-            return (
-                root.applications
-                && root.applications.applications
-                && root.applications.applications.values
-            )
-                ? root.applications.applications.values.length
+            return root.applications
+                ? root.applications.filtered(root.applicationQuery).length
                 : 0
         case LauncherController.Mode.Actions:
             itemCount = root.actions
@@ -119,6 +121,8 @@ QtObject {
                 : 0
             return itemCount
         case LauncherController.Mode.Calculator:
+            return 0
+        case LauncherController.Mode.Installer:
             return 0
         default:
             return 0
@@ -195,12 +199,8 @@ QtObject {
     }
 
     function acceptApplication() {
-        const values = (
-            root.applications
-            && root.applications.applications
-            && root.applications.applications.values
-        )
-            ? root.applications.applications.values
+        const values = root.applications
+            ? root.applications.filtered(root.applicationQuery)
             : null
         const index = root.selectedIndex
 
@@ -256,6 +256,13 @@ QtObject {
 
         if (action.command === "calc") {
             root.launcherState.query = ">calc"
+            root.launcherState.focusSearch()
+            root.resetSelection()
+            return
+        }
+
+        if (action.command === "install") {
+            root.launcherState.query = ">install"
             root.launcherState.focusSearch()
             root.resetSelection()
             return
@@ -351,6 +358,7 @@ QtObject {
             break
         case LauncherController.Mode.Calculator:
         case LauncherController.Mode.Weather:
+        case LauncherController.Mode.Installer:
             break
         }
     }
@@ -410,6 +418,7 @@ QtObject {
             break
         case LauncherController.Mode.Calculator:
         case LauncherController.Mode.Weather:
+        case LauncherController.Mode.Installer:
             root.launcherState.query = ">"
             root.launcherState.focusSearch()
             break

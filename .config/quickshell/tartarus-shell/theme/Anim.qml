@@ -1,6 +1,6 @@
 import QtQuick
 
 NumberAnimation {
-    duration: Style.motionNormal
+    duration: Motion.normal
     easing.type: Easing.OutCubic
 }

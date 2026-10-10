@@ -5,7 +5,6 @@ import QtQml
 QtObject {
     id: root
 
-    property string query: ""
     property var usage: ({})
 
     readonly property FileView usageFile: FileView {
@@ -27,16 +26,16 @@ QtObject {
     }
 
     readonly property var applications: ScriptModel {
-        values: DesktopEntries.applications.values
-            .filter(app => {
-                return root.matchesPrefix(
-                    app.name,
-                    root.query
-                )
-            })
+        values: DesktopEntries.applications.values.slice()
             .sort((a, b) => {
                 return root.frequency(b) - root.frequency(a)
             })
+    }
+
+    function filtered(query) {
+        return root.applications.values.filter(app => {
+            return root.matchesPrefix(app.name, query)
+        })
     }
 
     function matchesPrefix(text, query) {

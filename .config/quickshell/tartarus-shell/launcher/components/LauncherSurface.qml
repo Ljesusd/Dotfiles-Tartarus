@@ -6,7 +6,8 @@ import "../../theme"
 Item {
     id: root
     property bool opened: false
-    property real reveal: opened ? 1 : 0
+    property real reveal: 0
+    property bool closeNotified: true
     readonly property int shadowPadding: 14
     readonly property int joinRadius: 20
     readonly property int horizontalInset: shadowPadding + joinRadius
@@ -21,15 +22,42 @@ Item {
 
     clip: true
     opacity: Math.min(1, reveal * 3)
+    onOpenedChanged: closeNotified = false
     onRevealChanged: {
-        if (reveal === 0 && !opened) closed()
+        if (reveal <= 0.001 && !opened && !closeNotified) {
+            closeNotified = true
+            closed()
+        }
     }
     onFillColorChanged: background.requestPaint()
     onOutlineColorChanged: background.requestPaint()
     onShadowColorChanged: background.requestPaint()
-    Behavior on reveal {
-        NumberAnimation { duration: Style.launcherMotionPanel; easing.type: Easing.OutCubic }
+    states: State {
+        name: "opened"
+        when: root.opened
+        PropertyChanges { target: root; reveal: 1 }
     }
+
+    transitions: [
+        Transition {
+            to: "opened"
+            NumberAnimation {
+                property: "reveal"
+                duration: Motion.popupOpen
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Motion.popupOpenCurve
+            }
+        },
+        Transition {
+            from: "opened"
+            NumberAnimation {
+                property: "reveal"
+                duration: Motion.popupClose
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Motion.popupCloseCurve
+            }
+        }
+    ]
 
     Item {
         id: frame
@@ -39,12 +67,20 @@ Item {
         height: root.contentHeight + root.shadowPadding
         clip: true
         Behavior on width {
-            enabled: root.opened && root.reveal === 1
-            NumberAnimation { duration: Style.launcherMotionPanel; easing.type: Easing.OutCubic }
+            enabled: root.opened && root.reveal > 0.98
+            NumberAnimation {
+                duration: Motion.popupResize
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Motion.spatialCurve
+            }
         }
         Behavior on height {
-            enabled: root.opened && root.reveal === 1
-            NumberAnimation { duration: Style.launcherMotionPanel; easing.type: Easing.OutCubic }
+            enabled: root.opened && root.reveal > 0.98
+            NumberAnimation {
+                duration: Motion.popupResize
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Motion.spatialCurve
+            }
         }
 
         Canvas {

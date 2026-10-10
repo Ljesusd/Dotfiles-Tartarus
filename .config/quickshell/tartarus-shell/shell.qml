@@ -22,6 +22,8 @@ ShellRoot {
 
     readonly property var sharedLauncherState: launcherState
     readonly property var sharedPluginRegistry: pluginRegistry
+    readonly property var sharedApplications: sharedApplicationsService
+    readonly property var sharedLauncherActions: sharedLauncherActionsService
 
     // Qt can expose a placeholder while Wayland has no outputs. Wait for a
     // screen present in both models before creating any per-monitor panels.
@@ -54,6 +56,16 @@ ShellRoot {
 
     PluginDiscovery {
         registry: pluginRegistry
+    }
+
+    // Shared launcher data. Each monitor keeps its own popup and selection,
+    // while application/action models are loaded only once.
+    Applications {
+        id: sharedApplicationsService
+    }
+
+    LauncherActions {
+        id: sharedLauncherActionsService
     }
 
     GlobalShortcut {
@@ -249,6 +261,8 @@ ShellRoot {
             launcherState: root.sharedLauncherState
             shellState: globalShellState
             pluginRegistry: root.sharedPluginRegistry
+            sharedApplications: root.sharedApplications
+            sharedLauncherActions: root.sharedLauncherActions
         }
     }
 

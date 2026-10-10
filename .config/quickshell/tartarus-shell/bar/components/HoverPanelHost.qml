@@ -377,8 +377,9 @@ PopupWindow {
         enabled: root.positionInitialized && root.visible
 
         NumberAnimation {
-            duration: Style.motionNormal
-            easing.type: Easing.OutCubic
+            duration: Motion.normal
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Motion.spatialCurve
         }
     }
 
@@ -386,8 +387,9 @@ PopupWindow {
         enabled: root.sizeInitialized && root.visible
 
         NumberAnimation {
-            duration: Style.motionFast
-            easing.type: Easing.OutCubic
+            duration: Motion.popupResize
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Motion.spatialCurve
         }
     }
 
@@ -395,8 +397,9 @@ PopupWindow {
         enabled: root.sizeInitialized && root.visible
 
         NumberAnimation {
-            duration: Style.motionFast
-            easing.type: Easing.OutCubic
+            duration: Motion.popupResize
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Motion.spatialCurve
         }
     }
 
@@ -408,8 +411,9 @@ PopupWindow {
 
         from: 0.0
         to: 1.0
-        duration: Style.motionFast
-        easing.type: Easing.OutCubic
+        duration: Motion.fast
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Motion.effectCurve
 
         onFinished: {
             root.finishContentTransition()
@@ -468,13 +472,14 @@ PopupWindow {
         }
 
         Behavior on opacity {
-            Anim { duration: Style.motionFast }
+            Anim { duration: Motion.fast }
         }
 
         Behavior on scale {
             Anim {
-                duration: Style.motionPopup
-                easing.type: Easing.OutCubic
+                duration: Motion.popupOpen
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Motion.popupOpenCurve
             }
         }
 
