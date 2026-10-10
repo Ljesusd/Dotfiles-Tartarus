@@ -12,6 +12,10 @@ QtObject {
     id: root
 
     property bool dnd: false
+    // The notification server remains owned by Quickshell. These options
+    // expose the parts of Ryoku/SwayNC that are useful to both surfaces
+    // without starting a second notification daemon.
+    property bool groupingEnabled: true
     property bool centerOpen: false
     property string centerScreenName: ""
     readonly property string sessionId: String(Date.now())
@@ -22,6 +26,7 @@ QtObject {
 
     readonly property var notificationModel: ListModel {}
     readonly property var history: historyModel
+    readonly property var groupedHistory: groupedHistoryModel
     readonly property int historyLimit: 100
 
     readonly property FileView historyFile: FileView {
@@ -37,6 +42,7 @@ QtObject {
     }
 
     readonly property var historyModel: ListModel {}
+    readonly property var groupedHistoryModel: ListModel {}
 
     function loadSettings() {
         const text = settingsFile.text()
@@ -49,6 +55,8 @@ QtObject {
 
             if (settings && settings.dnd !== undefined)
                 root.dnd = Boolean(settings.dnd)
+            if (settings && settings.groupingEnabled !== undefined)
+                root.groupingEnabled = Boolean(settings.groupingEnabled)
         } catch (error) {
             console.warn("Could not read notification-settings.json:", error)
         }
@@ -57,6 +65,7 @@ QtObject {
     function saveSettings() {
         settingsFile.setText(JSON.stringify({
             dnd: root.dnd,
+            groupingEnabled: root.groupingEnabled,
         }, null, 2))
     }
 
@@ -85,11 +94,16 @@ QtObject {
                     summary: entry.summary || "",
                     body: entry.body || "",
                     image: String(entry.image || "").startsWith("image://") ? "" : (entry.image || ""),
+                    groupKey: entry.groupKey || root.groupKeyFor(entry.appName, entry.desktopEntry),
+                    urgency: entry.urgency || "normal",
+                    category: entry.category || "",
+                    desktopEntry: entry.desktopEntry || "",
                     timestamp: Number(entry.timestamp) || 0,
                 })
             }
 
             root.trimHistory()
+            root.rebuildGroups()
         } catch (error) {
             console.warn("Could not read notifications.json:", error)
         }
@@ -102,6 +116,73 @@ QtObject {
             entries.push(historyModel.get(i))
 
         historyFile.setText(JSON.stringify(entries, null, 2))
+    }
+
+    function groupKeyFor(appName, desktopEntry) {
+        const value = String(desktopEntry || appName || "").trim().toLowerCase()
+        return value.length > 0 ? value : "unknown"
+    }
+
+    function appLabel(appName, desktopEntry) {
+        const value = String(appName || desktopEntry || "").trim()
+        return value.length > 0 ? value : "Notification"
+    }
+
+    function rebuildGroups() {
+        if (!root.groupedHistoryModel)
+            return
+
+        const buckets = ({})
+
+        for (let i = 0; i < historyModel.count; ++i) {
+            const entry = historyModel.get(i)
+            const key = entry.groupKey || root.groupKeyFor(
+                entry.appName,
+                entry.desktopEntry
+            )
+
+            if (!buckets[key]) {
+                buckets[key] = {
+                    groupKey: key,
+                    appName: root.appLabel(entry.appName, entry.desktopEntry),
+                    items: [],
+                }
+            }
+
+            buckets[key].items.push({
+                historyIndex: i,
+                notificationId: entry.notificationId,
+                sessionId: entry.sessionId || "",
+                appName: entry.appName || "",
+                summary: entry.summary || "",
+                body: entry.body || "",
+                image: entry.image || "",
+                timestamp: Number(entry.timestamp) || 0,
+                urgency: entry.urgency || "normal",
+                category: entry.category || "",
+                desktopEntry: entry.desktopEntry || "",
+            })
+        }
+
+        root.groupedHistoryModel.clear()
+        Object.keys(buckets).forEach(key => {
+            const group = buckets[key]
+            root.groupedHistoryModel.append({
+                groupKey: group.groupKey,
+                appName: group.appName,
+                count: group.items.length,
+                // Nested arrays become QQmlListModel values when stored in a
+                // ListModel. Keep the older entries serialised so QML can
+                // expand them predictably in the center.
+                itemsJson: JSON.stringify(group.items.slice(1)),
+                latestAppName: group.items[0]?.appName || "",
+                latestSummary: group.items[0]?.summary || "",
+                latestBody: group.items[0]?.body || "",
+                latestImage: group.items[0]?.image || "",
+                latestTimestamp: group.items[0]?.timestamp || 0,
+                latestHistoryIndex: group.items[0]?.historyIndex ?? -1,
+            })
+        })
     }
 
     function trimHistory() {
@@ -123,11 +204,18 @@ QtObject {
         const entry = {
             notificationId,
             sessionId: root.sessionId,
-            appName: notification.appName || "",
+                appName: notification.appName || "",
             summary: notification.summary || "",
-            body: notification.body || "",
-            image: root.historyImage(notification),
-            timestamp: Date.now(),
+                body: notification.body || "",
+                image: root.historyImage(notification),
+                groupKey: root.groupKeyFor(
+                    notification.appName,
+                    notification.desktopEntry
+                ),
+                urgency: `${notification.urgency || "normal"}`,
+                category: notification.category || "",
+                desktopEntry: notification.desktopEntry || "",
+                timestamp: Date.now(),
         }
 
         for (let i = 0; i < historyModel.count; ++i) {
@@ -142,6 +230,7 @@ QtObject {
                 // but move it to the newest-first position.
                 if (i > 0) historyModel.move(i, 0, 1)
                 root.saveHistory()
+                root.rebuildGroups()
                 return
             }
         }
@@ -149,11 +238,13 @@ QtObject {
         historyModel.insert(0, entry)
         root.trimHistory()
         root.saveHistory()
+        root.rebuildGroups()
     }
 
     function clearHistory() {
         historyModel.clear()
         root.saveHistory()
+        root.rebuildGroups()
     }
 
     function removeHistory(index) {
@@ -164,6 +255,7 @@ QtObject {
         if (entry.sessionId === root.sessionId) root.close(entry.notificationId)
         historyModel.remove(index)
         root.saveHistory()
+        root.rebuildGroups()
     }
 
     function toggleCenter() {
@@ -301,6 +393,13 @@ QtObject {
                     summary: notification.summary,
                     body: notification.body,
                     image: notification.image,
+                    groupKey: root.groupKeyFor(
+                        notification.appName,
+                        notification.desktopEntry
+                    ),
+                    urgency: `${notification.urgency || "normal"}`,
+                    category: notification.category || "",
+                    desktopEntry: notification.desktopEntry || "",
                     actions: extracted.actions,
                     notificationActions: notification.actions,
                     receivedAt: Date.now(),
@@ -347,6 +446,13 @@ QtObject {
             summary: notification.summary,
             body: notification.body,
             image: notification.image,
+            groupKey: root.groupKeyFor(
+                notification.appName,
+                notification.desktopEntry
+            ),
+            urgency: `${notification.urgency || "normal"}`,
+            category: notification.category || "",
+            desktopEntry: notification.desktopEntry || "",
             actions: extracted.actions,
             notificationActions: notification.actions,
             receivedAt: Date.now(),
@@ -356,6 +462,39 @@ QtObject {
         const key = root.toNotificationId(notification.id)
         notificationObjects[key] = notification
         notificationActionObjects[key] = extracted.actionMap
+    }
+
+    function liveGroupCount(groupKey) {
+        if (!groupKey)
+            return 0
+
+        let count = 0
+        for (let i = 0; i < notificationModel.count; ++i) {
+            if (notificationModel.get(i).groupKey === groupKey)
+                count++
+        }
+        return count
+    }
+
+    function twoFactorCode(text) {
+        const value = String(text || "")
+        const match = value.match(/(?:^|\s)(\d{6,8})(?:\s|$)/)
+        return match ? match[1] : ""
+    }
+
+    function copyTwoFactorCode(text, screenName) {
+        const code = root.twoFactorCode(text)
+        if (!code || typeof ClipboardService === "undefined")
+            return false
+
+        ClipboardService.copy(code)
+        ToastService.push(
+            screenName || "",
+            "content_copy",
+            "Código copiado",
+            "El código de verificación está en el portapapeles."
+        )
+        return true
     }
 
     function remove(notificationId) {

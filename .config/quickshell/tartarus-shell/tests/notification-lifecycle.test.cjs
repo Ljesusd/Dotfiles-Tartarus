@@ -26,6 +26,7 @@ class Model {
 
 function fixture() {
     const historyModel = new Model();
+    const groupedHistoryModel = new Model();
     const notificationModel = new Model();
     const Hyprland = { focusedMonitor: { name: 'DP-2' } };
     let saved = '[]';
@@ -33,6 +34,7 @@ function fixture() {
     const historyFile = { text: () => saved, setText: value => { saved = value; } };
     const root = {
         sessionId: 'isolated-test', historyLimit: 100, dnd: false,
+        groupingEnabled: true, groupedHistoryModel,
         notificationObjects: {}, notificationActionObjects: {},
     };
     const context = createContext({
@@ -55,7 +57,15 @@ function fixture() {
             dismiss() { this.dismissCalls++; root.remove(this.id); },
         };
     }
-    return { root, historyModel, notificationModel, Hyprland, notification, historyFile };
+    return {
+        root,
+        historyModel,
+        groupedHistoryModel,
+        notificationModel,
+        Hyprland,
+        notification,
+        historyFile,
+    };
 }
 
 test('replacement updates one entity and retains its original monitor', () => {
@@ -152,4 +162,22 @@ test('DND records replacements without allowing a popup', () => {
     assert.equal(f.historyModel.count, 1);
     assert.equal(f.historyModel.get(0).body, 'Updated silently');
     assert.equal(f.root.popupVisible(1, 'DP-2', 3), false);
+});
+
+test('history groups notifications by application without losing entries', () => {
+    const f = fixture();
+    f.root.add(f.notification(1, 'First'));
+    f.root.add(f.notification(2, 'Second'));
+    assert.equal(f.groupedHistoryModel.count, 1);
+    const group = f.groupedHistoryModel.get(0);
+    assert.equal(group.count, 2);
+    assert.equal(group.appName, 'Test');
+    assert.equal(JSON.parse(group.itemsJson).length, 1);
+    assert.equal(group.latestSummary, 'Same title');
+});
+
+test('six to eight digit notification codes can be copied safely', () => {
+    const f = fixture();
+    assert.equal(f.root.twoFactorCode('Your verification code is 123456'), '123456');
+    assert.equal(f.root.twoFactorCode('No code here'), '');
 });
