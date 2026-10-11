@@ -4,70 +4,71 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../services" as Services
 import "../theme"
+import "../launcher/components" as LauncherComponents
 
 Scope {
     id: root
 
     required property ShellScreen monitorScreen
     required property var monitorContext
+    required property Item anchorItem
+    required property Item anchorSurface
 
     readonly property var groups: Services.NotificationService.groupedHistory
+    readonly property real panelWidth: Math.min(
+        440,
+        Math.max(300, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
+    )
+    readonly property real panelHeight: Math.min(
+        720,
+        Math.max(
+            420,
+            (root.monitorScreen?.height ?? 800)
+                - Style.barHeight
+                - Style.paddingLarge * 2
+        )
+    )
 
-    PanelWindow {
-        screen: root.monitorScreen
-        anchors {
-            top: true
-            bottom: true
-            right: true
-        }
-        margins {
-            top: Style.barHeight + Style.spacingLarge
-            right: Style.spacingLarge
-            bottom: Style.spacingLarge
-        }
+    PopupWindow {
+        anchor.item: root.anchorItem
+        anchor.edges: Edges.Top
+        anchor.gravity: Edges.Top
+        anchor.adjustment: PopupAdjustment.Slide
         implicitWidth: Math.min(
-            440,
-            Math.max(300, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
+            root.panelWidth + notificationSurface.horizontalInset * 2,
+            Math.max(1, root.monitorScreen?.width ?? 1280)
         )
-        implicitHeight: Math.min(
-            720,
-            Math.max(420, (root.monitorScreen?.height ?? 800)
-                - Style.barHeight - Style.spacingLarge * 2)
-        )
+        implicitHeight: root.panelHeight
+            + Style.barPopupGap * 2
+            + notificationSurface.shadowPadding
         color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        visible: Services.NotificationService.centerOpen || drawer.opacity > 0
+        visible: Services.NotificationService.centerOpen
+            || notificationSurface.reveal > 0
+        mask: Region { item: notificationSurface.maskItem }
 
-        Rectangle {
-            id: drawer
-            x: Services.NotificationService.centerOpen ? 0 : width
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: parent.width
-            opacity: Services.NotificationService.centerOpen ? 1 : 0
-            clip: true
-            radius: Style.panelRadius
-            color: Color.surfaceContainer
-            border.width: Style.panelBorderWidth
-            border.color: Color.outlineVariant
+        LauncherComponents.LauncherSurface {
+            id: notificationSurface
+            anchors.fill: parent
+            opened: Services.NotificationService.centerOpen
+            contentWidth: root.panelWidth
+            contentHeight: root.panelHeight
 
-            Behavior on x {
-                NumberAnimation {
-                    duration: Style.motionNormal
-                    easing.type: Easing.OutCubic
-                }
-            }
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Style.motionFast
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            ColumnLayout {
+            Item {
+                id: drawer
+                parent: notificationSurface.contentItem
                 anchors.fill: parent
-                anchors.margins: Style.paddingLarge
-                spacing: Style.spacingMedium
+                clip: true
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "transparent"
+                }
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Style.paddingLarge
+                    anchors.bottomMargin: Style.paddingLarge + Style.barPopupGap * 2
+                    spacing: Style.spacingMedium
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -267,25 +268,48 @@ Scope {
                     }
                 }
 
-                RowLayout {
+                Rectangle {
                     Layout.fillWidth: true
-                    MaterialIcon {
-                        text: Services.NotificationService.dnd
-                            ? "notifications_off"
-                            : "notifications"
-                        color: Services.NotificationService.dnd
-                            ? Color.tertiaryContainer
-                            : Color.foregroundMuted
-                        font.pixelSize: Style.materialIconSmall
+                    Layout.preferredHeight: 1
+                    color: Color.surfaceHover
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    Layout.leftMargin: Style.paddingSmall
+                    Layout.rightMargin: Style.paddingSmall
+                    radius: Style.controlRadius
+                    color: Color.surfaceElevated
+                    border.width: 1
+                    border.color: Color.outlineVariant
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: Style.paddingSmall
+                        anchors.rightMargin: Style.paddingSmall
+                        spacing: Style.spacingSmall
+
+                        MaterialIcon {
+                            text: Services.NotificationService.dnd
+                                ? "notifications_off"
+                                : "notifications"
+                            color: Services.NotificationService.dnd
+                                ? Color.tertiaryContainer
+                                : Color.foregroundMuted
+                            font.pixelSize: Style.materialIconSmall
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: Services.NotificationService.dnd
+                                ? "No molestar activo"
+                                : "Notificaciones activas"
+                            color: Color.foregroundMuted
+                            font.pixelSize: Style.fontSmall
+                            elide: Text.ElideRight
+                        }
                     }
-                    Text {
-                        Layout.fillWidth: true
-                        text: Services.NotificationService.dnd
-                            ? "No molestar activo"
-                            : "Notificaciones activas"
-                        color: Color.foregroundMuted
-                        font.pixelSize: Style.fontSmall
-                    }
+                }
                 }
             }
         }

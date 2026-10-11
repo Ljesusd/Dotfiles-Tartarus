@@ -15,6 +15,8 @@ PanelWindow {
     required property var monitorContext
     required property var shellState
     required property var pluginRegistry
+    readonly property Item notificationAnchor: notificationPopupAnchor
+    readonly property Item popupAnchorSurface: barSurface
     readonly property var launcherAnchor:
         launcherPopupAnchor
 
@@ -307,6 +309,35 @@ PanelWindow {
             // seam without covering the controls inside the bar.
             y: 0
             width: Style.launcherWidth
+            height: 1
+            opacity: 0
+        }
+
+        // Use the same wide invisible anchor as the launcher. Anchoring the
+        // notification drawer to the icon itself makes the compositor align
+        // the popup by its left edge; this keeps the curved bridge centered on
+        // the notification control while still allowing edge adjustment.
+        Item {
+            id: notificationPopupAnchor
+
+            readonly property real anchorWidth: Math.min(
+                440,
+                Math.max(300, barSurface.width - Style.spacingLarge * 2)
+            )
+
+            x: Math.max(
+                0,
+                Math.min(
+                    barSurface.width - width,
+                    barSurface.mapFromItem(
+                        notificationIcon,
+                        notificationIcon.width / 2,
+                        0
+                    ).x - width / 2
+                )
+            )
+            y: 0
+            width: anchorWidth
             height: 1
             opacity: 0
         }

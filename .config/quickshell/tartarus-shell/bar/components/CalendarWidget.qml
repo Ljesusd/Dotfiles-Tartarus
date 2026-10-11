@@ -24,6 +24,28 @@ Item {
 
     readonly property var monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
     readonly property var weekdayNames: ["L", "M", "X", "J", "V", "S", "D"]
+    // Keep the native popup envelope identical to launcher, tray and
+    // notifications. The extra space belongs to the transparent window; the
+    // shared surface is what actually touches the bar.
+    readonly property real popupContentWidth: Math.min(
+        680,
+        Math.max(
+            360,
+            (root.anchorSurface?.width ?? 1280)
+                - surface.horizontalInset * 2
+        )
+    )
+    readonly property real popupContentHeight: Math.min(
+        610,
+        Math.max(
+            420,
+            (root.anchorSurface?.screen?.height ?? 800)
+                - Style.barHeight
+                - Style.paddingLarge * 2
+                - Style.barPopupGap * 2
+                - surface.shadowPadding
+        )
+    )
 
     function dateKey(date) {
         return Qt.formatDate(date, "yyyy-MM-dd")
@@ -172,8 +194,10 @@ Item {
         anchor.edges: Edges.Top
         anchor.gravity: Edges.Top
         anchor.adjustment: PopupAdjustment.Slide
-        implicitWidth: Math.min(680, Math.max(360, (root.anchorSurface?.width || 1280) - 32))
-        implicitHeight: 610
+        implicitWidth: root.popupContentWidth + surface.horizontalInset * 2
+        implicitHeight: root.popupContentHeight
+            + Style.barPopupGap * 2
+            + surface.shadowPadding
         color: "transparent"
         visible: root.popupOpen || surface.reveal > 0
         mask: Region { item: surface.maskItem }
@@ -182,8 +206,8 @@ Item {
             id: surface
             anchors.fill: parent
             opened: root.popupOpen
-            contentWidth: popup.width - horizontalInset * 2
-            contentHeight: popup.height - shadowPadding
+            contentWidth: root.popupContentWidth
+            contentHeight: root.popupContentHeight
 
             ColumnLayout {
                 parent: surface.contentItem
@@ -191,7 +215,7 @@ Item {
                 anchors.leftMargin: Style.paddingLarge
                 anchors.rightMargin: Style.paddingLarge
                 anchors.topMargin: Style.paddingLarge
-                anchors.bottomMargin: Style.paddingLarge
+                anchors.bottomMargin: Style.paddingLarge + Style.barPopupGap * 2
                 spacing: Style.spacingMedium
 
                 RowLayout {

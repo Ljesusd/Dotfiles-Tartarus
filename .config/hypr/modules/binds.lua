@@ -90,11 +90,11 @@ hl.bind(
 )
 hl.bind(
     mainMod .. " + PRINT",
-    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh area")
+    hl.dsp.exec_cmd("bash $HOME/.config/quickshell/tartarus-shell/scripts/capture.sh area")
 )
 hl.bind(
     mainMod .. " + SHIFT + PRINT",
-    hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh monitor")
+    hl.dsp.exec_cmd("bash $HOME/.config/quickshell/tartarus-shell/scripts/capture.sh monitor")
 )
 
 -- Scroll through existing workspaces with mainMod + scroll

@@ -2,6 +2,7 @@ pragma Singleton
 import QtQml
 import Quickshell
 import Quickshell.Io
+import "." as Services
 QtObject {
     id: root
     property bool available: false
@@ -131,6 +132,14 @@ QtObject {
     }
     property Process settingsWrite: Process {}
     property Process alertProc: Process {}
-    property Timer pollTimer: Timer { interval: 2000; repeat: true; running: root.monitoringEnabled; triggeredOnStart: true; onTriggered: root.refresh() }
+    // Hardware telemetry is useful while browsing the panel, but polling it
+    // every two seconds during a game only adds wakeups and Python launches.
+    property Timer pollTimer: Timer {
+        interval: Services.PerformanceService.gaming ? 10000 : 2000
+        repeat: true
+        running: root.monitoringEnabled
+        triggeredOnStart: true
+        onTriggered: root.refresh()
+    }
     Component.onCompleted: root.settingsRead.running=true
 }

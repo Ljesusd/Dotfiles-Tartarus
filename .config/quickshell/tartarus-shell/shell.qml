@@ -139,6 +139,12 @@ ShellRoot {
         function shutdown(): void { PowerService.shutdown() }
     }
 
+    IpcHandler {
+        target: "performance"
+        function setGaming(enabled: bool): void { PerformanceService.setGaming(enabled) }
+        function toggleGaming(): void { PerformanceService.toggleGaming() }
+    }
+
     GlobalShortcut {
         name: "notification-dnd"
         description: "Toggle notification Do Not Disturb"

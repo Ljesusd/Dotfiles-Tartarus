@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Dialogs
 import Quickshell.Services.Pipewire
 import Quickshell.Io
 import "../services" as Services
@@ -36,35 +37,45 @@ FloatingWindow {
     property int appearanceSchemeIndex: 0
     property string fastfetchPackageCount: "—"
     property string profileImageSource: ""
+    property string profileImagePath: ""
     property string speedTestPhase: "idle"
     property string speedTestError: ""
     property bool speedTestResultReady: false
     property real speedTestDownload: -1
     property real speedTestUpload: -1
     property real speedTestPing: -1
-    readonly property color lyneBackground: "#171925"
-    readonly property color lyneSurface: "#20243a"
-    readonly property color lyneSurfaceHigh: "#282e48"
-    readonly property color lyneSurfaceHover: "#303957"
-    readonly property color lyneAccent: "#83aef7"
-    readonly property color lyneText: "#d9e1ff"
-    readonly property color lyneMuted: "#9ba7ca"
+    // Neutral graphite palette: the settings pages share the same restrained
+    // technical language as the Profile dossier, while status colors below
+    // still communicate warnings and active devices.
+    readonly property color lyneBackground: "#111216"
+    readonly property color lyneSurface: "#191a1e"
+    readonly property color lyneSurfaceHigh: "#24262b"
+    readonly property color lyneSurfaceHover: "#303238"
+    readonly property color lyneAccent: "#d8d6cf"
+    readonly property color lyneText: "#f0eee8"
+    readonly property color lyneMuted: "#9b9c98"
     readonly property var navigationItems: [
         { header: "OVERVIEW" },
-        { label: "Inicio", icon: "home", page: 0 },
-        { header: "CONNECTIVITY" },
-        { label: "Wi‑Fi", icon: "wifi", page: 1 },
+        { label: "Profile", icon: "badge", page: 0 },
+        { label: "Global", icon: "tune", page: 11 },
+        { header: "DEVICES" },
+        { label: "Displays", icon: "monitor", page: 9 },
+        { label: "Connections", icon: "wifi", page: 1 },
         { label: "Bluetooth", icon: "bluetooth", page: 2 },
-        { label: "Output", icon: "volume_up", page: 3 },
         { label: "Input", icon: "mic", page: 4 },
-        { header: "APPEARANCE & SHELL" },
-        { label: "Apariencia", icon: "palette", page: 5 },
-        { label: "Atajos", icon: "keyboard", page: 7 },
-        { header: "SYSTEM" },
-        { label: "Hardware", icon: "memory", page: 6 },
-        { label: "Monitores", icon: "monitor", page: 9 },
-        { label: "Calendario", icon: "calendar_month", page: 10 },
-        { label: "Sesión", icon: "power_settings_new", page: 8 }
+        { label: "Cursor", icon: "mouse", page: 13 },
+        { label: "Machine", icon: "memory", page: 6 },
+        { header: "DESKTOP" },
+        { label: "Windows", icon: "window", page: 12 },
+        { label: "Appearance", icon: "palette", page: 5 },
+        { label: "Bar Studio", icon: "view_quilt", page: 15 },
+        { label: "Desktop", icon: "desktop_windows", page: 14 },
+        { label: "Widgets", icon: "widgets", page: 16 },
+        { header: "TOOLS" },
+        { label: "Sound", icon: "volume_up", page: 3 },
+        { label: "Shortcuts", icon: "keyboard", page: 7 },
+        { label: "Calendar", icon: "calendar_month", page: 10 },
+        { label: "Session", icon: "power_settings_new", page: 8 }
     ]
     property real presentationOpacity: shellState.controlCenterOpen ? 1 : 0
     visible: shellState.controlCenterOpen || presentationOpacity > 0
@@ -78,7 +89,7 @@ FloatingWindow {
 
     function syncHardwareMonitoring() {
         Services.HardwareService.setConsumerActive("control-center-hardware",
-            Boolean(root.shellState?.controlCenterOpen && root.page === 6))
+            Boolean(root.shellState?.controlCenterOpen && (root.page === 0 || root.page === 6)))
         Services.MonitorService.active = Boolean(root.shellState?.controlCenterOpen && root.page === 9)
     }
 
@@ -152,15 +163,49 @@ FloatingWindow {
             waitForEnd: true
             onStreamFinished: {
                 const path = this.text.trim()
-                if (path !== "")
+                if (path !== "") {
+                    root.profileImagePath = path
                     root.profileImageSource = "file://" + path
+                }
             }
         }
+    }
+
+    readonly property Process profileImageCopyProcess: Process {
+        id: profileImageCopyProcess
+        stdout: StdioCollector { waitForEnd: true }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0 && root.profileImagePath !== "")
+                root.profileImageSource = "file://" + root.profileImagePath
+        }
+    }
+
+    readonly property Process profileFolderLinkProcess: Process {
+        command: ["sh", "-c", "home=\"$1\"; target=\"$home/Pictures/Face\"; if [ -L \"$target\" ] || [ ! -e \"$target\" ]; then ln -sfn \"$home/.face\" \"$target\"; fi", "tartarus-profile-link", Quickshell.env("HOME")]
+    }
+
+    FileDialog {
+        id: profileFileDialog
+        title: "Elegir imagen de perfil"
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["Imágenes (*.png *.jpg *.jpeg *.webp)", "Todos los archivos (*)"]
+        onAccepted: root.selectProfileImage(selectedFile)
+    }
+
+    function selectProfileImage(url) {
+        const source = decodeURIComponent(String(url).replace(/^file:\/\//, ""))
+        const match = source.match(/\.([a-zA-Z0-9]+)$/)
+        const extension = match ? match[1].toLowerCase() : "png"
+        const destination = Quickshell.env("HOME") + "/.face/tartarus-profile." + extension
+        root.profileImagePath = destination
+        root.profileImageCopyProcess.command = ["sh", "-c", "mkdir -p \"$1\" && cp -- \"$2\" \"$3\"", "tartarus-profile-copy", Quickshell.env("HOME") + "/.face", source, destination]
+        root.profileImageCopyProcess.running = true
     }
 
     Component.onCompleted: {
         root.fastfetchPackagesProcess.running = true
         root.profileImageProcess.running = true
+        root.profileFolderLinkProcess.running = true
     }
 
     Connections {
@@ -243,7 +288,7 @@ FloatingWindow {
         radius: Style.panelRadius + 4
         color: root.lyneBackground
         border.width: Style.panelBorderWidth
-        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.75)
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
 
         ToolButton {
             anchors.top: parent.top
@@ -323,23 +368,42 @@ FloatingWindow {
                     MaterialIcon { text: "arrow_forward"; iconSize: Style.materialIconSmall; iconColor: root.pageHistoryIndex < root.pageHistory.length - 1 ? root.lyneText : root.lyneMuted; opacity: root.pageHistoryIndex < root.pageHistory.length - 1 ? 1 : .45; TapHandler { onTapped: root.goForward() } }
                     Item { Layout.fillWidth: true }
                 }
-                Text { text: "OVERVIEW"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1 }
-                Nav { label: "Inicio"; icon: "home"; visible: root.matchesNavigation(label); selected: root.page === 0; onClicked: root.navigate(0) }
-                Text { text: "CONNECTIVITY"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
-                Nav { label: "Wi‑Fi"; icon: "wifi"; visible: root.matchesNavigation(label); selected: root.page === 1; onClicked: root.navigate(1) }
-                Nav { label: "Bluetooth"; icon: "bluetooth"; visible: root.matchesNavigation(label); selected: root.page === 2; onClicked: root.navigate(2) }
-                Nav { label: "Output"; icon: "volume_up"; visible: root.matchesNavigation(label); selected: root.page === 3; onClicked: root.navigate(3) }
-                Nav { label: "Input"; icon: "mic"; visible: root.matchesNavigation(label); selected: root.page === 4; onClicked: root.navigate(4) }
-                Text { text: "APPEARANCE & SHELL"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
-                Nav { label: "Apariencia"; icon: "palette"; visible: root.matchesNavigation(label); selected: root.page === 5; onClicked: root.navigate(5) }
-                Nav { label: "Atajos"; icon: "keyboard"; visible: root.matchesNavigation(label); selected: root.page === 7; onClicked: root.navigate(7) }
-                Text { text: "SYSTEM"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
-                Nav { label: "Hardware"; icon: "memory"; visible: root.matchesNavigation(label); selected: root.page === 6; onClicked: root.navigate(6) }
-                Nav { label: "Monitores"; icon: "monitor"; visible: root.matchesNavigation(label); selected: root.page === 9; onClicked: root.navigate(9) }
-                Nav { label: "Calendario"; icon: "calendar_month"; visible: root.matchesNavigation(label); selected: root.page === 10; onClicked: root.navigate(10) }
-                Nav { label: "Sesión"; icon: "power_settings_new"; visible: root.matchesNavigation(label); selected: root.page === 8; onClicked: root.navigate(8) }
-                Item { Layout.fillHeight: true }
-                Nav { label: "Cerrar"; icon: "close"; onClicked: root.shellState.closeControlCenter() }
+                Flickable {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    contentWidth: width
+                    contentHeight: navList.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    ColumnLayout {
+                        id: navList
+                        width: parent.width
+                        spacing: Style.spacingXs
+                        Text { text: "OVERVIEW"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1 }
+                        Nav { label: "Profile"; icon: "badge"; visible: root.matchesNavigation(label); selected: root.page === 0; onClicked: root.navigate(0) }
+                        Nav { label: "Global"; icon: "tune"; visible: root.matchesNavigation(label); selected: root.page === 11; onClicked: root.navigate(11) }
+                        Text { text: "DEVICES"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
+                        Nav { label: "Displays"; icon: "monitor"; visible: root.matchesNavigation(label); selected: root.page === 9; onClicked: root.navigate(9) }
+                        Nav { label: "Connections"; icon: "wifi"; visible: root.matchesNavigation(label); selected: root.page === 1; onClicked: root.navigate(1) }
+                        Nav { label: "Bluetooth"; icon: "bluetooth"; visible: root.matchesNavigation(label); selected: root.page === 2; onClicked: root.navigate(2) }
+                        Nav { label: "Input"; icon: "mic"; visible: root.matchesNavigation(label); selected: root.page === 4; onClicked: root.navigate(4) }
+                        Nav { label: "Cursor"; icon: "mouse"; visible: root.matchesNavigation(label); selected: root.page === 13; onClicked: root.navigate(13) }
+                        Nav { label: "Machine"; icon: "memory"; visible: root.matchesNavigation(label); selected: root.page === 6; onClicked: root.navigate(6) }
+                        Text { text: "DESKTOP"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
+                        Nav { label: "Windows"; icon: "window"; visible: root.matchesNavigation(label); selected: root.page === 12; onClicked: root.navigate(12) }
+                        Nav { label: "Appearance"; icon: "palette"; visible: root.matchesNavigation(label); selected: root.page === 5; onClicked: root.navigate(5) }
+                        Nav { label: "Bar Studio"; icon: "view_quilt"; visible: root.matchesNavigation(label); selected: root.page === 15; onClicked: root.navigate(15) }
+                        Nav { label: "Desktop"; icon: "desktop_windows"; visible: root.matchesNavigation(label); selected: root.page === 14; onClicked: root.navigate(14) }
+                        Nav { label: "Widgets"; icon: "widgets"; visible: root.matchesNavigation(label); selected: root.page === 16; onClicked: root.navigate(16) }
+                        Text { text: "TOOLS"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
+                        Nav { label: "Sound"; icon: "volume_up"; visible: root.matchesNavigation(label); selected: root.page === 3; onClicked: root.navigate(3) }
+                        Nav { label: "Shortcuts"; icon: "keyboard"; visible: root.matchesNavigation(label); selected: root.page === 7; onClicked: root.navigate(7) }
+                        Nav { label: "Calendar"; icon: "calendar_month"; visible: root.matchesNavigation(label); selected: root.page === 10; onClicked: root.navigate(10) }
+                        Nav { label: "Session"; icon: "power_settings_new"; visible: root.matchesNavigation(label); selected: root.page === 8; onClicked: root.navigate(8) }
+                    }
+                }
+                Nav { label: "Cerrar"; icon: "close"; Layout.topMargin: Style.spacingSmall; onClicked: root.shellState.closeControlCenter() }
             }
         }
 
@@ -348,155 +412,10 @@ FloatingWindow {
             Layout.fillHeight: true
             currentIndex: root.page
             Page {
-                icon: "home"
-                title: "Centro de control"
-                subtitle: "Configuración rápida y estado del entorno"
-                ProfileHeader {}
-                SettingCard {
-                    title: "Ubicación y hora"
-                    icon: "location_on"
-                    subtitle: "Se usa para el clima y el reloj de la Dynamic Island"
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Ubicación del PC"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
-                        StyledSwitch {
-                            checked: Services.QuickSettingsState.weatherAutoLocation
-                            onToggled: Services.QuickSettingsState.setWeatherAutoLocation(checked)
-                        }
-                    }
-                    Text {
-                        text: Services.QuickSettingsState.weatherAutoLocation
-                            ? "Ciudad aproximada por IP: " + (Services.WeatherService.location || "Detectando…")
-                            : "Ciudad fijada: " + (Services.QuickSettingsState.weatherPlace?.label || Services.WeatherService.location || Services.QuickSettingsState.weatherLocation)
-                        color: root.lyneMuted
-                        font.pixelSize: 12
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Lugar"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120; Layout.alignment: Qt.AlignTop; topPadding: 10 }
-                        LauncherComponents.WeatherLocationPicker {
-                            id: locationField
-                            enabled: !Services.QuickSettingsState.weatherAutoLocation
-                            active: root.visible && root.page === 0 && !Services.QuickSettingsState.weatherAutoLocation
-                            Layout.fillWidth: true
-                            text: Services.QuickSettingsState.weatherPlace?.label || Services.QuickSettingsState.weatherLocation
-                            textColor: root.lyneText
-                            mutedColor: root.lyneMuted
-                            surfaceColor: root.lyneSurfaceHigh
-                            accentColor: root.lyneAccent
-                            onLocationSelected: place => Services.QuickSettingsState.setWeatherPlace(place)
-                        }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Zona horaria"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120 }
-                        TextField {
-                            id: timezoneField
-                            Layout.fillWidth: true
-                            text: Services.QuickSettingsState.timeZone
-                            placeholderText: "Europe/Madrid"
-                            color: root.lyneText
-                            placeholderTextColor: root.lyneMuted
-                            selectByMouse: true
-                            leftPadding: 12
-                            rightPadding: 12
-                            background: Rectangle {
-                                radius: Style.controlRadius
-                                color: root.lyneSurfaceHigh
-                                border.width: timezoneField.activeFocus ? 1 : 0
-                                border.color: root.lyneAccent
-                            }
-                            onEditingFinished: Services.QuickSettingsState.setTimeZone(text)
-                        }
-                    }
-                    Text { text: "Ejemplo: Europe/Madrid, America/Argentina/Buenos_Aires o America/New_York"; color: root.lyneMuted; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                }
-                SettingCard {
-                    title: "Fastfetch"
-                    icon: "terminal"
-                    subtitle: root.hardware.ready
-                        ? (root.hardware.data?.os?.distro || "Información del sistema")
-                        : "Recopilando información del sistema…"
-                    headerInfo: root.hardware.ready ? "Activo" : "Cargando…"
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: Math.max(188, fastfetchContent.implicitHeight + Style.paddingMedium * 2)
-                        radius: Style.controlRadius
-                        color: root.lyneBackground
-                        border.width: 1
-                        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
-
-                        GridLayout {
-                            id: fastfetchContent
-                            anchors.fill: parent
-                            anchors.margins: Style.paddingMedium
-                            columns: width >= 560 ? 2 : 1
-                            columnSpacing: Style.paddingLarge
-                            rowSpacing: Style.spacingMedium
-
-                            Text {
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 0
-                                Layout.preferredHeight: 164
-                                Layout.preferredWidth: fastfetchContent.columns === 2
-                                    ? fastfetchContent.width * 0.52 : fastfetchContent.width
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                                clip: true
-                                text: root.fastfetchLogoFile.text()
-                                textFormat: Text.PlainText
-                                color: root.lyneAccent
-                                font.family: "monospace"
-                                font.pixelSize: 8
-                                font.letterSpacing: 0
-                                lineHeight: 0.94
-                                lineHeightMode: Text.ProportionalHeight
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                                scale: Math.min(
-                                    1,
-                                    158 / Math.max(1, implicitHeight),
-                                    (fastfetchContent.width * 0.48) / Math.max(1, implicitWidth)
-                                )
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 0
-                                Layout.alignment: Qt.AlignVCenter
-                                spacing: 1
-                                FastfetchBoxLine { lineText: "╭───────────────────────────────────╮"; accent: root.lyneAccent }
-                                FastfetchLine { label: "kernel"; value: root.hardware.data?.os?.kernel || "—"; accent: root.lyneAccent }
-                                FastfetchLine { label: "uptime"; value: root.hardware.data?.os?.uptime || "—"; accent: "#f5b86b" }
-                                FastfetchLine { label: "shell"; value: "fish"; accent: root.lyneAccent }
-                                FastfetchLine {
-                                    label: "mem"
-                                    value: root.hardware.data?.memory
-                                        ? root.hardware.data.memory.used_gb.toFixed(1) + " / " + root.hardware.data.memory.total_gb.toFixed(1) + " GiB"
-                                        : "—"
-                                    accent: "#f26d78"
-                                }
-                                FastfetchLine {
-                                    label: "user"
-                                    value: Quickshell.env("USER") || "—"
-                                    accent: root.lyneAccent
-                                }
-                                FastfetchLine { label: "pkgs"; value: root.fastfetchPackageCount; accent: "#a8dba8" }
-                                FastfetchLine { label: "hname"; value: root.hardware.data?.os?.hostname || "—"; accent: "#f5b86b" }
-                                FastfetchLine { label: "distro"; value: root.hardware.data?.os?.distro || "—"; accent: "#b89cf5" }
-                                FastfetchBoxLine { lineText: "╰───────────────────────────────────╯"; accent: root.lyneAccent }
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        ActionButton { text: "Actualizar"; onClicked: root.hardware.refresh() }
-                        ActionButton { text: "Abrir hardware"; onClicked: root.navigate(6) }
-                    }
-                }
+                icon: "badge"
+                title: "Profile"
+                subtitle: "System dossier · live telemetry"
+                ProfileDossier {}
             }
             Page {
                 icon: "wifi"
@@ -874,6 +793,37 @@ FloatingWindow {
                     }
                 }
             }
+            GlobalPage {}
+            PlaceholderPage {
+                icon: "window"
+                title: "Windows"
+                subtitle: "Ventanas y reglas del compositor"
+                detail: "Aquí se reunirán las reglas, grupos y comportamiento de las ventanas de Hyprland."
+            }
+            PlaceholderPage {
+                icon: "mouse"
+                title: "Cursor"
+                subtitle: "Puntero y entrada visual"
+                detail: "Los ajustes del cursor se gestionan desde la configuración de Hyprland y GTK."
+            }
+            PlaceholderPage {
+                icon: "desktop_windows"
+                title: "Desktop"
+                subtitle: "Espacios de trabajo y fondo"
+                detail: "La vista de escritorio se ampliará aquí con fondos, workspaces y comportamiento del shell."
+            }
+            PlaceholderPage {
+                icon: "view_quilt"
+                title: "Bar Studio"
+                subtitle: "Diseño y módulos de la barra"
+                detail: "Un espacio para ajustar la composición de la barra, sus módulos y sus márgenes."
+            }
+            PlaceholderPage {
+                icon: "widgets"
+                title: "Widgets"
+                subtitle: "Elementos flotantes del escritorio"
+                detail: "Aquí se podrán activar y organizar los widgets flotantes de Tartarus."
+            }
         }
     }
 
@@ -884,17 +834,18 @@ FloatingWindow {
         property bool selected: false
         signal clicked()
         Layout.fillWidth: true
-        Layout.preferredHeight: 42
-        radius: Style.radiusFull
-        color: selected ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.18) : navHover.hovered ? root.lyneSurfaceHover : "transparent"
+        Layout.preferredHeight: 34
+        radius: selected ? Style.radiusSmall : Style.radiusFull
+        color: selected ? root.lyneText : navHover.hovered ? root.lyneSurfaceHover : "transparent"
         Behavior on color { ColorAnimation { duration: Style.motionFast } }
         HoverHandler { id: navHover }
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
+            anchors.leftMargin: Style.paddingSmall
+            anchors.rightMargin: Style.paddingSmall
             spacing: Style.spacingSmall
-            Rectangle { Layout.preferredWidth: 28; Layout.preferredHeight: 28; radius: Style.radiusMedium; color: nav.selected ? root.lyneAccent : root.lyneSurfaceHigh; MaterialIcon { anchors.centerIn: parent; text: nav.icon; iconSize: Style.iconButtonIconSize - 2; iconColor: nav.selected ? root.lyneBackground : root.lyneMuted } }
-            Text { text: nav.label; color: nav.selected ? root.lyneAccent : root.lyneText; font.pixelSize: Style.fontSmall; font.bold: nav.selected; Layout.fillWidth: true }
+            MaterialIcon { Layout.preferredWidth: 20; text: nav.icon; iconSize: Style.materialIconSmall; iconColor: nav.selected ? root.lyneBackground : root.lyneMuted }
+            Text { text: nav.label; color: nav.selected ? root.lyneBackground : root.lyneText; font.pixelSize: Style.fontSmall; font.bold: nav.selected; Layout.fillWidth: true }
         }
         TapHandler { onTapped: nav.clicked() }
     }
@@ -921,11 +872,268 @@ FloatingWindow {
             spacing: Style.spacingMedium
             RowLayout {
                 Layout.fillWidth: true
+                Layout.bottomMargin: 4
                 spacing: Style.spacingMedium
-                Rectangle { Layout.preferredWidth: 48; Layout.preferredHeight: 48; radius: Style.radiusLarge; color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16); MaterialIcon { anchors.centerIn: parent; text: page.icon; iconSize: Style.materialIconLarge; iconColor: root.lyneAccent } }
-                ColumnLayout { Layout.fillWidth: true; Text { text: page.title; color: root.lyneText; font.pixelSize: 28; font.bold: true } Text { text: page.subtitle; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true } }
+                Rectangle {
+                    Layout.preferredWidth: 44
+                    Layout.preferredHeight: 44
+                    radius: Style.radiusSmall
+                    color: root.lyneSurfaceHigh
+                    border.width: 1
+                    border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.35)
+                    MaterialIcon { anchors.centerIn: parent; text: page.icon; iconSize: Style.materialIconLarge; iconColor: root.lyneAccent }
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+                    Text { text: page.title; color: root.lyneText; font.pixelSize: 27; font.bold: true; font.letterSpacing: 0.2 }
+                    Text { text: page.subtitle; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                }
+            }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16) }
+        }
+    }
+
+    component GlobalPage: Page {
+        icon: "tune"
+        title: "Global"
+        subtitle: "Preferencias generales del entorno Tartarus"
+
+        SettingCard {
+            title: "Ubicación y hora"
+            icon: "location_on"
+            subtitle: "Se usa para el clima y el reloj de la Dynamic Island"
+            RowLayout {
+                Layout.fillWidth: true
+                Text { text: "Ubicación del PC"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
+                StyledSwitch {
+                    checked: Services.QuickSettingsState.weatherAutoLocation
+                    onToggled: Services.QuickSettingsState.setWeatherAutoLocation(checked)
+                }
+            }
+            Text {
+                text: Services.QuickSettingsState.weatherAutoLocation
+                    ? "Ciudad aproximada por IP: " + (Services.WeatherService.location || "Detectando…")
+                    : "Ciudad fijada: " + (Services.QuickSettingsState.weatherPlace?.label || Services.WeatherService.location || Services.QuickSettingsState.weatherLocation)
+                color: root.lyneMuted
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Text { text: "Lugar"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120; Layout.alignment: Qt.AlignTop; topPadding: 10 }
+                LauncherComponents.WeatherLocationPicker {
+                    id: globalLocationField
+                    enabled: !Services.QuickSettingsState.weatherAutoLocation
+                    active: root.visible && root.page === 11 && !Services.QuickSettingsState.weatherAutoLocation
+                    Layout.fillWidth: true
+                    text: Services.QuickSettingsState.weatherPlace?.label || Services.QuickSettingsState.weatherLocation
+                    textColor: root.lyneText
+                    mutedColor: root.lyneMuted
+                    surfaceColor: root.lyneSurfaceHigh
+                    accentColor: root.lyneAccent
+                    onLocationSelected: place => Services.QuickSettingsState.setWeatherPlace(place)
+                }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Text { text: "Zona horaria"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120 }
+                TextField {
+                    id: globalTimezoneField
+                    Layout.fillWidth: true
+                    text: Services.QuickSettingsState.timeZone
+                    placeholderText: "Europe/Madrid"
+                    color: root.lyneText
+                    placeholderTextColor: root.lyneMuted
+                    selectByMouse: true
+                    leftPadding: 12
+                    rightPadding: 12
+                    background: Rectangle { radius: Style.controlRadius; color: root.lyneSurfaceHigh; border.width: globalTimezoneField.activeFocus ? 1 : 0; border.color: root.lyneAccent }
+                    onEditingFinished: Services.QuickSettingsState.setTimeZone(text)
+                }
+            }
+            Text { text: "Ejemplo: Europe/Madrid, America/Argentina/Buenos_Aires o America/New_York"; color: root.lyneMuted; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+        }
+
+        SettingCard {
+            title: "System summary"
+            icon: "terminal"
+            subtitle: root.hardware.ready ? (root.hardware.data?.os?.distro || "Arch Linux") : "Recopilando información del sistema…"
+            headerInfo: root.hardware.ready ? "LIVE" : "LOADING"
+            GridLayout {
+                Layout.fillWidth: true
+                columns: width >= 560 ? 2 : 1
+                columnSpacing: Style.paddingLarge
+                rowSpacing: 2
+                FastfetchLine { label: "kernel"; value: root.hardware.data?.os?.kernel || "—"; accent: root.lyneAccent }
+                FastfetchLine { label: "uptime"; value: root.hardware.data?.os?.uptime || "—"; accent: "#f5b86b" }
+                FastfetchLine { label: "shell"; value: "fish · Quickshell"; accent: root.lyneAccent }
+                FastfetchLine { label: "memory"; value: root.hardware.data?.memory ? root.hardware.data.memory.used_gb.toFixed(1) + " / " + root.hardware.data.memory.total_gb.toFixed(1) + " GiB" : "—"; accent: "#f26d78" }
+                FastfetchLine { label: "user"; value: Quickshell.env("USER") || "—"; accent: root.lyneAccent }
+                FastfetchLine { label: "pkgs"; value: root.fastfetchPackageCount; accent: "#a8dba8" }
+                FastfetchLine { label: "host"; value: root.hardware.data?.os?.hostname || "—"; accent: "#f5b86b" }
+                FastfetchLine { label: "distro"; value: root.hardware.data?.os?.distro || "—"; accent: "#b89cf5" }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                ActionButton { text: "Actualizar"; onClicked: root.hardware.refresh() }
+                ActionButton { text: "Abrir hardware"; onClicked: root.navigate(6) }
             }
         }
+    }
+
+    component PlaceholderPage: Page {
+        id: placeholder
+        property string detail: ""
+        SettingCard {
+            title: placeholder.title
+            icon: placeholder.icon
+            subtitle: placeholder.subtitle
+            Text { text: placeholder.detail; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+        }
+    }
+
+    component ProfileDossier: Rectangle {
+        id: dossier
+        Layout.fillWidth: true
+        implicitHeight: 610
+        radius: Style.cardRadius
+        color: "#0d0e12"
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.5)
+        clip: true
+
+        function rate(value) {
+            const bytes = Number(value) || 0
+            if (bytes < 1024) return Math.round(bytes) + " B/s"
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB/s"
+            return (bytes / 1024 / 1024).toFixed(1) + " MB/s"
+        }
+
+        Image {
+            id: dossierPortrait
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            width: Math.max(250, dossier.width * 0.45)
+            source: root.profileImageSource
+            sourceSize: Qt.size(900, 900)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            smooth: true
+            opacity: 0.32
+        }
+        Rectangle {
+            anchors.fill: dossierPortrait
+            color: "#0d0e12"
+            opacity: 0.58
+        }
+        Rectangle {
+            anchors.top: parent.top
+            anchors.right: dossierPortrait.left
+            anchors.bottom: parent.bottom
+            width: 160
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#0d0e12" }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+        }
+        Text {
+            anchors.right: parent.right
+            anchors.rightMargin: 24
+            anchors.verticalCenter: parent.verticalCenter
+            text: "TARTARUS"
+            color: Qt.rgba(1, 1, 1, 0.08)
+            font.pixelSize: Math.max(54, dossier.width * 0.13)
+            font.bold: true
+            rotation: -90
+        }
+        Rectangle {
+            x: dossier.width * 0.57
+            y: 34
+            width: 1
+            height: dossier.height - 68
+            color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.25)
+        }
+        ColumnLayout {
+            anchors.left: parent.left
+            anchors.leftMargin: 30
+            anchors.top: parent.top
+            anchors.topMargin: 28
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 28
+            width: Math.max(260, dossier.width * 0.52)
+            spacing: 8
+
+            Text { text: "// SYSTEM DOSSIER"; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 11; font.letterSpacing: 2 }
+            Text { text: "Leandro"; color: "#f2f2f2"; font.pixelSize: 42; font.bold: true }
+            Text { text: "A live specimen — Tartarus shell"; color: root.lyneMuted; font.pixelSize: 13; font.italic: true; Layout.fillWidth: true; elide: Text.ElideRight }
+            Text { text: "Arch Linux · Quickshell · Hyprland"; color: root.lyneAccent; font.pixelSize: 12; font.family: "monospace"; Layout.fillWidth: true; elide: Text.ElideRight }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(1, 1, 1, 0.18); Layout.topMargin: 10; Layout.bottomMargin: 8 }
+            Text { text: "●  LIVE TELEMETRY"; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 11; font.letterSpacing: 1 }
+            GridLayout {
+                Layout.fillWidth: true
+                columns: 2
+                columnSpacing: 20
+                rowSpacing: 12
+                DossierMetric { label: "CORE"; value: Services.HardwareService.cpuTemperature >= 0 ? Services.HardwareService.cpuTemperature.toFixed(0) + "°C" : "—"; detail: "CPU · " + Math.round(Services.HardwareService.cpuUsage) + "%" }
+                DossierMetric { label: "GRAPHICS"; value: Services.HardwareService.gpuTemperature >= 0 ? Services.HardwareService.gpuTemperature.toFixed(0) + "°C" : "—"; detail: "GPU · " + (Services.HardwareService.gpuUsage >= 0 ? Math.round(Services.HardwareService.gpuUsage) + "%" : "—") }
+                DossierMetric { label: "MEMORY"; value: Math.round(Services.HardwareService.memoryUsed) + "%"; detail: Services.HardwareService.memoryTotalGiB > 0 ? Services.HardwareService.memoryUsedGiB.toFixed(1) + " / " + Services.HardwareService.memoryTotalGiB.toFixed(1) + " GiB" : "—" }
+                DossierMetric { label: "NETWORK"; value: root.net?.activeInterface || "offline"; detail: "↓ " + dossier.rate(root.net?.downloadSpeed) + "  ↑ " + dossier.rate(root.net?.uploadSpeed) }
+            }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(1, 1, 1, 0.18); Layout.topMargin: 4; Layout.bottomMargin: 4 }
+            GridLayout {
+                Layout.fillWidth: true
+                columns: 2
+                columnSpacing: 16
+                rowSpacing: 4
+                DossierSpec { label: "RESOLUTION"; value: root.screen ? root.screen.width + "×" + root.screen.height : "—" }
+                DossierSpec { label: "COMPOSITOR"; value: "Hyprland" }
+                DossierSpec { label: "UPTIME"; value: root.hardware.data?.os?.uptime || "—" }
+                DossierSpec { label: "KERNEL"; value: root.hardware.data?.os?.kernel || "—" }
+                DossierSpec { label: "PACKAGES"; value: root.fastfetchPackageCount }
+                DossierSpec { label: "HOST"; value: root.hardware.data?.os?.hostname || "—" }
+            }
+            Item { Layout.fillHeight: true }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 3
+                Repeater {
+                    model: 42
+                    Rectangle { Layout.fillWidth: true; Layout.preferredWidth: 3 + (index % 4) * 2; height: index % 5 === 0 ? 22 : 12; color: index % 7 === 0 ? root.lyneAccent : Qt.rgba(1, 1, 1, 0.56) }
+                }
+            }
+            Text { text: "TARTARUS / LIVE PROFILE"; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 9; font.letterSpacing: 2 }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Style.spacingSmall
+                ActionButton { text: "Cambiar foto"; onClicked: profileFileDialog.open() }
+                Text { text: "~/.face · ~/Pictures/Face"; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true }
+            }
+        }
+    }
+
+    component DossierMetric: ColumnLayout {
+        id: metric
+        property string label: ""
+        property string value: "—"
+        property string detail: ""
+        Layout.fillWidth: true
+        spacing: 0
+        Text { text: metric.label; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 10; font.letterSpacing: 1 }
+        Text { text: metric.value; color: "#f2f2f2"; font.pixelSize: 25; font.bold: true }
+        Text { text: metric.detail; color: root.lyneAccent; font.family: "monospace"; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true }
+    }
+
+    component DossierSpec: RowLayout {
+        id: spec
+        property string label: ""
+        property string value: "—"
+        Layout.fillWidth: true
+        spacing: 6
+        Text { text: spec.label; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 9; Layout.preferredWidth: 78 }
+        Text { text: spec.value; color: "#e6e6e6"; font.family: "monospace"; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true }
     }
 
     component ProfileHeader: Rectangle {
@@ -1024,7 +1232,7 @@ FloatingWindow {
                 y: 3
                 x: styledSwitch.checked ? parent.width - width - 3 : 3
                 radius: Style.radiusFull
-                color: styledSwitch.checked ? root.lyneBackground : root.lyneMuted
+                color: styledSwitch.checked ? root.lyneBackground : root.lyneText
                 Behavior on x { NumberAnimation { duration: Style.motionFast; easing.type: Easing.OutCubic } }
                 Behavior on color { ColorAnimation { duration: Style.motionFast } }
             }
@@ -1038,8 +1246,10 @@ FloatingWindow {
         property color accent: root.lyneAccent
         Layout.fillWidth: true
         implicitHeight: 70
-        radius: Style.controlRadius
+        radius: Style.radiusSmall
         color: root.lyneSurfaceHigh
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12)
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: Style.paddingSmall
@@ -1058,25 +1268,33 @@ FloatingWindow {
         default property alias content: cardBody.data
         Layout.fillWidth: true
         implicitHeight: cardBody.implicitHeight + Style.paddingMedium * 2
-        radius: Style.cardRadius
+        radius: Style.radiusMedium
         color: root.lyneSurface
         border.width: 1
-        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.08)
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.18)
         ColumnLayout {
             id: cardBody
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingSmall
+            anchors.margins: Style.paddingLarge
+            spacing: Style.spacingMedium
             RowLayout {
                 Layout.fillWidth: true
-                Rectangle { Layout.preferredWidth: 30; Layout.preferredHeight: 30; radius: Style.radiusMedium; color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.14); MaterialIcon { anchors.centerIn: parent; text: card.icon; iconSize: Style.sectionIconSize; iconColor: root.lyneAccent } }
+                Rectangle {
+                    Layout.preferredWidth: 28
+                    Layout.preferredHeight: 28
+                    radius: Style.radiusSmall
+                    color: "transparent"
+                    border.width: 1
+                    border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
+                    MaterialIcon { anchors.centerIn: parent; text: card.icon; iconSize: Style.sectionIconSize - 2; iconColor: root.lyneAccent }
+                }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
-                    Text { text: card.title; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Text { text: card.title; color: root.lyneText; font.pixelSize: 16; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
                     Text { visible: card.subtitle !== ""; text: card.subtitle; color: root.lyneMuted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
                 }
-                Text { visible: card.headerInfo !== ""; text: card.headerInfo; color: root.lyneAccent; font.pixelSize: Style.fontSmall; font.bold: true; Layout.alignment: Qt.AlignTop }
+                Text { visible: card.headerInfo !== ""; text: card.headerInfo; color: root.lyneAccent; font.family: "monospace"; font.pixelSize: 11; font.bold: true; Layout.alignment: Qt.AlignTop }
             }
         }
     }
@@ -1089,9 +1307,10 @@ FloatingWindow {
         signal clicked()
         Layout.fillWidth: true
         implicitHeight: 52
-        radius: Style.controlRadius
-        color: active ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.18) : root.lyneSurfaceHigh
-        border.width: 0
+        radius: Style.radiusSmall
+        color: active ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12) : root.lyneSurfaceHigh
+        border.width: 1
+        border.color: active ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.45) : Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.10)
         RowLayout {
             anchors.fill: parent
             anchors.margins: Style.paddingSmall
@@ -1120,10 +1339,28 @@ FloatingWindow {
 
     component ActionButton: Button {
         id: button
-        implicitHeight: 38
-        implicitWidth: Math.max(104, contentItem.implicitWidth + 22)
-        contentItem: Text { text: button.text; color: button.enabled ? root.lyneText : root.lyneMuted; font.pixelSize: Style.fontSmall; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
-        background: Rectangle { radius: Style.radiusFull; color: button.down ? root.lyneAccent : button.hovered ? root.lyneSurfaceHover : root.lyneSurfaceHigh; border.width: 0; opacity: button.enabled ? 1 : 0.55 }
+        implicitHeight: 34
+        implicitWidth: Math.max(96, contentItem.implicitWidth + 24)
+        contentItem: Text {
+            text: button.text
+            color: button.down ? root.lyneBackground : button.enabled ? root.lyneText : root.lyneMuted
+            font.pixelSize: Style.fontSmall
+            font.bold: button.down
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+        }
+        background: Rectangle {
+            radius: Style.radiusSmall
+            color: button.down ? root.lyneAccent : button.hovered ? root.lyneSurfaceHover : "transparent"
+            border.width: 1
+            border.color: button.down || button.hovered
+                ? root.lyneAccent
+                : Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
+            opacity: button.enabled ? 1 : 0.5
+            Behavior on color { ColorAnimation { duration: Style.motionFast } }
+            Behavior on border.color { ColorAnimation { duration: Style.motionFast } }
+        }
     }
 
     component FastfetchLine: RowLayout {
@@ -1207,8 +1444,10 @@ FloatingWindow {
         property bool showCoreUsage: false
         readonly property color accent: usage < 0 ? root.lyneMuted : usage >= 90 ? "#f26d78" : usage >= 70 ? "#f2b36d" : root.lyneAccent
         implicitHeight: hero.showCoreUsage ? 246 : 172
-        radius: Style.cardRadius
+        radius: Style.radiusMedium
         color: root.lyneSurface
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: Style.paddingMedium
@@ -1287,8 +1526,10 @@ FloatingWindow {
         property string detail: ""
         readonly property color accent: value >= 90 ? "#f26d78" : value >= 70 ? "#f2b36d" : root.lyneAccent
         implicitHeight: 172
-        radius: Style.cardRadius
+        radius: Style.radiusMedium
         color: root.lyneSurface
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
         RowLayout {
             anchors.fill: parent
             anchors.margins: Style.paddingMedium
@@ -1311,8 +1552,10 @@ FloatingWindow {
         property color accent: root.lyneAccent
         property var history: []
         implicitHeight: 94
-        radius: Style.controlRadius
+        radius: Style.radiusSmall
         color: root.lyneSurfaceHigh
+        border.width: 1
+        border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12)
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: Style.paddingSmall
@@ -1379,9 +1622,9 @@ FloatingWindow {
         signal clicked()
         implicitWidth: 190
         implicitHeight: 82
-        radius: Style.controlRadius
+        radius: Style.radiusSmall
         color: themeChoice.theme.slug === root.settingsThemes.currentSlug ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.22) : root.lyneSurfaceHigh
-        border.width: themeChoice.theme.slug === root.settingsThemes.currentSlug ? 1 : 0
+        border.width: 1
         border.color: root.lyneAccent
         ColumnLayout {
             anchors.fill: parent
@@ -1411,11 +1654,13 @@ FloatingWindow {
         signal clicked()
         implicitWidth: 190
         implicitHeight: 126
-        radius: Style.controlRadius
+        radius: Style.radiusSmall
         clip: true
         color: root.lyneSurfaceHigh
-        border.width: wallpaperChoice.current ? 2 : 0
-        border.color: root.lyneAccent
+        border.width: 1
+        border.color: wallpaperChoice.current
+            ? root.lyneAccent
+            : Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
         Image { anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right; height: 92; source: wallpaperChoice.wallpaper.path; sourceSize.width: 480; sourceSize.height: 270; fillMode: Image.PreserveAspectCrop; asynchronous: true }
         Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 36; color: root.lyneSurfaceHigh }
         Text { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: Style.paddingSmall; text: wallpaperChoice.wallpaper.name; color: root.lyneText; font.pixelSize: 12; elide: Text.ElideRight }
@@ -1430,10 +1675,10 @@ FloatingWindow {
             x: slider.leftPadding
             y: slider.topPadding + (slider.availableHeight - height) / 2
             width: slider.availableWidth
-            height: 6
-            radius: 3
+            height: 5
+            radius: 2.5
             color: root.lyneSurfaceHigh
-            Rectangle { width: slider.position * parent.width; height: parent.height; radius: parent.radius; color: slider.enabled ? root.lyneAccent : root.lyneMuted }
+            Rectangle { width: slider.position * parent.width; height: parent.height; radius: parent.radius; color: slider.enabled ? root.lyneAccent : root.lyneMuted; Behavior on width { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } } }
         }
         handle: Rectangle {
             x: slider.leftPadding + slider.visualPosition * (slider.availableWidth - width)
@@ -1442,8 +1687,10 @@ FloatingWindow {
             height: width
             radius: width / 2
             color: slider.enabled ? root.lyneAccent : root.lyneMuted
-            border.width: slider.activeFocus ? 2 : 0
+            border.width: slider.activeFocus || slider.pressed ? 2 : 0
             border.color: root.lyneText
+            Behavior on width { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
+            Behavior on height { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
         }
     }
 }

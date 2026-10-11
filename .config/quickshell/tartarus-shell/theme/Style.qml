@@ -118,14 +118,14 @@ QtObject {
     readonly property int animationNormal: motionNormal
     readonly property int animationSlow: motionSlow
 
-    readonly property int motionFast: 80
-    readonly property int motionNormal: 100
-    readonly property int motionSlow: 140
-    readonly property int motionPopup: 100
-    readonly property int motionPanel: 140
+    readonly property int motionFast: Motion.gamingMode ? 0 : 80
+    readonly property int motionNormal: Motion.gamingMode ? 0 : 100
+    readonly property int motionSlow: Motion.gamingMode ? 0 : 140
+    readonly property int motionPopup: Motion.gamingMode ? 0 : 100
+    readonly property int motionPanel: Motion.gamingMode ? 0 : 140
     readonly property int trayHoverDelay: 140
-    readonly property int launcherMotionFast: 60
-    readonly property int launcherMotionPanel: 80
+    readonly property int launcherMotionFast: Motion.gamingMode ? 0 : 60
+    readonly property int launcherMotionPanel: Motion.gamingMode ? 0 : 80
     readonly property real hoverOpacity: 0.08
     readonly property real selectedOpacity: 0.16
 }

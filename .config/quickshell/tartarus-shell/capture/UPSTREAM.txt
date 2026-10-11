@@ -1,0 +1,5 @@
+Adapted from Ryoku-dev/ryoshot (fork of Gakuseei/rishot).
+Source: https://github.com/Ryoku-dev/ryoshot
+Revision: 3941d70
+MIT license retained in LICENSE. Original copyright: Gakuseei, 2026.
+Tartarus changes: branding, private configuration, upload disabled, shell integration.

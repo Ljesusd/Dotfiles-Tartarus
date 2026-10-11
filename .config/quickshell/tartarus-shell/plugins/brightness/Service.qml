@@ -32,6 +32,84 @@ QtObject {
 
     readonly property int wheelCommitDelay: 75
     readonly property int sliderCommitDelay: 350
+    // Internal panels are exposed by brightnessctl; external panels use DDC/CI.
+    property var internalBrightness: ({
+        device: "",
+        current: 0,
+        maximum: 100,
+        available: false
+    })
+
+    function refreshInternalBrightness() {
+        if (internalBrightnessProcess.running)
+            return
+
+        if (!root.monitors.some(monitor => monitor.isInternal))
+            return
+
+        internalBrightnessProcess.running = true
+    }
+
+    function parseInternalBrightness(text) {
+        // brightnessctl -m: device,class,current,max,percent
+        const fields = String(text).trim().split(",")
+        if (fields.length < 5)
+            return null
+
+        const current = parseInt(fields[2], 10)
+        const maximum = parseInt(fields[3], 10)
+        if (!isFinite(current) || !isFinite(maximum) || maximum <= 0)
+            return null
+
+        return {
+            device: fields[0],
+            current: current,
+            maximum: maximum,
+            available: true
+        }
+    }
+
+    function setInternalBrightness(value) {
+        if (!root.internalBrightness.available || internalWriteProcess.running)
+            return
+
+        const target = Math.max(
+            0,
+            Math.min(Math.round(value), root.internalBrightness.maximum)
+        )
+        const command = ["brightnessctl", "-q"]
+        if (root.internalBrightness.device !== "")
+            command.push("-d", root.internalBrightness.device)
+        command.push("set", target.toString())
+        internalWriteProcess.command = command
+        root.internalBrightness = Object.assign({}, root.internalBrightness, {
+            current: target
+        })
+        internalWriteProcess.running = true
+    }
+
+    readonly property Process internalBrightnessProcess: Process {
+        command: ["brightnessctl", "-m"]
+        stdout: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                const parsed = root.parseInternalBrightness(text)
+                if (parsed)
+                    root.internalBrightness = parsed
+            }
+        }
+    }
+
+    readonly property Process internalWriteProcess: Process {
+        onExited: root.refreshInternalBrightness()
+    }
+
+    readonly property Timer internalBrightnessTimer: Timer {
+        interval: 1500
+        repeat: true
+        running: true
+        onTriggered: root.refreshInternalBrightness()
+    }
 
     readonly property Variants monitorVariants: Variants {
         model: Quickshell.screens
@@ -46,6 +124,9 @@ QtObject {
 
             readonly property string screenName:
                 monitor.modelData?.name ?? ""
+
+            readonly property bool isInternal:
+                /^(eDP|LVDS|DSI)/.test(monitor.screenName)
 
             readonly property var ddcInfo:
                 monitor.screenName.length > 0
@@ -64,14 +145,19 @@ QtObject {
                 ?? monitor.screenName
 
             readonly property int brightness:
-                monitor.ddcInfo?.brightness ?? 0
+                monitor.isInternal
+                    ? root.internalBrightness.current
+                    : monitor.ddcInfo?.brightness ?? 0
 
             readonly property int maxBrightness:
-                monitor.ddcInfo?.maxBrightness
-                ?? 100
+                monitor.isInternal
+                    ? root.internalBrightness.maximum
+                    : monitor.ddcInfo?.maxBrightness ?? 100
 
             readonly property bool available:
-                monitor.ddcInfo?.readable === true
+                monitor.isInternal
+                    ? root.internalBrightness.available
+                    : monitor.ddcInfo?.readable === true
 
             readonly property int brightnessPercent:
                 monitor.available
@@ -86,6 +172,11 @@ QtObject {
             function initBrightness() {
                 if (!monitor.modelData)
                     return
+
+                if (monitor.isInternal) {
+                    root.refreshInternalBrightness()
+                    return
+                }
 
                 if (monitor.bus <= 0)
                     return
@@ -123,6 +214,11 @@ QtObject {
                             monitor.maxBrightness
                         )
                     )
+
+                if (monitor.isInternal) {
+                    root.setInternalBrightness(target)
+                    return
+                }
 
                 if (
                     target === monitor.brightness

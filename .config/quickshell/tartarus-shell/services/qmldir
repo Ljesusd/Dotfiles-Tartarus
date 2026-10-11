@@ -27,6 +27,9 @@ singleton DynamicActivityService 1.0 DynamicActivityService.qml
 singleton EasyEffectsService 1.0 EasyEffectsService.qml
 singleton TimerService 1.0 TimerService.qml
 singleton RecorderService 1.0 RecorderService.qml
+singleton CaptureService 1.0 CaptureService.qml
+singleton QuickSettingsService 1.0 QuickSettingsService.qml
+singleton PerformanceService 1.0 PerformanceService.qml
 singleton WhispService 1.0 WhispService.qml
 singleton MonitorService 1.0 MonitorService.qml
 singleton CalendarService 1.0 CalendarService.qml

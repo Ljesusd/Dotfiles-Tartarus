@@ -92,6 +92,8 @@ Scope {
     NotificationCenter {
         monitorScreen: root.screen
         monitorContext: context
+        anchorItem: bar.notificationAnchor
+        anchorSurface: bar.popupAnchorSurface
     }
 
     OsdOverlay { monitorScreen: root.screen; monitorContext: context }

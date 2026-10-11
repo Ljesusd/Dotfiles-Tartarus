@@ -44,7 +44,7 @@
         "mode": "agent-full-access",
         "collaboration_mode": "plan",
         "fast-mode": false,
-        "reasoning_effort": "high",
+        "reasoning_effort": "low",
         "model": "gpt-6-astra"
       },
       "type": "registry"

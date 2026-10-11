@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQml
 import Quickshell
+import "../services" as Services
 
 // Central motion tokens inspired by Ryoku's Motion service. Keeping the
 // timings here makes every shared popup feel like part of the same shell and
@@ -9,6 +10,10 @@ import Quickshell
 QtObject {
     readonly property bool reduceMotion:
         Quickshell.env("TARTARUS_REDUCE_MOTION") === "1"
+
+    // Gaming mode removes animation work from both QML and the compositor.
+    // The visual state remains the same; only transitions are skipped.
+    readonly property bool gamingMode: Services.PerformanceService.gaming
 
     readonly property real speed: {
         const requested = Number(Quickshell.env("TARTARUS_MOTION_SPEED"))
@@ -18,7 +23,7 @@ QtObject {
     }
 
     function dur(milliseconds) {
-        return reduceMotion ? 0 : Math.round(milliseconds * speed)
+        return gamingMode || reduceMotion ? 0 : Math.round(milliseconds * speed)
     }
 
     readonly property int fast: dur(80)

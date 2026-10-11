@@ -25,8 +25,6 @@ PanelWindow {
     property string wifiMessage: ""
     property string pendingBluetoothAddress: ""
     property string bluetoothMessage: ""
-    property bool nightBackendAvailable: false
-    property string nightBackend: ""
     screen: monitorScreen
     anchors { top: true; left: true; bottom: true }
     implicitWidth: Math.min(
@@ -37,18 +35,6 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     visible: monitorContext.leftSidebarOpened || offsetScale < 1
     PwObjectTracker { objects: [root.mic] }
-    Process {
-        id: nightBackendProbe
-        command: ["sh", "-c", "command -v hyprsunset || command -v wlsunset || command -v gammastep"]
-        stdout: StdioCollector {
-            waitForEnd: true
-            onStreamFinished: {
-                root.nightBackend = String(text).trim()
-                root.nightBackendAvailable = root.nightBackend !== ""
-            }
-        }
-    }
-    Process { id: nightAction }
     Timer {
         id: wifiTimeout
         interval: 12000
@@ -122,24 +108,6 @@ PanelWindow {
         bluetoothTimeout.restart()
         root.bt.connectDevice(device)
     }
-    function toggleNight() {
-        if (!root.nightBackendAvailable) return
-        const enabled = !Services.QuickSettingsState.nightPreferred
-        Services.QuickSettingsState.nightPreferred = enabled
-        Services.QuickSettingsState.save()
-        if (root.nightBackend.endsWith("hyprsunset")) {
-            nightAction.command = enabled
-                ? ["hyprctl", "hyprsunset", "temperature", String(Services.QuickSettingsState.nightTemperature)]
-                : ["hyprctl", "hyprsunset", "identity"]
-        } else if (root.nightBackend.endsWith("gammastep")) {
-            nightAction.command = enabled ? [root.nightBackend, "-O", String(Services.QuickSettingsState.nightTemperature)] : [root.nightBackend, "-x"]
-        } else {
-            nightAction.command = enabled ? [root.nightBackend, "-t", String(Services.QuickSettingsState.nightTemperature)] : ["pkill", "-x", "wlsunset"]
-        }
-        nightAction.running = true
-    }
-
-    Component.onCompleted: nightBackendProbe.running = true
     MouseArea {
         anchors.fill: parent
         enabled: root.visible
@@ -203,7 +171,9 @@ PanelWindow {
                         QuickCard { title: "Micrófono"; icon: "mic"; summary: root.mic?.audio ? (root.mic.audio.muted ? "Silenciado" : Math.round(root.mic.audio.volume * 100) + "%") : "No disponible"; onClicked: root.showPage("microphone") }
                         QuickCard { title: "Brillo"; icon: "brightness_6"; summary: root.brightness?.availableForScreen(root.monitorScreen) ? Math.round(root.brightness.brightnessPercentForScreen(root.monitorScreen)) + "%" : "No disponible"; onClicked: root.showPage("brightness") }
                         QuickCard { title: "No molestar"; icon: "notifications_off"; summary: Services.NotificationService.dnd ? "Activado" : "Desactivado"; onClicked: root.showPage("dnd") }
-                        QuickCard { title: "Modo nocturno"; icon: "nightlight"; summary: root.nightBackendAvailable ? "Disponible" : "Backend no disponible"; onClicked: root.showPage("night") }
+                        QuickCard { title: "Modo nocturno"; icon: "nightlight"; summary: Services.QuickSettingsService.nightAvailable ? "Disponible" : "Backend no disponible"; onClicked: root.showPage("night") }
+                        QuickCard { title: "Mantener despierto"; icon: "coffee"; summary: Services.QuickSettingsService.keepAwake ? "Activado" : "Desactivado"; onClicked: Services.QuickSettingsService.toggleKeepAwake() }
+                        QuickCard { title: "Modo gaming"; icon: "sports_esports"; summary: Services.QuickSettingsService.gaming ? "Activado" : "Desactivado"; onClicked: Services.QuickSettingsService.toggleGaming() }
                         QuickCard { title: "Energía y sesión"; icon: "power_settings_new"; summary: "Bloquear, suspender o apagar"; onClicked: root.showPage("power") }
                     }
 
@@ -409,17 +379,21 @@ PanelWindow {
                             visible: root.detailPage === "brightness"
                             title: "Brillo"
                             icon: "brightness_6"
-                            subtitle: "Pantalla " + (root.monitorScreen?.name ?? "no disponible")
-                            SliderRow {
-                                label: "Brillo"
-                                icon: "brightness_6"
-                                value: (root.brightness?.brightnessPercentForScreen(root.monitorScreen) || 0) / 100
-                                enabled: Boolean(root.brightness?.availableForScreen(root.monitorScreen))
-                                onMoved: if (root.brightness) root.brightness.setBrightnessForScreen(root.monitorScreen, value * 100, 350)
+                            subtitle: "Una línea por monitor compatible"
+                            Repeater {
+                                model: root.brightness?.monitors || []
+                                delegate: SliderRow {
+                                    required property var modelData
+                                    label: modelData.name || modelData.screenName || "Pantalla"
+                                    icon: "brightness_6"
+                                    value: (modelData.brightnessPercent || 0) / 100
+                                    enabled: Boolean(modelData.available)
+                                    onMoved: modelData.setBrightness(value * (modelData.maxBrightness || 100), 350)
+                                }
                             }
                             Text {
-                                visible: !root.brightness?.availableForScreen(root.monitorScreen)
-                                text: "Este monitor no admite control de brillo desde el shell"
+                                visible: (root.brightness?.monitors || []).length === 0
+                                text: "No se detectaron monitores controlables"
                                 color: Color.foregroundMuted
                                 font.pixelSize: Style.fontSmall
                                 Layout.fillWidth: true
@@ -442,11 +416,11 @@ PanelWindow {
                             visible: root.detailPage === "night"
                             title: "Modo nocturno"
                             icon: "nightlight"
-                            subtitle: root.nightBackendAvailable ? "Temperatura de pantalla" : "Backend no disponible"
+                            subtitle: Services.QuickSettingsService.nightAvailable ? "Temperatura de pantalla" : "Backend no disponible"
                             Text {
                                 Layout.fillWidth: true
                                 text: "No hay un controlador de temperatura compatible instalado. Instala y configura hyprsunset para activar este control."
-                                visible: !root.nightBackendAvailable
+                                visible: !Services.QuickSettingsService.nightAvailable
                                 color: Color.foregroundMuted
                                 font.pixelSize: Style.fontSmall
                                 wrapMode: Text.WordWrap
@@ -455,14 +429,14 @@ PanelWindow {
                                 label: "Temperatura · " + Services.QuickSettingsState.nightTemperature + " K"
                                 icon: "thermostat"
                                 value: (Services.QuickSettingsState.nightTemperature - 2500) / 4000
-                                enabled: root.nightBackendAvailable
+                                enabled: Services.QuickSettingsService.nightAvailable
                                 onMoved: Services.QuickSettingsState.setNightTemperature(2500 + value * 4000)
                             }
                             Toggle {
                                 label: "Filtro de luz azul"
                                 icon: "nightlight"
-                                active: Services.QuickSettingsState.nightPreferred
-                                onClicked: root.toggleNight()
+                                active: Services.QuickSettingsService.night
+                                onClicked: Services.QuickSettingsService.toggleNight()
                             }
                         }
                         SettingCard {
