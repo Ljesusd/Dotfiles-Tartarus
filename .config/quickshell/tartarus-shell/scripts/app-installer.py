@@ -69,15 +69,18 @@ def run(command: list[str]) -> int:
     return subprocess.run(command, check=False).returncode
 
 
-def write_desktop(name: str, executable: Path) -> None:
+def write_desktop(name: str, executable: Path, icon: Path | None = None) -> None:
     DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
     desktop_id = safe_slug(name)
     desktop = DESKTOP_ROOT / f"tartarus-{desktop_id}.desktop"
+    icon_line = f"Icon={icon}\n" if icon else ""
     desktop.write_text(
         "[Desktop Entry]\n"
         "Type=Application\n"
         f"Name={name}\n"
         f"Exec={executable} %U\n"
+        f"TryExec={executable}\n"
+        f"{icon_line}"
         "Terminal=false\n"
         "Categories=Utility;\n",
         encoding="utf-8",
@@ -137,19 +140,92 @@ def extract_rpm(path: Path, target: Path) -> None:
         raise RuntimeError("No se pudo extraer el paquete RPM.")
 
 
-def register_extracted(path: Path, title: str) -> None:
+def app_title(path: Path) -> str:
+    """Turn common archive names into a useful launcher label."""
+    value = path.name
+    value = re.sub(r"\.(tar|tar\.[a-z0-9]+|linux-[a-z0-9_-]+)$", "", value, flags=re.I)
+    value = re.sub(r"[-_.](x86_64|aarch64|amd64|arm64)$", "", value, flags=re.I)
+    value = re.sub(r"[._-]linux$", "", value, flags=re.I)
+    return value.replace("-", " ").replace("_", " ").strip().title() or "Aplicación"
+
+
+def executable_candidates(path: Path, title: str) -> list[Path]:
+    """Find the actual launcher in a portable archive without picking a helper."""
+    ignored = {"updater", "pingsender", "gfxtest", "crashreporter"}
+    title_tokens = {
+        token.lower()
+        for token in re.split(r"[^a-zA-Z0-9]+", title)
+        if len(token) >= 2
+    }
+    candidates = [item for item in path.rglob("*") if item.is_file() and os.access(item, os.X_OK)]
+
+    def score(item: Path) -> tuple[int, int, int, str]:
+        name = item.name.lower()
+        stem = item.stem.lower()
+        score_value = 0
+        if name in title_tokens or stem in title_tokens:
+            score_value += 100
+        if name in {"run", "start", "launch"}:
+            score_value += 35
+        if name.endswith("-bin"):
+            score_value -= 20
+        if name in ignored or stem in ignored:
+            score_value -= 100
+        if "." not in name:
+            score_value += 15
+        return score_value, -len(item.relative_to(path).parts), -len(name), str(item)
+
+    return sorted(candidates, key=score, reverse=True)
+
+
+def register_extracted(path: Path, title: str) -> bool:
     candidates = list(path.rglob("*.desktop"))
-    if not candidates:
-        print(f"Archivos extraídos en {path}")
-        print("No se encontró un archivo .desktop para añadirlo al launcher.")
-        return
-    desktop = candidates[0]
-    executable = next((item for item in path.rglob("*") if item.is_file() and os.access(item, os.X_OK)), None)
+    desktop = candidates[0] if candidates else None
+    executable = None
+    icon = None
+
+    if desktop:
+        values = {}
+        for line in desktop.read_text(encoding="utf-8", errors="replace").splitlines():
+            if "=" in line and not line.startswith("#"):
+                key, value = line.split("=", 1)
+                values[key.strip()] = value.strip()
+        exec_value = values.get("Exec", "").split()[0].replace("%U", "").replace("%u", "").strip()
+        if exec_value:
+            possible = (desktop.parent / exec_value).resolve()
+            if possible.is_file() and os.access(possible, os.X_OK) and path in possible.parents:
+                executable = possible
+        title = values.get("Name", "").strip() or title
+        icon_value = values.get("Icon", "").strip()
+        if icon_value:
+            possible_icon = (desktop.parent / icon_value).resolve()
+            if possible_icon.is_file() and path in possible_icon.parents:
+                icon = possible_icon
+
+    if executable is None:
+        executable = next(iter(executable_candidates(path, title)), None)
+        if executable:
+            icon = next(
+                (item for item in path.rglob("*")
+                 if item.is_file() and item.suffix.lower() in {".png", ".svg", ".xpm"}
+                 and any(part in item.name.lower() for part in (executable.stem.lower(), title.lower().split()[0]))),
+                None,
+            )
+            if icon is None:
+                icon = next(
+                    (item for item in path.rglob("*")
+                     if item.is_file() and item.name.lower().startswith("default")
+                     and item.suffix.lower() in {".png", ".svg", ".xpm"}),
+                    None,
+                )
+
     if executable:
-        write_desktop(title, executable)
+        write_desktop(title, executable, icon)
         print(f"Aplicación añadida al launcher: {title}")
+        return True
     else:
         print(f"Archivos extraídos en {path}; no se encontró un ejecutable.")
+        return False
 
 
 def install_local(raw: str) -> int:
@@ -181,7 +257,7 @@ def install_local(raw: str) -> int:
         extract_rpm(path, target)
     else:
         extract_tar(path, target)
-    register_extracted(target, path.stem)
+    register_extracted(target, app_title(path))
     return 0
 
 

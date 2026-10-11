@@ -73,9 +73,39 @@ Item {
                 anchors.centerIn: parent
                 width: parent.width - Style.paddingLarge * 2
                 spacing: Style.spacingSmall
-                MaterialIcon { Layout.alignment: Qt.AlignHCenter; text: dropArea.containsDrag ? "file_download" : "upload_file"; iconSize: 44; iconColor: Color.primary }
-                Text { Layout.fillWidth: true; text: dropArea.containsDrag ? "Suelta el archivo para analizarlo" : "Suelta una aplicación o paquete"; color: Color.foreground; font.pixelSize: Style.fontNormal; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap }
-                Text { Layout.fillWidth: true; text: "AppImage · Flatpak · Arch · DEB · RPM · tar"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall; horizontalAlignment: Text.AlignHCenter }
+                Item {
+                    Layout.alignment: Qt.AlignHCenter
+                    width: root.service.phase === "installing" ? 52 : 44
+                    height: root.service.phase === "installing" ? 52 : 44
+
+                    MaterialIcon {
+                        anchors.centerIn: parent
+                        text: root.service.phase === "installing"
+                            ? "download"
+                            : dropArea.containsDrag ? "file_download" : "upload_file"
+                        iconSize: root.service.phase === "installing" ? 26 : 44
+                        iconColor: Color.primary
+                    }
+
+                    Rectangle {
+                        visible: root.service.phase === "installing"
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: "transparent"
+                        border.width: 2
+                        border.color: Color.primary
+                        opacity: 0.8
+                        RotationAnimation on rotation {
+                            from: 0
+                            to: 360
+                            duration: 900
+                            loops: Animation.Infinite
+                            running: root.service.phase === "installing"
+                        }
+                    }
+                }
+                Text { Layout.fillWidth: true; text: root.service.phase === "installing" ? "Instalando aplicación…" : dropArea.containsDrag ? "Suelta el archivo para analizarlo" : "Suelta una aplicación o paquete"; color: Color.foreground; font.pixelSize: Style.fontNormal; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap }
+                Text { Layout.fillWidth: true; text: root.service.phase === "installing" ? "Preparando la entrada del launcher" : "AppImage · Flatpak · Arch · DEB · RPM · tar"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall; horizontalAlignment: Text.AlignHCenter }
             }
         }
 

@@ -7,6 +7,8 @@ import QtQml
 QtObject {
     id: root
 
+    signal applicationInstalled()
+
     readonly property string helperPath:
         Quickshell.shellPath("scripts/app-installer.py")
     property string path: ""
@@ -99,9 +101,10 @@ QtObject {
             waitForEnd: true
         }
         onExited: (exitCode, exitStatus) => {
-            if (exitCode === 0)
+            if (exitCode === 0) {
                 root.phase = "installed"
-            else {
+                root.applicationInstalled()
+            } else {
                 root.phase = "error"
                 const detail = String(installStderr.text || "").trim()
                 root.error = detail !== ""

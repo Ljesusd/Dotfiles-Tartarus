@@ -1,11 +1,13 @@
 import Quickshell
 import Quickshell.Io
 import QtQml
+import "." as Services
 
 QtObject {
     id: root
 
     property var usage: ({})
+    property var applicationValues: []
 
     readonly property FileView usageFile: FileView {
         path: Quickshell.stateDir + "/app-usage.json"
@@ -23,13 +25,29 @@ QtObject {
                 console.warn("No se pudo leer app-usage.json:", error)
             }
         }
+
+        root.refresh()
     }
 
     readonly property var applications: ScriptModel {
-        values: DesktopEntries.applications.values.slice()
+        values: root.applicationValues.slice()
             .sort((a, b) => {
                 return root.frequency(b) - root.frequency(a)
             })
+    }
+
+    function refresh() {
+        root.applicationValues = DesktopEntries.applications.values.slice()
+    }
+
+    Connections {
+        target: DesktopEntries
+        function onApplicationsChanged() { root.refresh() }
+    }
+
+    Connections {
+        target: Services.InstallerService
+        function onApplicationInstalled() { root.refresh() }
     }
 
     function filtered(query) {
