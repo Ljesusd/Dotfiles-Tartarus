@@ -216,13 +216,22 @@ if [[ -n "$clean_preload" ]]; then
     steam_command+=("LD_PRELOAD=$clean_preload")
 fi
 steam_command+=("$steam_bin" -gamepadui)
+# Let games release and reacquire the pointer when focus moves to another
+# monitor. Forced relative mode is an opt-in workaround for specific games.
+configure_cursor_capture() {
+    cursor_args=()
+    if [[ "${TARTARUS_GAMING_FORCE_GRAB:-0}" == 1 ]]; then
+        cursor_args=(--force-grab-cursor)
+    fi
+}
+configure_cursor_capture
 gamescope_command=(
     gamescope \
     --backend wayland \
     -e \
     -f \
     -b \
-    --force-grab-cursor \
+    "${cursor_args[@]}" \
     -W "$output_width" -H "$output_height" \
     -w "$output_width" -h "$output_height" \
     -r "$output_refresh" \

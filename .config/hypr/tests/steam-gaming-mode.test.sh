@@ -72,3 +72,13 @@ source <(sed -n '/^watch_session() {$/,/^}$/p' "$test_dir/../scripts/steam-gamin
     wait
 )
 printf 'PASS: session watcher does not retain launch lock.\n'
+
+source <(sed -n '/^configure_cursor_capture() {$/,/^}$/p' "$test_dir/../scripts/steam-gaming-mode.sh")
+unset TARTARUS_GAMING_FORCE_GRAB
+configure_cursor_capture
+[[ ${#cursor_args[@]} == 0 ]]
+TARTARUS_GAMING_FORCE_GRAB=1 configure_cursor_capture
+[[ ${#cursor_args[@]} == 1 && ${cursor_args[0]} == --force-grab-cursor ]]
+TARTARUS_GAMING_FORCE_GRAB=0 configure_cursor_capture
+[[ ${#cursor_args[@]} == 0 ]]
+printf 'PASS: automatic pointer capture by default; forced capture is opt-in and reversible.\n'
