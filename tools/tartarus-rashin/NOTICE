@@ -1,0 +1,11 @@
+Tartarus Rashin is an independent Tartarus implementation inspired by the
+local-agent architecture and ACP integration documented by Ryoku.
+
+The Ryoku project is licensed under the GNU General Public License, version 3.
+This directory does not vendor Ryoku source files; any future code copied from
+Ryoku must retain its copyright and GPLv3 notices.
+
+The Odysseus-inspired chat workspace keeps its own implementation but follows
+the local Odysseus frontend's interaction patterns and inline SVG treatment.
+Odysseus is licensed under the GNU Affero General Public License, version 3;
+see the upstream Odysseus project's LICENSE for its notice.

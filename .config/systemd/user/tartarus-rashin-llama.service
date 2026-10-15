@@ -1,0 +1,15 @@
+[Unit]
+Description=Tartarus local LLM for Rashin
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/tartarus-rashin-llama
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=180
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

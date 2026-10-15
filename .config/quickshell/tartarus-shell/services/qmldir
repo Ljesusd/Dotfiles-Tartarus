@@ -26,7 +26,9 @@ WeatherRequest 1.0 WeatherRequest.qml
 singleton DynamicActivityService 1.0 DynamicActivityService.qml
 singleton EasyEffectsService 1.0 EasyEffectsService.qml
 singleton TimerService 1.0 TimerService.qml
+singleton RecorderSettings 1.0 RecorderSettings.qml
 singleton RecorderService 1.0 RecorderService.qml
+singleton RashinService 1.0 RashinService.qml
 singleton CaptureService 1.0 CaptureService.qml
 singleton QuickSettingsService 1.0 QuickSettingsService.qml
 singleton PerformanceService 1.0 PerformanceService.qml
@@ -34,5 +36,6 @@ singleton WhispService 1.0 WhispService.qml
 singleton MonitorService 1.0 MonitorService.qml
 singleton CalendarService 1.0 CalendarService.qml
 singleton InstallerService 1.0 InstallerService.qml
+singleton FlatpakStoreService 1.0 FlatpakStoreService.qml
 singleton DesktopWidgets 1.0 DesktopWidgets.qml
 singleton DesktopNotesService 1.0 DesktopNotesService.qml

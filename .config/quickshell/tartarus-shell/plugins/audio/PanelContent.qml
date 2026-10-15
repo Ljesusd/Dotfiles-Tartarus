@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -15,11 +15,11 @@ Item {
     implicitWidth: 360
     implicitHeight:
         contentColumn.implicitHeight
-        + Style.paddingLarge * 2
+        + Theme.Style.paddingLarge * 2
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: Style.barPopupGap
+        anchors.margins: Theme.Style.barPopupGap
 
         radius: 0
         color: "transparent"
@@ -41,32 +41,32 @@ Item {
 
             anchors {
                 fill: parent
-                margins: Style.paddingLarge
+                margins: Theme.Style.paddingLarge
             }
 
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
             Text {
                 Layout.fillWidth: true
 
                 text: "Audio"
 
-                font.pixelSize: Style.fontNormal
-                color: Color.foreground
+                font.pixelSize: Theme.Style.fontNormal
+                color: Theme.Color.foreground
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
 
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
                 Text {
                     Layout.fillWidth: true
 
                     text: "Output"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 Text {
@@ -74,10 +74,10 @@ Item {
 
                     text: root.service.outputName
 
-                    font.pixelSize: Style.fontNormal
+                    font.pixelSize: Theme.Style.fontNormal
                     color: root.service.available
-                        ? Color.foreground
-                        : Color.foregroundMuted
+                        ? Theme.Color.foreground
+                        : Theme.Color.foregroundMuted
 
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -87,13 +87,13 @@ Item {
             ColumnLayout {
                 Layout.fillWidth: true
 
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
                 Text {
                     text: "Output"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 Repeater {
@@ -129,16 +129,16 @@ Item {
                         Layout.fillWidth: true
 
                         width: parent ? parent.width : 0
-                        implicitHeight: Style.barControlHeight
+                        implicitHeight: Theme.Style.barControlHeight
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
                             text: outputRow.outputIcon
-                            font.pixelSize: Style.materialIconMedium
+                            font.pixelSize: Theme.Style.materialIconMedium
                             color: outputRow.selected
-                                ? Color.accent
-                                : Color.foregroundMuted
+                                ? Theme.Color.accent
+                                : Theme.Color.foregroundMuted
                         }
 
                         Text {
@@ -153,10 +153,10 @@ Item {
                                 outputRow.modelData
                             )
 
-                            font.pixelSize: Style.fontNormal
+                            font.pixelSize: Theme.Style.fontNormal
                             color: outputRow.selected
-                                ? Color.foreground
-                                : Color.foregroundMuted
+                                ? Theme.Color.foreground
+                                : Theme.Color.foregroundMuted
 
                             elide: Text.ElideRight
                             maximumLineCount: 1
@@ -186,8 +186,8 @@ Item {
 
                     text: "Aplicaciones"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 Text {
@@ -196,8 +196,8 @@ Item {
 
                     text: "No hay aplicaciones reproduciendo audio"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 Repeater {
@@ -209,7 +209,7 @@ Item {
                         required property var modelData
 
                         Layout.fillWidth: true
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
                         readonly property string applicationName: modelData.name
                         readonly property string detail:
@@ -226,16 +226,16 @@ Item {
                                 implicitWidth: 28
                                 implicitHeight: 28
                                 enabled: applicationRow.modelData.nodes.length > 0
-                                radius: Style.controlRadius
+                                radius: Theme.Style.controlRadius
                                 color: muteButton.hovered
-                                    ? Color.surfaceHover : Color.surface
+                                    ? Theme.Color.surfaceHover : Theme.Color.surface
 
-                                MaterialIcon {
+                                Theme.MaterialIcon {
                                     anchors.centerIn: parent
                                     text: root.service.applicationIcon(applicationRow.modelData)
-                                    font.pixelSize: Style.materialIconMedium
+                                    font.pixelSize: Theme.Style.materialIconMedium
                                     color: applicationRow.applicationMuted
-                                        ? Color.foregroundMuted : Color.accent
+                                        ? Theme.Color.foregroundMuted : Theme.Color.accent
                                 }
 
                                 HoverHandler { id: muteButton }
@@ -253,8 +253,8 @@ Item {
                                     Layout.fillWidth: true
 
                                     text: applicationRow.applicationName
-                                    font.pixelSize: Style.fontNormal
-                                    color: Color.foreground
+                                    font.pixelSize: Theme.Style.fontNormal
+                                    color: Theme.Color.foreground
                                     elide: Text.ElideRight
                                     maximumLineCount: 1
                                 }
@@ -264,8 +264,8 @@ Item {
                                     Layout.fillWidth: true
 
                                     text: applicationRow.detail
-                                    font.pixelSize: Style.fontSmall
-                                    color: Color.foregroundMuted
+                                    font.pixelSize: Theme.Style.fontSmall
+                                    color: Theme.Color.foregroundMuted
                                     elide: Text.ElideRight
                                     maximumLineCount: 1
                                 }
@@ -273,8 +273,8 @@ Item {
 
                             Text {
                                 text: Math.round(applicationRow.applicationVolume * 100) + "%"
-                                font.pixelSize: Style.fontSmall
-                                color: Color.foregroundMuted
+                                font.pixelSize: Theme.Style.fontSmall
+                                color: Theme.Color.foregroundMuted
                             }
 
                         }
@@ -295,7 +295,7 @@ Item {
                                 }
                                 height: 4
                                 radius: height / 2
-                                color: Color.surface
+                                color: Theme.Color.surface
                             }
 
                             Rectangle {
@@ -308,7 +308,7 @@ Item {
                                 height: 4
                                 radius: height / 2
                                 color: applicationRow.applicationMuted
-                                    ? Color.foregroundMuted : Color.accent
+                                    ? Theme.Color.foregroundMuted : Theme.Color.accent
                             }
 
                             MouseArea {
@@ -329,12 +329,12 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     text: root.service.muted ? "volume_off" : "volume_up"
-                    font.pixelSize: Style.materialIconMedium
+                    font.pixelSize: Theme.Style.materialIconMedium
                     color: root.service.available
-                        ? Color.accent
-                        : Color.foregroundMuted
+                        ? Theme.Color.accent
+                        : Theme.Color.foregroundMuted
                 }
 
                 Text {
@@ -342,15 +342,15 @@ Item {
 
                     text: "Volume"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 Text {
                     text: root.service.volumePercent + "%"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
             }
 
@@ -373,7 +373,7 @@ Item {
                     height: 4
 
                     radius: height / 2
-                    color: Color.surface
+                    color: Theme.Color.surface
                 }
 
                 Rectangle {
@@ -395,8 +395,8 @@ Item {
 
                     radius: height / 2
                     color: root.service.available
-                        ? Color.accent
-                        : Color.foregroundMuted
+                        ? Theme.Color.accent
+                        : Theme.Color.foregroundMuted
                 }
 
                 Rectangle {
@@ -418,8 +418,8 @@ Item {
 
                     radius: width / 2
                     color: root.service.available
-                        ? Color.accent
-                        : Color.foregroundMuted
+                        ? Theme.Color.accent
+                        : Theme.Color.foregroundMuted
                 }
 
                 MouseArea {
@@ -446,15 +446,15 @@ Item {
 
             Rectangle {
                 implicitWidth: muteText.implicitWidth
-                    + Style.paddingLarge * 2
+                    + Theme.Style.paddingLarge * 2
 
                 implicitHeight: 38
 
-                radius: Style.radiusMedium
+                radius: Theme.Style.radiusMedium
 
                 color: muteHover.hovered
-                    ? Color.surfaceHover
-                    : Color.surface
+                    ? Theme.Color.surfaceHover
+                    : Theme.Color.surface
 
                 Text {
                     id: muteText
@@ -463,10 +463,10 @@ Item {
 
                     text: root.service.muted ? "Activar" : "Silenciar"
 
-                    font.pixelSize: Style.fontSmall
+                    font.pixelSize: Theme.Style.fontSmall
                     color: root.service.available
-                        ? Color.foreground
-                        : Color.foregroundMuted
+                        ? Theme.Color.foreground
+                        : Theme.Color.foregroundMuted
                 }
 
                 HoverHandler {

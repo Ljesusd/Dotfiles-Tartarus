@@ -1,7 +1,7 @@
 import Quickshell.Hyprland
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../utils"
 
 Item {
@@ -23,7 +23,7 @@ Item {
     }
 
     implicitWidth: Math.min(240, appList.contentWidth)
-    implicitHeight: Style.barInnerHeight
+    implicitHeight: Theme.Style.barInnerHeight
 
     Connections {
         target: Hyprland
@@ -37,46 +37,46 @@ Item {
         id: appList
         anchors.verticalCenter: parent.verticalCenter
         width: contentWidth
-        height: Style.barInnerHeight
+        height: Theme.Style.barInnerHeight
         orientation: ListView.Horizontal
-        spacing: Style.barWorkspaceContentSpacing
+        spacing: Theme.Style.barWorkspaceContentSpacing
         interactive: false
         clip: true
         model: root.windows
 
         add: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Style.motionFast }
-                NumberAnimation { property: "scale"; from: 0.7; to: 1; duration: Style.motionNormal; easing.type: Easing.OutBack }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.Style.motionFast }
+                NumberAnimation { property: "scale"; from: 0.7; to: 1; duration: Theme.Style.motionNormal; easing.type: Easing.OutBack }
             }
         }
         remove: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; to: 0; duration: Style.motionFast }
-                NumberAnimation { property: "scale"; to: 0.7; duration: Style.motionFast }
+                NumberAnimation { property: "opacity"; to: 0; duration: Theme.Style.motionFast }
+                NumberAnimation { property: "scale"; to: 0.7; duration: Theme.Style.motionFast }
             }
         }
         displaced: Transition {
-            NumberAnimation { properties: "x"; duration: Style.motionNormal; easing.type: Easing.OutCubic }
+            NumberAnimation { properties: "x"; duration: Theme.Style.motionNormal; easing.type: Easing.OutCubic }
         }
 
         delegate: Item {
             id: appItem
             required property var modelData
 
-            width: Style.barControlHeight
-            height: Style.barInnerHeight
+            width: Theme.Style.barControlHeight
+            height: Theme.Style.barInnerHeight
             scale: appHover.hovered ? 1.12 : 1
 
             Behavior on scale {
-                Anim { duration: Style.motionFast; easing.type: Easing.OutCubic }
+                Theme.Anim { duration: Theme.Style.motionFast; easing.type: Easing.OutCubic }
             }
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 anchors.centerIn: parent
                 text: Icons.iconForWindow(appItem.modelData, "apps")
-                iconSize: Style.barIconSmall
-                iconColor: appHover.hovered ? Color.primary : Color.foreground
+                iconSize: Theme.Style.barIconSmall
+                iconColor: appHover.hovered ? Theme.Color.primary : Theme.Color.foreground
                 fill: 0
                 grade: 0
             }

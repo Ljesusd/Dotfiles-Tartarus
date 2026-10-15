@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../services" as Services
 import "../services/NotificationMedia.js" as Media
-import "../theme"
+import "../theme" as Theme
 
 // Shared presentation for live popups and the notification history. Keeping
 // the card in one place makes the popup and SwayNC-like center behave alike.
@@ -31,11 +31,11 @@ Rectangle {
     signal removeRequested(int index)
     signal actionRequested(string identifier)
 
-    implicitHeight: content.implicitHeight + Style.paddingLarge * 2
-    radius: Style.radiusLarge
-    color: Color.surfaceContainer
-    border.width: Style.panelBorderWidth
-    border.color: Color.outlineVariant
+    implicitHeight: content.implicitHeight + Theme.Style.paddingLarge * 2
+    radius: Theme.Style.radiusLarge
+    color: Theme.Color.surfaceContainer
+    border.width: Theme.Style.panelBorderWidth
+    border.color: Theme.Color.outlineVariant
 
     function twoFactorCode() {
         return Services.NotificationService.twoFactorCode(
@@ -46,8 +46,8 @@ Rectangle {
     Column {
         id: content
         anchors.fill: parent
-        anchors.margins: Style.paddingLarge
-        spacing: Style.spacingSmall
+        anchors.margins: Theme.Style.paddingLarge
+        spacing: Theme.Style.spacingSmall
 
         RowLayout {
             width: parent.width
@@ -55,8 +55,8 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: root.appName.length > 0 ? root.appName : "Notification"
-                color: Color.foregroundMuted
-                font.pixelSize: Style.fontSmall
+                color: Theme.Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
                 elide: Text.ElideRight
             }
 
@@ -64,15 +64,15 @@ Rectangle {
                 visible: root.groupCount > 1
                 Layout.preferredWidth: visible ? groupCountLabel.implicitWidth + 12 : 0
                 Layout.preferredHeight: visible ? 22 : 0
-                radius: Style.radiusFull
-                color: Color.primaryContainer
+                radius: Theme.Style.radiusFull
+                color: Theme.Color.primaryContainer
 
                 Text {
                     id: groupCountLabel
                     anchors.centerIn: parent
                     text: `×${root.groupCount}`
-                    color: Color.foreground
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall
                     font.bold: true
                 }
             }
@@ -80,20 +80,20 @@ Rectangle {
             Text {
                 visible: root.timestampLabel.length > 0
                 text: root.timestampLabel
-                color: Color.foregroundMuted
-                font.pixelSize: Style.fontSmall
+                color: Theme.Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
             }
 
             ToolButton {
                 visible: root.compact || root.showRemove
                 display: AbstractButton.IconOnly
                 padding: 0
-                implicitWidth: Style.barIconSmall + Style.paddingSmall
-                implicitHeight: Style.barIconSmall + Style.paddingSmall
-                contentItem: MaterialIcon {
+                implicitWidth: Theme.Style.barIconSmall + Theme.Style.paddingSmall
+                implicitHeight: Theme.Style.barIconSmall + Theme.Style.paddingSmall
+                contentItem: Theme.MaterialIcon {
                     text: "close"
-                    color: parent.hovered ? Color.foreground : Color.foregroundMuted
-                    font.pixelSize: Style.materialIconSmall
+                    color: parent.hovered ? Theme.Color.foreground : Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.materialIconSmall
                 }
                 onClicked: {
                     if (root.showRemove && root.historyIndex >= 0)
@@ -106,14 +106,14 @@ Rectangle {
 
         RowLayout {
             width: parent.width
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
             Rectangle {
                 visible: Media.avatar(root.image, root.appName).length > 0
                 Layout.preferredWidth: visible ? (root.compact ? 48 : 52) : 0
                 Layout.preferredHeight: visible ? (root.compact ? 48 : 52) : 0
                 radius: width / 2
-                color: Color.surfaceContainerHigh
+                color: Theme.Color.surfaceContainerHigh
                 clip: true
 
                 Image {
@@ -126,13 +126,13 @@ Rectangle {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
 
                 Text {
                     Layout.fillWidth: true
                     text: root.summary
-                    color: Color.foreground
-                    font.pixelSize: root.compact ? Style.fontSmall : Style.fontNormal
+                    color: Theme.Color.foreground
+                    font.pixelSize: root.compact ? Theme.Style.fontSmall : Theme.Style.fontNormal
                     font.bold: !root.compact
                     wrapMode: Text.Wrap
                     maximumLineCount: root.compact ? 2 : 3
@@ -142,8 +142,8 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: Media.textBody(root.body)
-                    color: Color.foregroundMuted
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
                     wrapMode: Text.Wrap
                     maximumLineCount: root.compact ? 3 : 6
                     elide: Text.ElideRight
@@ -164,7 +164,7 @@ Rectangle {
 
         Flow {
             width: parent.width
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
             visible: root.showActions && actionRepeater.count > 0
 
             Repeater {
@@ -177,15 +177,15 @@ Rectangle {
                     visible: actionText.length > 0
                     text: actionText
                     height: 30
-                    implicitWidth: actionLabel.implicitWidth + Style.paddingLarge * 2
+                    implicitWidth: actionLabel.implicitWidth + Theme.Style.paddingLarge * 2
 
                     contentItem: Text {
                         id: actionLabel
                         text: actionButton.actionText
                         color: actionButton.pressed
-                            ? Color.foreground
-                            : Color.onPrimaryContainer
-                        font.pixelSize: Style.fontSmall
+                            ? Theme.Color.foreground
+                            : Theme.Color.onPrimaryContainer
+                        font.pixelSize: Theme.Style.fontSmall
                         font.weight: Font.Medium
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -193,12 +193,12 @@ Rectangle {
                     }
 
                     background: Rectangle {
-                        radius: Style.radiusSmall
+                        radius: Theme.Style.radiusSmall
                         color: actionButton.pressed
-                            ? Color.selection
+                            ? Theme.Color.selection
                             : actionButton.hovered
-                                ? Color.surfaceHover
-                                : Color.primaryContainer
+                                ? Theme.Color.surfaceHover
+                                : Theme.Color.primaryContainer
                     }
 
                     onClicked: root.actionRequested(modelData.identifier)

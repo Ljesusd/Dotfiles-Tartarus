@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import QtQuick
 import "../../services" as Services
-import "../../theme"
+import "../../theme" as Theme
 import "../../launcher/components" as LauncherComponents
 
 PopupWindow {
@@ -20,7 +20,7 @@ PopupWindow {
     anchor.gravity: Edges.Top
     anchor.adjustment: PopupAdjustment.Slide
     implicitWidth: Math.min(360 + surface.horizontalInset * 2, Math.max(1, (root.barWindow.screen?.width ?? 1280) - 32))
-    implicitHeight: Math.min(540, Math.max(1, (root.barWindow.screen?.height ?? 800) - Style.barHeight - 32))
+    implicitHeight: Math.min(540, Math.max(1, (root.barWindow.screen?.height ?? 800) - Theme.Style.barHeight - 32))
     visible: root.popupOpen || surface.reveal > 0
     color: "transparent"
     mask: Region { item: surface.maskItem }

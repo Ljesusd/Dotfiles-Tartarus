@@ -2,7 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "../theme"
+import "../theme" as Theme
 
 ColumnLayout {
     id: root
@@ -17,7 +17,7 @@ ColumnLayout {
     property color mutedColor: "#9ba7ca"
 
     Layout.fillWidth: true
-    spacing: Style.spacingMedium
+    spacing: Theme.Style.spacingMedium
 
     readonly property var selected: root.service.selectedMonitor()
 
@@ -86,33 +86,33 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: 76
-        radius: Style.cardRadius
+        radius: Theme.Style.cardRadius
         color: root.surfaceColor
         border.width: 1
         border.color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.12)
 
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingMedium
+            anchors.margins: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingMedium
             Rectangle {
                 Layout.preferredWidth: 42
                 Layout.preferredHeight: 42
-                radius: Style.radiusMedium
+                radius: Theme.Style.radiusMedium
                 color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.16)
-                MaterialIcon { anchors.centerIn: parent; text: "monitor"; iconSize: Style.materialIconLarge; iconColor: root.accentColor }
+                Theme.MaterialIcon { anchors.centerIn: parent; text: "monitor"; iconSize: Theme.Style.materialIconLarge; iconColor: root.accentColor }
             }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2
-                Text { text: root.service.monitors.length + " pantalla" + (root.service.monitors.length === 1 ? "" : "s") + " conectada" + (root.service.monitors.length === 1 ? "" : "s"); color: root.textColor; font.pixelSize: Style.fontNormal; font.bold: true }
-                Text { text: root.service.loading ? "Leyendo el estado de Hyprland…" : root.service.previewActive ? "Previsualización activa · " + root.service.previewSeconds + " s para confirmar" : "Organiza la disposición y ajusta cada salida"; color: root.mutedColor; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
+                Text { text: root.service.monitors.length + " pantalla" + (root.service.monitors.length === 1 ? "" : "s") + " conectada" + (root.service.monitors.length === 1 ? "" : "s"); color: root.textColor; font.pixelSize: Theme.Style.fontNormal; font.bold: true }
+                Text { text: root.service.loading ? "Leyendo el estado de Hyprland…" : root.service.previewActive ? "Previsualización activa · " + root.service.previewSeconds + " s para confirmar" : "Organiza la disposición y ajusta cada salida"; color: root.mutedColor; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
             }
             Text { visible: root.service.managerConflict; text: "hyprmoncfg activo"; color: "#f5b86b"; font.pixelSize: 12; font.bold: true }
             RowLayout {
                 visible: root.service.previewActive
                 Layout.alignment: Qt.AlignVCenter
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
                 MonitorButton { text: "Revertir"; buttonIcon: "undo"; danger: true; onClicked: root.service.revertChanges() }
                 MonitorButton { text: "Mantener"; buttonIcon: "check"; primary: true; onClicked: root.service.keepChanges() }
             }
@@ -123,8 +123,8 @@ ColumnLayout {
         id: editorGrid
         Layout.fillWidth: true
         columns: width >= 760 ? 2 : 1
-        columnSpacing: Style.spacingMedium
-        rowSpacing: Style.spacingMedium
+        columnSpacing: Theme.Style.spacingMedium
+        rowSpacing: Theme.Style.spacingMedium
         Layout.preferredHeight: columns === 2 ? 360 : 680
 
         Rectangle {
@@ -133,7 +133,7 @@ ColumnLayout {
             Layout.fillHeight: true
             Layout.preferredHeight: 360
             Layout.minimumHeight: 300
-            radius: Style.cardRadius
+            radius: Theme.Style.cardRadius
             color: root.backgroundColor
             border.width: 1
             border.color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.22)
@@ -142,10 +142,10 @@ ColumnLayout {
             Text {
                 anchors.top: parent.top
                 anchors.left: parent.left
-                anchors.margins: Style.paddingMedium
+                anchors.margins: Theme.Style.paddingMedium
                 text: "Mapa del escritorio"
                 color: root.textColor
-                font.pixelSize: Style.fontSmall
+                font.pixelSize: Theme.Style.fontSmall
                 font.bold: true
                 z: 2
             }
@@ -161,15 +161,15 @@ ColumnLayout {
                     y: root.mapY(monitor) + 28
                     width: root.mapWidth(monitor)
                     height: root.mapHeight(monitor)
-                    radius: Style.radiusMedium
+                    radius: Theme.Style.radiusMedium
                     color: selectedMonitor ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.32) : root.surfaceHighColor
                     border.width: selectedMonitor ? 2 : 1
                     border.color: selectedMonitor ? root.accentColor : Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.24)
                     opacity: monitor.disabled ? 0.45 : 1
                     property real dragStartX: 0
                     property real dragStartY: 0
-                    Behavior on color { ColorAnimation { duration: Style.motionFast } }
-                    Behavior on border.color { ColorAnimation { duration: Style.motionFast } }
+                    Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
+                    Behavior on border.color { ColorAnimation { duration: Theme.Style.motionFast } }
 
                     Column {
                         anchors.centerIn: parent
@@ -202,7 +202,7 @@ ColumnLayout {
                 visible: root.service.draftMonitors.length === 0 && !root.service.loading
                 text: root.service.errorMessage || "No hay monitores disponibles"
                 color: root.mutedColor
-                font.pixelSize: Style.fontSmall
+                font.pixelSize: Theme.Style.fontSmall
             }
         }
 
@@ -211,7 +211,7 @@ ColumnLayout {
             Layout.fillHeight: true
             Layout.preferredHeight: 360
             Layout.minimumHeight: 360
-            radius: Style.cardRadius
+            radius: Theme.Style.cardRadius
             color: root.surfaceColor
             border.width: 1
             border.color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.10)
@@ -219,19 +219,19 @@ ColumnLayout {
             ColumnLayout {
                 id: monitorInspector
                 anchors.fill: parent
-                anchors.margins: Style.paddingMedium
-                spacing: Style.spacingMedium
+                anchors.margins: Theme.Style.paddingMedium
+                spacing: Theme.Style.spacingMedium
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: root.selected ? root.selected.name : "Selecciona una pantalla"; color: root.textColor; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Text { text: root.selected ? root.selected.name : "Selecciona una pantalla"; color: root.textColor; font.pixelSize: Theme.Style.fontNormal; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
                     Text { visible: root.selected !== null && root.selected.focused === true; text: "Enfocado"; color: root.accentColor; font.pixelSize: 12; font.bold: true }
                 }
                 Text { visible: root.selected !== null; text: root.selected ? (root.selected.description || "Salida de Hyprland") : ""; color: root.mutedColor; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "Activa"; color: root.textColor; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
+                    Text { text: "Activa"; color: root.textColor; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true }
                     Switch {
                         id: enabledSwitch
                         enabled: root.selected !== null && !root.service.previewActive
@@ -246,7 +246,7 @@ ColumnLayout {
                             color: enabledSwitch.checked ? root.accentColor : root.surfaceHighColor
                             border.width: 1
                             border.color: enabledSwitch.checked ? root.accentColor : root.mutedColor
-                            Rectangle { width: 18; height: 18; y: 2; x: enabledSwitch.checked ? parent.width - width - 3 : 3; radius: Style.radiusFull; color: enabledSwitch.checked ? root.backgroundColor : root.mutedColor }
+                            Rectangle { width: 18; height: 18; y: 2; x: enabledSwitch.checked ? parent.width - width - 3 : 3; radius: Theme.Style.radiusFull; color: enabledSwitch.checked ? root.backgroundColor : root.mutedColor }
                         }
                     }
                 }
@@ -259,8 +259,8 @@ ColumnLayout {
                     model: root.modeOptions(root.selected)
                     currentIndex: Math.max(0, model.indexOf(root.selected ? root.selected.mode : ""))
                     onActivated: if (root.selected && currentIndex >= 0) root.service.setDraftField(root.selected.name, "mode", model[currentIndex])
-                    contentItem: Text { leftPadding: 12; rightPadding: 34; text: modeBox.displayText || "Sin modos disponibles"; color: root.textColor; font.pixelSize: Style.fontSmall; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
-                    background: Rectangle { radius: Style.controlRadius; color: root.surfaceHighColor; border.width: modeBox.activeFocus ? 1 : 0; border.color: root.accentColor }
+                    contentItem: Text { leftPadding: 12; rightPadding: 34; text: modeBox.displayText || "Sin modos disponibles"; color: root.textColor; font.pixelSize: Theme.Style.fontSmall; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                    background: Rectangle { radius: Theme.Style.controlRadius; color: root.surfaceHighColor; border.width: modeBox.activeFocus ? 1 : 0; border.color: root.accentColor }
                 }
 
                 RowLayout {
@@ -302,9 +302,9 @@ ColumnLayout {
                         border.width: 3
                         border.color: root.surfaceColor
                         scale: scaleSlider.pressed ? 1.06 : 1
-                        Behavior on width { NumberAnimation { duration: Style.motionFast; easing.type: Easing.OutCubic } }
-                        Behavior on height { NumberAnimation { duration: Style.motionFast; easing.type: Easing.OutCubic } }
-                        Behavior on scale { NumberAnimation { duration: Style.motionFast; easing.type: Easing.OutCubic } }
+                        Behavior on width { NumberAnimation { duration: Theme.Style.motionFast; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: Theme.Style.motionFast; easing.type: Easing.OutCubic } }
+                        Behavior on scale { NumberAnimation { duration: Theme.Style.motionFast; easing.type: Easing.OutCubic } }
                     }
                 }
 
@@ -319,7 +319,7 @@ ColumnLayout {
                         currentIndex: root.selected ? Math.min(3, Number(root.selected.transform || 0) % 4) : 0
                         onActivated: if (root.selected) root.service.setDraftField(root.selected.name, "transform", currentIndex)
                         contentItem: Text { leftPadding: 12; rightPadding: 30; text: transformBox.displayText; color: root.textColor; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter }
-                        background: Rectangle { radius: Style.controlRadius; color: root.surfaceHighColor }
+                        background: Rectangle { radius: Theme.Style.controlRadius; color: root.surfaceHighColor }
                     }
                 }
 
@@ -338,7 +338,7 @@ ColumnLayout {
                             root.service.setDraftField(root.selected.name, "mirrorOf", currentIndex === 0 ? "none" : String(model[currentIndex]).replace("Duplicar: ", ""))
                         }
                         contentItem: Text { leftPadding: 12; rightPadding: 30; text: mirrorBox.displayText; color: root.textColor; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
-                        background: Rectangle { radius: Style.controlRadius; color: root.surfaceHighColor }
+                        background: Rectangle { radius: Theme.Style.controlRadius; color: root.surfaceHighColor }
                     }
                 }
 
@@ -355,17 +355,17 @@ ColumnLayout {
     Rectangle {
         id: actionsCard
         Layout.fillWidth: true
-        implicitHeight: actionsContent.implicitHeight + Style.paddingMedium * 2
-        radius: Style.cardRadius
+        implicitHeight: actionsContent.implicitHeight + Theme.Style.paddingMedium * 2
+        radius: Theme.Style.cardRadius
         color: root.service.errorMessage !== "" ? Qt.rgba(0.95, 0.42, 0.45, 0.12) : root.surfaceColor
         border.width: 1
         border.color: root.service.errorMessage !== "" ? Qt.rgba(0.95, 0.42, 0.45, 0.35) : Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.10)
         ColumnLayout {
             id: actionsContent
-            x: Style.paddingMedium
-            y: Style.paddingMedium
-            width: actionsCard.width - Style.paddingMedium * 2
-            spacing: Style.spacingMedium
+            x: Theme.Style.paddingMedium
+            y: Theme.Style.paddingMedium
+            width: actionsCard.width - Theme.Style.paddingMedium * 2
+            spacing: Theme.Style.spacingMedium
             RowLayout {
                 Layout.fillWidth: true
                 Text {
@@ -396,16 +396,16 @@ ColumnLayout {
         implicitWidth: Math.max(104, contentItem.implicitWidth + 24)
         contentItem: RowLayout {
             spacing: 6
-            MaterialIcon { visible: button.buttonIcon !== ""; text: button.buttonIcon; iconSize: 15; iconColor: button.enabled ? (button.primary ? root.backgroundColor : root.textColor) : root.mutedColor }
+            Theme.MaterialIcon { visible: button.buttonIcon !== ""; text: button.buttonIcon; iconSize: 15; iconColor: button.enabled ? (button.primary ? root.backgroundColor : root.textColor) : root.mutedColor }
             Text { text: button.text; color: button.enabled ? (button.primary ? root.backgroundColor : root.textColor) : root.mutedColor; font.pixelSize: 12; font.bold: button.primary; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; Layout.fillWidth: true }
         }
         background: Rectangle {
-            radius: Style.radiusFull
+            radius: Theme.Style.radiusFull
             color: !button.enabled ? root.surfaceHighColor : button.down ? (button.primary ? Qt.lighter(root.accentColor, 115) : root.surfaceHoverColor) : button.primary ? root.accentColor : button.hovered ? root.surfaceHoverColor : root.surfaceHighColor
             border.width: button.primary || button.danger ? 1 : 0
             border.color: button.danger ? Qt.rgba(1, 0.48, 0.48, 0.55) : button.primary ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.9) : "transparent"
             opacity: button.enabled ? 1 : 0.5
-            Behavior on color { ColorAnimation { duration: Style.motionFast } }
+            Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
         }
     }
 }

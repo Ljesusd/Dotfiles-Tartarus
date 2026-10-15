@@ -1,7 +1,7 @@
 import Quickshell.Hyprland
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Text {
     id: root
@@ -10,7 +10,7 @@ Text {
         ? Hyprland.activeToplevel.title
         : ""
 
-    color: Color.foreground
+    color: Theme.Color.foreground
 
     elide: Text.ElideRight
 }

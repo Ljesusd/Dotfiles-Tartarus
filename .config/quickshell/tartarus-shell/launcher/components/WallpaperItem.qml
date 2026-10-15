@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -39,10 +39,10 @@ Rectangle {
 
     readonly property color targetBorderColor:
         root.selected
-            ? Color.primary
+            ? Theme.Color.primary
             : hoverHandler.hovered
-                ? Color.surfaceVariant
-                : Color.outline
+                ? Theme.Color.surfaceVariant
+                : Theme.Color.outline
 
     readonly property bool highlighted:
         root.selected || hoverHandler.hovered
@@ -53,7 +53,7 @@ Rectangle {
     width: root.cardWidth
     height: root.cardHeight
 
-    radius: Style.radiusLarge
+    radius: Theme.Style.radiusLarge
     clip: true
     border.width: root.targetBorderWidth
     border.color: root.targetBorderColor
@@ -61,25 +61,25 @@ Rectangle {
     opacity: root.targetOpacity
     transformOrigin: Item.Center
 
-    color: root.selected ? Color.surfaceContainerHigh : Color.surfaceContainer
+    color: root.selected ? Theme.Color.surfaceContainerHigh : Theme.Color.surfaceContainer
 
     Behavior on scale {
         NumberAnimation {
-            duration: Style.launcherMotionPanel
+            duration: Theme.Style.launcherMotionPanel
             easing.type: Easing.OutCubic
         }
     }
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Style.launcherMotionFast
+            duration: Theme.Style.launcherMotionFast
             easing.type: Easing.OutCubic
         }
     }
 
     Behavior on border.width {
         NumberAnimation {
-            duration: Style.launcherMotionFast
+            duration: Theme.Style.launcherMotionFast
             easing.type: Easing.OutCubic
         }
     }
@@ -107,7 +107,7 @@ Rectangle {
 
         Behavior on opacity {
             NumberAnimation {
-                duration: Style.launcherMotionFast
+                duration: Theme.Style.launcherMotionFast
                 easing.type: Easing.OutCubic
             }
         }
@@ -118,13 +118,13 @@ Rectangle {
         radius: parent.radius
         color: "transparent"
         border.width: root.selected ? 2 : 0
-        border.color: Color.primary
+        border.color: Theme.Color.primary
         opacity: root.selected ? 1 : 0
     }
 
     Behavior on border.color {
         ColorAnimation {
-            duration: Style.launcherMotionFast
+            duration: Theme.Style.launcherMotionFast
             easing.type: Easing.OutCubic
         }
     }
@@ -134,19 +134,19 @@ Rectangle {
         anchors {
             right: parent.right
             top: parent.top
-            margins: Style.spacingSmall
+            margins: Theme.Style.spacingSmall
         }
         width: 12
         height: 12
-        radius: Style.radiusFull
-        color: root.isCurrent ? Color.primary : "transparent"
+        radius: Theme.Style.radiusFull
+        color: root.isCurrent ? Theme.Color.primary : "transparent"
         border.width: root.isCurrent ? 2 : 0
-        border.color: Color.surface
+        border.color: Theme.Color.surface
         opacity: root.isCurrent ? 0.95 : 0.0
 
         Behavior on opacity {
             NumberAnimation {
-                duration: Style.launcherMotionFast
+                duration: Theme.Style.launcherMotionFast
                 easing.type: Easing.OutCubic
             }
         }

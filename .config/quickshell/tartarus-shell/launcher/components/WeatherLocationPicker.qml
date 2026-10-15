@@ -5,17 +5,17 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../../services" as Services
 import "../../services/WeatherLocation.js" as Places
-import "../../theme"
+import "../../theme" as Theme
 
 ColumnLayout {
     id: root
     objectName: "weatherLocationPicker"
     property alias text: field.text
     property bool active: true
-    property color accentColor: Color.primary
-    property color textColor: Color.foreground
-    property color mutedColor: Color.foregroundMuted
-    property color surfaceColor: Color.surfaceContainerHigh
+    property color accentColor: Theme.Color.primary
+    property color textColor: Theme.Color.foreground
+    property color mutedColor: Theme.Color.foregroundMuted
+    property color surfaceColor: Theme.Color.surfaceContainerHigh
     property bool busy: false
     property bool suggestionsOpen: false
     property var results: []
@@ -72,12 +72,12 @@ ColumnLayout {
         selectByMouse: true
         color: root.textColor
         placeholderTextColor: root.mutedColor
-        font.pixelSize: Style.fontSmall
+        font.pixelSize: Theme.Style.fontSmall
         leftPadding: 12
         rightPadding: 12
         background: Rectangle {
             color: root.surfaceColor
-            radius: Style.controlRadius
+            radius: Theme.Style.controlRadius
             border.width: field.activeFocus ? 1 : 0
             border.color: root.accentColor
         }
@@ -101,7 +101,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: Math.min(root.results.length, 4) * 56 + 8
         color: root.surfaceColor
-        radius: Style.controlRadius
+        radius: Theme.Style.controlRadius
         ListView {
             id: suggestions
             anchors.fill: parent
@@ -116,13 +116,13 @@ ColumnLayout {
                 required property int index
                 width: suggestions.width
                 height: 56
-                radius: Style.controlRadius - 2
+                radius: Theme.Style.controlRadius - 2
                 color: suggestions.currentIndex === index ? Qt.alpha(root.accentColor, 0.16) : "transparent"
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
                     spacing: 10
-                    MaterialIcon { text: "location_on"; iconSize: 18; iconColor: root.accentColor }
+                    Theme.MaterialIcon { text: "location_on"; iconSize: 18; iconColor: root.accentColor }
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -130,7 +130,7 @@ ColumnLayout {
                         Text {
                             text: suggestion.modelData.label
                             textFormat: Text.PlainText
-                            font.pixelSize: Style.fontSmall
+                            font.pixelSize: Theme.Style.fontSmall
                             font.bold: true
                             color: root.textColor
                             elide: Text.ElideRight
@@ -145,7 +145,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                         }
                     }
-                    MaterialIcon { text: "chevron_right"; iconSize: 16; iconColor: root.mutedColor }
+                    Theme.MaterialIcon { text: "chevron_right"; iconSize: 16; iconColor: root.mutedColor }
                 }
                 MouseArea {
                     anchors.fill: parent

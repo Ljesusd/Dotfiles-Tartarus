@@ -2,13 +2,13 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Item {
     id: root
     property var service: Services.PeripheralService
-    readonly property color muted: Color.foregroundMuted
-    readonly property color accent: Color.primary
+    readonly property color muted: Theme.Color.foregroundMuted
+    readonly property color accent: Theme.Color.primary
     readonly property var devices: service.devices || []
     readonly property var audioDevices: devices.filter(x => ["Audio", "Micrófono"].indexOf(x.kind) !== -1)
     readonly property var keyboards: devices.filter(x => x.kind === "Teclado")
@@ -55,13 +55,13 @@ Item {
                 }
                 return total + Math.max(0, visibleCount - 1) * spacing
             }
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
             Text {
                 width: parent.width
                 text: "Periféricos"
-                color: Color.foreground
-                font.pixelSize: Style.fontLarge
+                color: Theme.Color.foreground
+                font.pixelSize: Theme.Style.fontLarge
                 font.bold: true
                 wrapMode: Text.WordWrap
             }
@@ -78,14 +78,14 @@ Item {
                         width: filterText.implicitWidth + 24
                         height: 28
                         radius: 14
-                        color: root.filterKind === modelData ? root.accent : Color.surfaceContainerHigh
+                        color: root.filterKind === modelData ? root.accent : Theme.Color.surfaceContainerHigh
                         border.width: 1
-                        border.color: Color.outlineVariant
+                        border.color: Theme.Color.outlineVariant
                         Text {
                             id: filterText
                             anchors.centerIn: parent
                             text: parent.modelData
-                            color: root.filterKind === parent.modelData ? Color.background : root.muted
+                            color: root.filterKind === parent.modelData ? Theme.Color.background : root.muted
                             font.pixelSize: 10
                             font.bold: root.filterKind === parent.modelData
                         }
@@ -129,7 +129,7 @@ Item {
     component Caption: Text {
         width: parent ? parent.width : 0
         color: root.muted
-        font.pixelSize: Style.fontSmall
+        font.pixelSize: Theme.Style.fontSmall
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
     }
@@ -141,26 +141,26 @@ Item {
         property var devices: []
         property string emptyText: ""
         width: parent ? parent.width : 0
-        height: inside.childrenRect.height + Style.paddingMedium * 2
+        height: inside.childrenRect.height + Theme.Style.paddingMedium * 2
         implicitHeight: height
-        radius: Style.radiusMedium
-        color: Color.surfaceContainerHigh
+        radius: Theme.Style.radiusMedium
+        color: Theme.Color.surfaceContainerHigh
         border.width: 1
-        border.color: Color.outlineVariant
+        border.color: Theme.Color.outlineVariant
 
         Column {
             id: inside
-            x: Style.paddingMedium
-            y: Style.paddingMedium
-            width: Math.max(0, card.width - Style.paddingMedium * 2)
-            spacing: Style.spacingSmall
+            x: Theme.Style.paddingMedium
+            y: Theme.Style.paddingMedium
+            width: Math.max(0, card.width - Theme.Style.paddingMedium * 2)
+            spacing: Theme.Style.spacingSmall
             height: childrenRect.height
 
             RowLayout {
                 width: parent.width
-                MaterialIcon {
+                Theme.MaterialIcon {
                     text: card.icon
-                    iconSize: Style.materialIconMedium
+                    iconSize: Theme.Style.materialIconMedium
                     iconColor: root.accent
                 }
                 Text {
@@ -170,7 +170,7 @@ Item {
                     textFormat: Text.PlainText
                     color: root.accent
                     font.bold: true
-                    font.pixelSize: Style.fontSmall
+                    font.pixelSize: Theme.Style.fontSmall
                     wrapMode: Text.Wrap
                 }
                 Rectangle {
@@ -178,14 +178,14 @@ Item {
                     width: 24
                     height: 22
                     radius: 11
-                    color: card.devices.length > 0 ? Color.primary : Color.surfaceContainer
+                    color: card.devices.length > 0 ? Theme.Color.primary : Theme.Color.surfaceContainer
                     border.width: 1
-                    border.color: Color.outlineVariant
+                    border.color: Theme.Color.outlineVariant
                     Text {
                         id: countLabel
                         anchors.centerIn: parent
                         text: card.devices.length
-                        color: card.devices.length > 0 ? Color.background : root.muted
+                        color: card.devices.length > 0 ? Theme.Color.background : root.muted
                         font.pixelSize: 10
                         font.bold: true
                     }
@@ -209,7 +209,7 @@ Item {
         property string label: ""
         property string value: ""
         width: parent ? parent.width : 0
-        spacing: Style.spacingSmall
+        spacing: Theme.Style.spacingSmall
 
         Text {
             Layout.fillWidth: true
@@ -218,7 +218,7 @@ Item {
             text: stat.label
             textFormat: Text.PlainText
             color: root.muted
-            font.pixelSize: Style.fontSmall
+            font.pixelSize: Theme.Style.fontSmall
             wrapMode: Text.Wrap
         }
         Text {
@@ -227,8 +227,8 @@ Item {
             Layout.preferredWidth: stat.width * 0.4
             text: stat.value
             textFormat: Text.PlainText
-            color: Color.foreground
-            font.pixelSize: Style.fontSmall
+            color: Theme.Color.foreground
+            font.pixelSize: Theme.Style.fontSmall
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignRight
         }
@@ -238,18 +238,18 @@ Item {
         id: device
         required property var modelData
         width: parent ? parent.width : 0
-        implicitHeight: details.implicitHeight + Style.paddingSmall * 2
-        radius: Style.radiusSmall
-        color: Color.surfaceContainer
+        implicitHeight: details.implicitHeight + Theme.Style.paddingSmall * 2
+        radius: Theme.Style.radiusSmall
+        color: Theme.Color.surfaceContainer
 
         RowLayout {
             id: details
-            x: Style.paddingSmall
-            y: Style.paddingSmall
-            width: Math.max(0, device.width - Style.paddingSmall * 2)
-            spacing: Style.spacingSmall
+            x: Theme.Style.paddingSmall
+            y: Theme.Style.paddingSmall
+            width: Math.max(0, device.width - Theme.Style.paddingSmall * 2)
+            spacing: Theme.Style.spacingSmall
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: device.modelData.kind === "Iluminación" ? "lightbulb"
                     : device.modelData.kind === "iPhone" ? "phone_iphone"
                     : device.modelData.kind === "Micrófono" ? "mic"
@@ -258,7 +258,7 @@ Item {
                     : device.modelData.kind === "Control" ? "gamepad"
                     : device.modelData.kind === "Webcam" ? "videocam"
                     : "usb"
-                iconSize: Style.materialIconMedium
+                iconSize: Theme.Style.materialIconMedium
                 iconColor: root.accent
             }
             ColumnLayout {
@@ -268,8 +268,8 @@ Item {
                     Layout.fillWidth: true
                     text: device.modelData.name || "Dispositivo USB"
                     textFormat: Text.PlainText
-                    color: Color.foreground
-                    font.pixelSize: Style.fontSmall + 1
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall + 1
                     font.bold: true
                     wrapMode: Text.NoWrap
                     elide: Text.ElideRight
@@ -293,13 +293,13 @@ Item {
                     Layout.preferredWidth: 116
                     Layout.preferredHeight: 28
                     radius: 14
-                    color: root.openConfig === device.modelData.name ? Color.primary : Color.surfaceContainerHigh
+                    color: root.openConfig === device.modelData.name ? Theme.Color.primary : Theme.Color.surfaceContainerHigh
                     border.width: 1
-                    border.color: Color.outlineVariant
+                    border.color: Theme.Color.outlineVariant
                     Text {
                         anchors.centerIn: parent
                         text: root.openConfig === device.modelData.name ? "Cerrar" : "Configuración"
-                        color: root.openConfig === device.modelData.name ? Color.background : Color.foreground
+                        color: root.openConfig === device.modelData.name ? Theme.Color.background : Theme.Color.foreground
                         font.pixelSize: 10
                         font.bold: true
                     }
@@ -332,7 +332,7 @@ Item {
                         && device.modelData.kind === "Micrófono"
                     visible: active
                     opacity: active ? 1 : 0
-                    Behavior on opacity { Anim { duration: Style.motionFast } }
+                    Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
                     sourceComponent: Component {
                         MicrophoneControls { deviceName: device.modelData.name || "" }
                     }
@@ -344,7 +344,7 @@ Item {
                         && device.modelData.controller === "logitech-g"
                     visible: active
                     opacity: active ? 1 : 0
-                    Behavior on opacity { Anim { duration: Style.motionFast } }
+                    Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
                     sourceComponent: Component {
                         MouseControls { }
                     }

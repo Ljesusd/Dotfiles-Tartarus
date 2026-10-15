@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 
-import "../theme"
+import "../theme" as Theme
 import "../services" as Services
 import "../core"
 import "components"
@@ -34,8 +34,8 @@ PanelWindow {
 
     // The transparent layer is taller, while barSurface keeps the original
     // visual height so the widgets do not grow with the reserved area.
-    implicitHeight: Style.barHeight + 16
-    exclusiveZone: Style.barHeight + 16
+    implicitHeight: Theme.Style.barHeight + 16
+    exclusiveZone: Theme.Style.barHeight + 16
     focusable: true
     color: "transparent"
 
@@ -59,8 +59,8 @@ PanelWindow {
             topMargin: 10
             bottomMargin: 10
         }
-        radius: Style.radiusFull
-        color: Color.surfaceContainer
+        radius: Theme.Style.radiusFull
+        color: Theme.Color.surfaceContainer
         border.width: 0
         border.color: "transparent"
 
@@ -90,8 +90,8 @@ PanelWindow {
                 bottom: barSurface.bottom
                 left: barSurface.left
                 right: barSurface.right
-                leftMargin: Style.barContentHorizontalPadding
-                rightMargin: Style.barContentHorizontalPadding
+                leftMargin: Theme.Style.barContentHorizontalPadding
+                rightMargin: Theme.Style.barContentHorizontalPadding
             }
             spacing: 0
 
@@ -106,7 +106,7 @@ PanelWindow {
                         verticalCenter: parent.verticalCenter
                     }
 
-                    spacing: Style.barSpacingNormal
+                    spacing: Theme.Style.barSpacingNormal
 
                     EntryWrapper {
                         entryId: "workspaces"
@@ -131,18 +131,18 @@ PanelWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: Math.min(190, activeWindow.implicitWidth + Style.barPaddingSmall * 2)
-                        Layout.preferredHeight: Style.barInnerHeight
+                        Layout.preferredWidth: Math.min(190, activeWindow.implicitWidth + Theme.Style.barPaddingSmall * 2)
+                        Layout.preferredHeight: Theme.Style.barInnerHeight
                         visible: activeWindow.text !== ""
                         clip: true
 
                         ActiveWindow {
                             id: activeWindow
                             anchors.centerIn: parent
-                            width: parent.width - Style.barPaddingSmall * 2
-                            font.pixelSize: Style.barFontSmall
+                            width: parent.width - Theme.Style.barPaddingSmall * 2
+                            font.pixelSize: Theme.Style.barFontSmall
                             elide: Text.ElideRight
-                            color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.72)
+                            color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.72)
                         }
                     }
                 }
@@ -163,6 +163,27 @@ PanelWindow {
                     screen: root.screen
                     onMusicRequested: musicPopup.toggle()
                 }
+
+                // Compact local assistant pill. Its popup uses the same
+                // connected surface as the launcher and stays beside the island.
+                Item {
+                    id: rashinChatAnchor
+                    x: Math.max(0, dynamicIsland.x + (dynamicIsland.width - width) / 2)
+                    y: 0
+                    width: 360
+                    height: 1
+                    opacity: 0
+                }
+
+                RashinPill {
+                    id: rashinPill
+                    anchors.left: dynamicIsland.right
+                    anchors.leftMargin: Theme.Style.spacingSmall
+                    anchors.verticalCenter: dynamicIsland.verticalCenter
+                    anchorItem: rashinChatAnchor
+                    barWindow: root
+                    monitorContext: root.monitorContext
+                }
             }
 
             // Derecha
@@ -176,10 +197,10 @@ PanelWindow {
                         verticalCenter: parent.verticalCenter
                     }
 
-                    spacing: Style.barSpacingNormal
+                    spacing: Theme.Style.barSpacingNormal
 
                     RowLayout {
-                        spacing: Style.barSpacingNormal
+                        spacing: Theme.Style.barSpacingNormal
 
                         EntryWrapper {
                             entryId: "audio"
@@ -214,13 +235,13 @@ PanelWindow {
                             }
                         }
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             id: notificationIcon
-                            Layout.preferredWidth: Style.barControlHeight
-                            Layout.preferredHeight: Style.barControlHeight
+                            Layout.preferredWidth: Theme.Style.barControlHeight
+                            Layout.preferredHeight: Theme.Style.barControlHeight
                             text: "notifications"
-                            iconSize: Style.barIconNormal
-                            iconColor: Color.foreground
+                            iconSize: Theme.Style.barIconNormal
+                            iconColor: Theme.Color.foreground
 
                             Rectangle {
                                 id: notificationBadge
@@ -228,10 +249,10 @@ PanelWindow {
                                 anchors.bottom: parent.bottom
                                 width: Math.max(16, badgeText.implicitWidth + 6)
                                 height: 16
-                                radius: Style.radiusFull
-                                color: Color.primary
+                                radius: Theme.Style.radiusFull
+                                color: Theme.Color.primary
                                 border.width: 1
-                                border.color: Color.surfaceContainer
+                                border.color: Theme.Color.surfaceContainer
                                 visible: Services.NotificationService.notifications.count > 0
 
                                 Text {
@@ -239,7 +260,7 @@ PanelWindow {
                                     anchors.centerIn: parent
                                     text: Math.min(Services.NotificationService.notifications.count, 99)
                                         + (Services.NotificationService.notifications.count > 99 ? "+" : "")
-                                    color: Color.onPrimary
+                                    color: Theme.Color.onPrimary
                                     font.pixelSize: 10
                                     font.bold: true
                                 }
@@ -259,8 +280,8 @@ PanelWindow {
                         }
 
                         ProfileButton {
-                            Layout.preferredWidth: Style.barControlHeight
-                            Layout.preferredHeight: Style.barControlHeight
+                            Layout.preferredWidth: Theme.Style.barControlHeight
+                            Layout.preferredHeight: Theme.Style.barControlHeight
                             shellState: root.shellState
                             anchorSurface: barSurface
                             barWindow: root
@@ -308,7 +329,7 @@ PanelWindow {
             // Meet the bar at its upper edge. The shared surface removes the
             // seam without covering the controls inside the bar.
             y: 0
-            width: Style.launcherWidth
+            width: Theme.Style.launcherWidth
             height: 1
             opacity: 0
         }
@@ -322,7 +343,7 @@ PanelWindow {
 
             readonly property real anchorWidth: Math.min(
                 440,
-                Math.max(300, barSurface.width - Style.spacingLarge * 2)
+                Math.max(300, barSurface.width - Theme.Style.spacingLarge * 2)
             )
 
             x: Math.max(
@@ -366,18 +387,18 @@ PanelWindow {
 
             Rectangle {
                 anchors.centerIn: parent
-                width: Math.min(360, parent.width - Style.paddingLarge * 2)
+                width: Math.min(360, parent.width - Theme.Style.paddingLarge * 2)
                 height: 44
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 visible: installerDropArea.containsDrag
-                color: Color.primaryContainer
+                color: Theme.Color.primaryContainer
                 border.width: 1
-                border.color: Color.primary
+                border.color: Theme.Color.primary
                 Text {
                     anchors.centerIn: parent
                     text: "Suelta aquí para instalar"
-                    color: Color.foreground
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall
                     font.bold: true
                 }
             }

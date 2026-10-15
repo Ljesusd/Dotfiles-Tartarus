@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Syncthing
+Comment=Open the local file synchronization panel
+Comment[es]=Abrir el panel local de sincronización de archivos
+Exec=xdg-open http://127.0.0.1:8384/
+TryExec=syncthing
+Icon=network-workgroup
+Terminal=false
+Categories=Network;FileTransfer;
+Keywords=sync;KeePass;sincronizar;
+StartupNotify=false

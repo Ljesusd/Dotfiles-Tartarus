@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rashin · Tartarus</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="download.css">
+  <link rel="stylesheet" href="models.css">
+  <link rel="stylesheet" href="chat-patch.css">
+  <link rel="stylesheet" href="attachments-patch.css">
+  <link rel="stylesheet" href="workspace-patch.css">
+  <link rel="stylesheet" href="odysseus-chat.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="rail">
+      <div class="brand"><span class="brand-mark">✦</span><div><strong>RASHIN</strong><small>TARTARUS LOCAL</small></div></div>
+      <nav id="nav">
+        <button class="nav-item active" data-page="overview">Resumen</button>
+        <button class="nav-item" data-page="chat">Chat</button>
+        <button class="nav-item" data-page="models">Modelos</button>
+        <button class="nav-item" data-page="vault">Bóveda</button>
+        <button class="nav-item" data-page="memory">Memoria</button>
+        <button class="nav-item" data-page="skills">Skills</button>
+        <button class="nav-item" data-page="agents">Agentes</button>
+      </nav>
+      <div class="rail-footer"><span class="dot" id="rail-dot"></span><span id="rail-status">Conectando</span></div>
+    </aside>
+    <main class="content">
+      <header class="topbar"><div><p class="eyebrow">TARTARUS / SISTEMA LOCAL</p><h1 id="page-title">Resumen</h1></div><div class="top-actions"><span class="model-chip" id="model">Modelo local</span><button class="icon-button" id="setup">Configurar Hermes</button></div></header>
+
+      <section class="page active" id="page-overview">
+        <div class="hero card"><div><p class="eyebrow">AGENTE LOCAL</p><h2>La aguja conoce tu sistema.</h2><p class="muted">Sesiones, proyectos, memoria y archivos permanecen en tu máquina. El modelo se consulta únicamente por localhost.</p></div><button class="primary" data-open-chat>Preguntar</button></div>
+        <div class="status-grid"><article class="card stat"><span class="label">Estado</span><strong id="state">Conectando</strong><small id="privacy">Solo localhost</small></article><article class="card stat"><span class="label">Modelo activo</span><strong id="model-stat">—</strong><small id="endpoint">—</small></article><article class="card stat"><span class="label">CPU</span><strong id="cpu">—</strong><small id="memory-stat">Memoria —</small></article><article class="card stat"><span class="label">Hermes</span><strong id="hermes">No configurado</strong><small id="vault-stat">Bóveda —</small></article></div>
+        <div class="split"><article class="card"><div class="card-heading"><div><p class="eyebrow">ACTIVIDAD</p><h3>Consultas recientes</h3></div><button class="text-button" data-page-target="chat">Abrir chat</button></div><div id="recent" class="recent-list"><p class="muted">Todavía no hay consultas.</p></div></article><article class="card"><div class="card-heading"><div><p class="eyebrow">CAPACIDADES</p><h3>Herramientas seguras</h3></div></div><div id="tool-list" class="tool-list"></div></article></div>
+      </section>
+
+      <section class="page" id="page-chat">
+        <div class="page-heading"><div><p class="eyebrow">SESSION LANE / FAST LANE</p><h2>Chat local</h2><p class="muted">Puedes seguir escribiendo mientras Rashin trabaja. Los mensajes esperan en la cola de esta sesión.</p></div><button class="secondary" id="cancel">Cancelar</button></div>
+        <div class="chat-layout">
+          <aside class="session-panel card"><div class="session-actions"><button class="primary" id="new-session">+ Sesión</button><button class="secondary" id="new-project">+ Proyecto</button></div><input id="session-search" class="search-input" placeholder="Buscar sesiones…"><div class="section-caption">PROYECTOS</div><div id="projects-list" class="project-list"></div><div class="section-caption">SESIONES</div><div id="sessions-list" class="sessions-list"></div></aside>
+          <div class="card chat-card">
+            <div class="chat-toolbar"><label class="select-label">Perfil<select id="model-profile"><option value="">Modelo activo</option></select></label><label class="toggle"><input type="checkbox" id="fast-mode"><span></span> Fast mode</label><label class="toggle"><input type="checkbox" id="hermes-mode"><span></span> Hermes + tools</label><span class="toolbar-note">Las acciones sensibles piden permiso</span></div>
+            <div id="thinking-status" class="thinking-status hidden"></div>
+            <div id="messages" class="messages"><div class="empty-chat">Escribe una pregunta para empezar.</div></div>
+            <div id="queue" class="queue-list"></div>
+            <div id="permission" class="permission hidden"></div>
+            <form id="composer"><div id="attachment-preview" class="attachment-preview"></div><textarea id="question" rows="2" placeholder="Pregunta a Rashin…"></textarea><div class="composer-row"><div class="attach-wrap"><button class="attach-button" id="attach-menu-toggle" type="button" title="Añadir adjunto">+</button><div id="attach-menu" class="attach-menu hidden"><button type="button" data-attach-kind="files">Archivos</button><button type="button" data-attach-kind="photos">Fotos</button><button type="button" data-attach-kind="videos">Vídeos</button><button type="button" data-attach-kind="documents">Documentos</button></div><input id="attachments" class="hidden-file-input" type="file" multiple></div><span class="muted" id="working"></span><button class="secondary" type="button" id="clear-attachments">Limpiar</button><button class="primary" type="submit">Enviar</button></div></form>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-models"><div class="page-heading"><div><p class="eyebrow">MODEL PROFILES / LOCAL ONLY</p><h2>Perfiles de modelo</h2><p class="muted">Una variante activa cada vez. Low→Ultra representa más calidad y consumo; el contexto activo es de 96K.</p></div><button class="secondary" id="refresh-models">Actualizar catálogo</button></div><div class="card download-card"><h3>Descargar una variante GGUF</h3><div class="download-form"><input id="model-url" class="search-input" placeholder="URL directa del archivo .gguf"><input id="model-name" class="search-input" placeholder="Nombre opcional"><select id="model-tier" class="search-input"><option>Low</option><option selected>Medium</option><option>High</option><option>XHigh</option><option>Max</option><option>Ultra</option></select><button class="primary" id="download-model">Descargar</button></div><div id="download-list" class="download-list"></div></div><div id="model-list" class="model-grid"></div><div class="card notice"><strong>Fast mode</strong><span>Amplía la generación y habilita el perfil turbo en la misma GPU. No inicia otro modelo en paralelo.</span></div></section>
+      <section class="page" id="page-vault"><div class="page-heading"><div><p class="eyebrow">CONTEXT / FILES</p><h2>Bóveda local</h2><p class="muted" id="vault-root">—</p></div><button class="secondary" id="reindex">Reindexar</button></div><div class="card"><div id="vault-files" class="file-list"></div></div></section>
+      <section class="page" id="page-memory"><div class="page-heading"><div><p class="eyebrow">PERSISTENT CONTEXT</p><h2>Memoria</h2><p class="muted">Las sugerencias necesitan tu aprobación y no se guardan automáticamente como hechos personales.</p></div></div><div class="card"><h3>Perfil local</h3><p class="muted">Un contexto editable para que Rashin sepa cómo ayudarte. No se sincroniza ni se envía fuera de localhost.</p><textarea id="user-profile" class="profile-editor" rows="5" placeholder="Ej.: Prefiero respuestas en español y uso Arch Linux."></textarea><div class="composer-row"><span id="profile-state" class="muted"></span><button class="primary" id="save-profile">Guardar perfil</button></div></div><div class="card"><h3>Sugerencias pendientes</h3><div id="memory-candidates" class="memory-candidates"></div></div><div class="card"><h3>Archivos locales</h3><div id="memory-files" class="file-list"></div></div></section>
+      <section class="page" id="page-skills"><div class="page-heading"><div><p class="eyebrow">CAPABILITY PACKS</p><h2>Skills</h2><p class="muted">Instrucciones especializadas disponibles para agentes locales.</p></div></div><div class="card"><div id="skills-list" class="skill-grid"></div></div></section>
+      <section class="page" id="page-agents"><div class="page-heading"><div><p class="eyebrow">AGENT WIRING</p><h2>Agentes</h2><p class="muted">Conecta agentes a la bóveda sin sobrescribir sus instrucciones.</p></div></div><div class="card"><div id="agents-list" class="agent-list"></div></div></section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+  <script src="download.js"></script>
+  <script src="models.js"></script>
+  <script src="profile.js"></script>
+  <script src="chat-patch.js"></script>
+  <script src="attachments-patch.js"></script>
+  <script src="workspace-patch.js"></script>
+  <script src="odysseus-chat.js"></script>
+</body>
+</html>

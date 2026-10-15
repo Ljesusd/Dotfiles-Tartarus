@@ -43,8 +43,8 @@
       "default_config_options": {
         "mode": "agent-full-access",
         "collaboration_mode": "plan",
-        "fast-mode": false,
-        "reasoning_effort": "low",
+        "fast-mode": true,
+        "reasoning_effort": "xhigh",
         "model": "gpt-6-astra"
       },
       "type": "registry"

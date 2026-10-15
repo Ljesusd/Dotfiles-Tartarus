@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import Quickshell.Widgets
 import "../../services" as Services
-import "../../theme"
+import "../../theme" as Theme
 import "ryoku" as Ryoku
 import "ryoku/ArtColor.js" as ArtColor
 
@@ -21,7 +21,7 @@ ClippingRectangle {
         ? Math.max(0, Math.min(duration, player.position)) : 0
     readonly property bool seekable: wanted && duration > 0
         && (player?.canSeek ?? false) && (player?.positionSupported ?? false)
-    readonly property color accent: ArtColor.accentOf(palette.colors, Color.primary)
+    readonly property color accent: ArtColor.accentOf(palette.colors, Theme.Color.primary)
     property var gesturePlayer: null
     property int gestureTrack: -1
     implicitWidth: 320
@@ -48,7 +48,7 @@ ClippingRectangle {
         anchors.fill: parent
         art: root.service.artUrl
         accent: root.accent
-        plate: Color.surface
+        plate: Theme.Color.surface
         hovered: false
         showArtwork: false
     }
@@ -65,12 +65,12 @@ ClippingRectangle {
         Behavior on opacity { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
     }
 
-    MaterialIcon {
+    Theme.MaterialIcon {
         anchors.centerIn: parent
         visible: cover.status !== Image.Ready
         text: "music_note"
         iconSize: 56
-        iconColor: Color.foregroundMuted
+        iconColor: Theme.Color.foregroundMuted
     }
 
     Rectangle {
@@ -162,10 +162,10 @@ ClippingRectangle {
         implicitWidth: primary ? 48 : 36
         implicitHeight: implicitWidth
         opacity: enabled ? 1 : 0.42
-        contentItem: MaterialIcon {
+        contentItem: Theme.MaterialIcon {
             text: button.symbol
             iconSize: button.primary ? 25 : 21
-            iconColor: button.primary ? Color.onPrimary : "white"
+            iconColor: button.primary ? Theme.Color.onPrimary : "white"
         }
         background: Rectangle {
             radius: height / 2

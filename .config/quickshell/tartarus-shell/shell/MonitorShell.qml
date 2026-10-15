@@ -70,6 +70,15 @@ Scope {
         pluginRegistry: root.pluginRegistry
     }
 
+    RecordingHud {
+        monitorScreen: root.screen
+        shellState: root.shellState
+    }
+
+    RecordingRegionPicker {
+        monitorScreen: root.screen
+    }
+
     Launcher {
         launcherState: root.launcherState
         monitorContext: context
@@ -97,7 +106,7 @@ Scope {
     }
 
     OsdOverlay { monitorScreen: root.screen; monitorContext: context }
-    SidebarOverlay { monitorScreen: root.screen; pluginRegistry: root.pluginRegistry; monitorContext: context }
+    SidebarOverlay { monitorScreen: root.screen; pluginRegistry: root.pluginRegistry; monitorContext: context; shellState: root.shellState }
     LeftSidebarOverlay { monitorScreen: root.screen; pluginRegistry: root.pluginRegistry; monitorContext: context }
 
     ClipboardOverlay {

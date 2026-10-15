@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -37,17 +37,17 @@ Item {
     implicitWidth: 340
     implicitHeight:
         contentColumn.implicitHeight
-        + Style.paddingLarge * 2
+        + Theme.Style.paddingLarge * 2
 
     Rectangle {
         id: panelContent
 
         anchors.fill: parent
-        anchors.margins: Style.barPopupGap
+        anchors.margins: Theme.Style.barPopupGap
 
         implicitHeight:
             contentColumn.implicitHeight
-            + Style.paddingLarge * 2
+            + Theme.Style.paddingLarge * 2
 
         radius: 0
         color: "transparent"
@@ -71,27 +71,27 @@ Item {
                 left: parent.left
                 right: parent.right
                 top: parent.top
-                margins: Style.paddingLarge
+                margins: Theme.Style.paddingLarge
             }
 
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
             RowLayout {
                 width: parent.width
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     text: "brightness_6"
-                    font.pixelSize: Style.materialIconMedium
+                    font.pixelSize: Theme.Style.materialIconMedium
                     color: root.brightnessAvailable
-                        ? Color.accent
-                        : Color.foregroundMuted
+                        ? Theme.Color.accent
+                        : Theme.Color.foregroundMuted
                 }
 
                 Text {
                     text: "Brightness"
 
-                    font.pixelSize: Style.fontNormal
-                    color: Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
+                    color: Theme.Color.foreground
                 }
 
                 Item {
@@ -101,10 +101,10 @@ Item {
                 Text {
                     text: root.brightnessPercent + "%"
 
-                    font.pixelSize: Style.fontNormal
+                    font.pixelSize: Theme.Style.fontNormal
                     color: root.brightnessAvailable
-                        ? Color.foreground
-                        : Color.foregroundMuted
+                        ? Theme.Color.foreground
+                        : Theme.Color.foregroundMuted
                 }
             }
 
@@ -116,16 +116,16 @@ Item {
                     ? root.panelDisplay.name
                     : "No display"
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
                 elide: Text.ElideRight
             }
 
             Text {
                 text: "Monitores"
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             Repeater {
@@ -144,29 +144,29 @@ Item {
                     width: contentColumn.width
                     height: 52
 
-                    radius: Style.radiusMedium
+                    radius: Theme.Style.radiusMedium
                     color: displayHover.hovered
-                        ? Color.surfaceHover
+                        ? Theme.Color.surfaceHover
                         : displayItem.selected
-                            ? Color.selection
-                            : Color.surface
+                            ? Theme.Color.selection
+                            : Theme.Color.surface
 
                     RowLayout {
                         anchors {
                             fill: parent
-                            leftMargin: Style.paddingMedium
-                            rightMargin: Style.paddingMedium
+                            leftMargin: Theme.Style.paddingMedium
+                            rightMargin: Theme.Style.paddingMedium
                         }
 
-                        spacing: Style.spacingMedium
+                        spacing: Theme.Style.spacingMedium
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             Layout.alignment: Qt.AlignVCenter
                             text: "monitor"
-                            font.pixelSize: Style.materialIconMedium
+                            font.pixelSize: Theme.Style.materialIconMedium
                             color: displayItem.selected
-                                ? Color.accent
-                                : Color.foregroundMuted
+                                ? Theme.Color.accent
+                                : Theme.Color.foregroundMuted
                         }
 
                         ColumnLayout {
@@ -179,8 +179,8 @@ Item {
 
                                 text: displayItem.modelData.name
 
-                                font.pixelSize: Style.fontSmall
-                                color: Color.foreground
+                                font.pixelSize: Theme.Style.fontSmall
+                                color: Theme.Color.foreground
 
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
@@ -191,8 +191,8 @@ Item {
 
                                 text: "Bus " + displayItem.modelData.bus
 
-                                font.pixelSize: Style.fontSmall
-                                color: Color.foregroundMuted
+                                font.pixelSize: Theme.Style.fontSmall
+                                color: Theme.Color.foregroundMuted
 
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
@@ -210,8 +210,8 @@ Item {
             Text {
                 text: "Brightness"
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             Slider {
@@ -219,7 +219,7 @@ Item {
 
                 width: contentColumn.width
 
-                implicitHeight: Style.barControlHeight
+                implicitHeight: Theme.Style.barControlHeight
 
                 from: 0
                 to: root.panelDisplay?.maxBrightness ?? 100
@@ -234,13 +234,13 @@ Item {
                     width: brightnessSlider.availableWidth
                     implicitHeight: 6
                     radius: 3
-                    color: Color.surfaceContainerHigh
+                    color: Theme.Color.surfaceContainerHigh
 
                     Rectangle {
                         width: brightnessSlider.visualPosition * parent.width
                         height: parent.height
                         radius: 3
-                        color: Color.accent
+                        color: Theme.Color.accent
                     }
                 }
 
@@ -254,9 +254,9 @@ Item {
                     implicitHeight: 18
                     radius: 9
                     color: brightnessSlider.pressed
-                        ? Color.foreground
-                        : Color.accent
-                    border.color: Color.background
+                        ? Theme.Color.foreground
+                        : Theme.Color.accent
+                    border.color: Theme.Color.background
                     border.width: 2
                 }
 
@@ -274,10 +274,10 @@ Item {
 
                 text: root.brightnessPercent + "%"
 
-                font.pixelSize: Style.fontSmall
+                font.pixelSize: Theme.Style.fontSmall
                 color: root.brightnessAvailable
-                    ? Color.foreground
-                    : Color.foregroundMuted
+                    ? Theme.Color.foreground
+                    : Theme.Color.foregroundMuted
             }
         }
     }

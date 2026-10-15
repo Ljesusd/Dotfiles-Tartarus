@@ -9,7 +9,6 @@ QtObject {
     id: root
 
     // Optional integrations. They stay false when the corresponding program is absent.
-    property bool recordingActive: false
     property bool vpnActive: false
     property bool easyEffectsActive: false
     property bool localSendActive: false
@@ -32,14 +31,11 @@ QtObject {
 
     property Process probe: Process {
         command: ["sh", "-c", ""
-            + "recording=0; "
-            + "(pgrep -x wf-recorder >/dev/null || pgrep -f '^([^ ]*/)?gpu-screen-recorder( |$)' >/dev/null || "
-            + "pgrep -x obs >/dev/null || pgrep -x kooha >/dev/null) && recording=1; "
             + "vpn=0; command -v nmcli >/dev/null && "
             + "nmcli -t -f TYPE,STATE dev 2>/dev/null | grep -q '^vpn:connected$' && vpn=1; "
             + "effects=0; pgrep -x easyeffects >/dev/null && effects=1; "
             + "localsend=0; pgrep -f '(^|/)localsend($| )' >/dev/null && localsend=1; "
-            + "printf 'recording=%s\\nvpn=%s\\neffects=%s\\nlocalsend=%s\\n' \"$recording\" \"$vpn\" \"$effects\" \"$localsend\""
+            + "printf 'vpn=%s\\neffects=%s\\nlocalsend=%s\\n' \"$vpn\" \"$effects\" \"$localsend\""
         ]
         stdout: StdioCollector {
             waitForEnd: true
@@ -49,7 +45,6 @@ QtObject {
                     const pair = line.split("=")
                     if (pair.length === 2) values[pair[0]] = pair[1] === "1"
                 })
-                root.recordingActive = values.recording === true
                 root.vpnActive = values.vpn === true
                 root.easyEffectsActive = values.effects === true
                 root.localSendActive = values.localsend === true

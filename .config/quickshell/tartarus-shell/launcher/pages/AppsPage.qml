@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 import "../components"
 
 Item {
@@ -41,42 +41,42 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.leftMargin: Style.paddingXLarge
-        anchors.rightMargin: Style.paddingXLarge
-        anchors.topMargin: Style.paddingLarge
-        anchors.bottomMargin: Style.paddingXLarge
+        anchors.leftMargin: Theme.Style.paddingXLarge
+        anchors.rightMargin: Theme.Style.paddingXLarge
+        anchors.topMargin: Theme.Style.paddingLarge
+        anchors.bottomMargin: Theme.Style.paddingXLarge
 
-        spacing: Style.spacingMedium
+        spacing: Theme.Style.spacingMedium
 
         RowLayout {
             Layout.fillWidth: true
 
-            spacing: Style.spacingLarge
+            spacing: Theme.Style.spacingLarge
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: "apps"
-                iconSize: Style.materialIconMedium
-                iconColor: Color.primary
+                iconSize: Theme.Style.materialIconMedium
+                iconColor: Theme.Color.primary
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
 
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
 
                 Text {
                     text: "Applications"
 
-                    font.pixelSize: Style.fontNormal
+                    font.pixelSize: Theme.Style.fontNormal
                     font.weight: Font.DemiBold
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                 }
 
                 Text {
                     text: "Launch an application"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
             }
         }
@@ -84,7 +84,7 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.topMargin: Style.spacingSmall
+            Layout.topMargin: Theme.Style.spacingSmall
 
             LauncherListView {
                 id: appList
@@ -129,8 +129,8 @@ Item {
                 visible: root.active && appList.count === 0
 
                 text: "No applications found"
-                font.pixelSize: Style.fontNormal
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontNormal
+                color: Theme.Color.foregroundMuted
             }
         }
     }

@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../theme" as Theme
 
 // Caelestia's connected drawer silhouette, adapted for Tartarus's bottom bar.
 // The outer curve flares into the bar; the baseline has no separating stroke.
@@ -13,9 +13,9 @@ Item {
     readonly property int horizontalInset: shadowPadding + joinRadius
     property real contentWidth: Math.max(0, width - horizontalInset * 2)
     property real contentHeight: Math.max(0, height - shadowPadding)
-    property color fillColor: Color.surfaceContainer
-    property color outlineColor: Qt.alpha(Color.foreground, 0.14)
-    property color shadowColor: Qt.rgba(0, 0, 0, Color.mode === "light" ? 0.2 : 0.35)
+    property color fillColor: Theme.Color.surfaceContainer
+    property color outlineColor: Qt.alpha(Theme.Color.foreground, 0.14)
+    property color shadowColor: Qt.rgba(0, 0, 0, Theme.Color.mode === "light" ? 0.2 : 0.35)
     readonly property alias contentItem: content
     readonly property alias maskItem: frame
     signal closed()
@@ -43,18 +43,18 @@ Item {
             to: "opened"
             NumberAnimation {
                 property: "reveal"
-                duration: Motion.popupOpen
+                duration: Theme.Motion.popupOpen
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.popupOpenCurve
+                easing.bezierCurve: Theme.Motion.popupOpenCurve
             }
         },
         Transition {
             from: "opened"
             NumberAnimation {
                 property: "reveal"
-                duration: Motion.popupClose
+                duration: Theme.Motion.popupClose
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.popupCloseCurve
+                easing.bezierCurve: Theme.Motion.popupCloseCurve
             }
         }
     ]
@@ -69,17 +69,17 @@ Item {
         Behavior on width {
             enabled: root.opened && root.reveal > 0.98
             NumberAnimation {
-                duration: Motion.popupResize
+                duration: Theme.Motion.popupResize
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.spatialCurve
+                easing.bezierCurve: Theme.Motion.spatialCurve
             }
         }
         Behavior on height {
             enabled: root.opened && root.reveal > 0.98
             NumberAnimation {
-                duration: Motion.popupResize
+                duration: Theme.Motion.popupResize
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.spatialCurve
+                easing.bezierCurve: Theme.Motion.spatialCurve
             }
         }
 
@@ -104,7 +104,7 @@ Item {
             const available = Math.max(0, height - top)
             if (available < 1 || width <= root.horizontalInset * 2) return
             const left = root.horizontalInset, right = width - left
-            const radius = Math.min(Style.panelRadius, (right - left) / 4, available / 3)
+            const radius = Math.min(Theme.Style.panelRadius, (right - left) / 4, available / 3)
             const join = Math.min(root.joinRadius, available / 3)
 
             ctx.beginPath()

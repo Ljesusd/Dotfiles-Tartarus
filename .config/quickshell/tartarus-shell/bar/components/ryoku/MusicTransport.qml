@@ -4,7 +4,7 @@
 // See LICENSE and NOTICE.md in this directory.
 pragma ComponentBehavior: Bound
 import QtQuick
-import "../../../theme"
+import "../../../theme" as Theme
 
 // The three moves: reverse, play or pause, skip. Play/pause wears the sleeve's
 // colour as the one filled tile, so the widget has a single focal control.
@@ -12,11 +12,11 @@ Row {
     id: transport
 
     property real s: 1
-    property color accent: Color.primary
-    property color ink: Color.foreground
+    property color accent: Theme.Color.primary
+    property color ink: Theme.Color.foreground
     // ink for the one filled tile. Not named onAccent: QML would read that as a
     // change handler for `accent` and drop the assignment.
-    property color inkOnAccent: Color.surface
+    property color inkOnAccent: Theme.Color.surface
     property bool active: true
     property bool playing: false
     property bool canPrevious: false
@@ -74,7 +74,7 @@ Row {
                                  : "transparent")
             Behavior on color { ColorAnimation { duration: 120 } }
         }
-        MaterialIcon {
+        Theme.MaterialIcon {
             anchors.centerIn: parent
             iconSize: (move.filled ? 20 : 18) * transport.s
             text: move.glyph

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -14,11 +14,11 @@ Item {
 
     implicitWidth: 260
     implicitHeight: panelColumn.implicitHeight
-        + Style.paddingLarge * 2
+        + Theme.Style.paddingLarge * 2
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: Style.barPopupGap
+        anchors.margins: Theme.Style.barPopupGap
         radius: 0
         color: "transparent"
         border.width: 0
@@ -38,23 +38,23 @@ Item {
             id: panelColumn
 
             anchors.fill: parent
-            anchors.margins: Style.paddingLarge
-            spacing: Style.spacingSmall
+            anchors.margins: Theme.Style.paddingLarge
+            spacing: Theme.Style.spacingSmall
 
             RowLayout {
                 Layout.fillWidth: true
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     text: "keyboard"
-                    color: Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
 
                 Text {
                     Layout.fillWidth: true
                     text: "Keyboard layout"
-                    color: Color.foreground
-                    font.pixelSize: Style.fontNormal
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
                 }
             }
 
@@ -63,15 +63,15 @@ Item {
                 text: root.service.keymap !== ""
                     ? root.service.keymap
                     : "Select layout"
-                color: Color.foregroundMuted
-                font.pixelSize: Style.fontSmall
+                color: Theme.Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
                 elide: Text.ElideRight
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Color.surfaceHover
+                color: Theme.Color.surfaceHover
             }
 
             Repeater {
@@ -86,40 +86,40 @@ Item {
 
                     Layout.fillWidth: true
                     implicitHeight: 42
-                    radius: Style.radiusMedium
+                    radius: Theme.Style.radiusMedium
                     color: root.service.currentLayoutIndex() === index
-                        ? Color.selection
+                        ? Theme.Color.selection
                         : layoutMouse.containsMouse
-                            ? Color.surfaceHover
+                            ? Theme.Color.surfaceHover
                             : "transparent"
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Style.paddingMedium
-                        anchors.rightMargin: Style.paddingMedium
-                        spacing: Style.spacingMedium
+                        anchors.leftMargin: Theme.Style.paddingMedium
+                        anchors.rightMargin: Theme.Style.paddingMedium
+                        spacing: Theme.Style.spacingMedium
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: root.service.currentLayoutIndex() === index
                                 ? "radio_button_checked"
                                 : "radio_button_unchecked"
                             color: root.service.currentLayoutIndex() === index
-                                ? Color.accent
-                                : Color.foregroundMuted
-                            font.pixelSize: Style.materialIconSmall
+                                ? Theme.Color.accent
+                                : Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconSmall
                         }
 
                         Text {
                             Layout.fillWidth: true
                             text: modelData.label
-                            color: Color.foreground
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foreground
+                            font.pixelSize: Theme.Style.fontSmall
                         }
 
                         Text {
                             text: modelData.short
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                         }
                     }
 

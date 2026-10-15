@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec bash "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/tartarus-shell/scripts/open-imageviewer.sh" "$@"

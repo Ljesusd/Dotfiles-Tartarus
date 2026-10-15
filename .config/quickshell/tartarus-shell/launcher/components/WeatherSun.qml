@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../theme"
+import "../../theme" as Theme
 import "../../services/WeatherModel.js" as Model
 
 Rectangle {
@@ -15,13 +15,13 @@ Rectangle {
         return (now - start) / (end - start)
     }
     implicitHeight: 176
-    radius: Style.cardRadius
-    color: Color.surfaceContainerHigh
+    radius: Theme.Style.cardRadius
+    color: Theme.Color.surfaceContainerHigh
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.paddingMedium
+        anchors.margins: Theme.Style.paddingMedium
         spacing: 5
-        Text { text: "Sol y noche"; color: Color.foreground; font.pixelSize: Style.fontNormal; font.bold: true }
+        Text { text: "Sol y noche"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontNormal; font.bold: true }
         Canvas {
             id: arc
             Layout.fillWidth: true
@@ -44,14 +44,14 @@ Rectangle {
                     ctx.stroke()
                 }
                 ctx.lineWidth = 2
-                ctx.strokeStyle = Qt.alpha(Color.warning, 0.25)
+                ctx.strokeStyle = Qt.alpha(Theme.Color.warning, 0.25)
                 trace(1)
                 if (root.progress >= 0) {
-                    ctx.strokeStyle = Color.warning
+                    ctx.strokeStyle = Theme.Color.warning
                     trace(root.progress)
                     ctx.beginPath()
                     ctx.arc(x0 + (x1 - x0) * root.progress, y - Math.sin(root.progress * Math.PI) * (height - 16), 5, 0, Math.PI * 2)
-                    ctx.fillStyle = Color.warning
+                    ctx.fillStyle = Theme.Color.warning
                     ctx.fill()
                 }
             }
@@ -71,15 +71,15 @@ Rectangle {
                     spacing: 2
                     Row {
                         spacing: 4
-                        MaterialIcon { text: modelData.icon; iconSize: 15; iconColor: Color.warning }
-                        Text { text: modelData.time || "—"; color: Color.foreground; font.pixelSize: 15; font.bold: true }
+                        Theme.MaterialIcon { text: modelData.icon; iconSize: 15; iconColor: Theme.Color.warning }
+                        Text { text: modelData.time || "—"; color: Theme.Color.foreground; font.pixelSize: 15; font.bold: true }
                     }
-                    Text { text: modelData.label; color: Color.foregroundMuted; font.pixelSize: 11 }
+                    Text { text: modelData.label; color: Theme.Color.foregroundMuted; font.pixelSize: 11 }
                 }
             }
         }
-        Text { text: "Anochecer: fin del crepúsculo civil, estimado"; color: Color.foregroundSubtle; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+        Text { text: "Anochecer: fin del crepúsculo civil, estimado"; color: Theme.Color.foregroundSubtle; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
     }
     onProgressChanged: arc.requestPaint()
-    Connections { target: Color; function onWarningChanged() { arc.requestPaint() } }
+    Connections { target: Theme.Color; function onWarningChanged() { arc.requestPaint() } }
 }

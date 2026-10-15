@@ -1,6 +1,7 @@
 import QtQuick
+import "." as Theme
 
 ColorAnimation {
-    duration: Style.motionFast
+    duration: Theme.Style.motionFast
     easing.type: Easing.OutCubic
 }

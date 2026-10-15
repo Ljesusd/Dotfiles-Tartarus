@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -15,18 +15,18 @@ Rectangle {
     signal activated()
     signal hovered()
 
-    implicitHeight: Math.max(Style.launcherSchemeItemHeight,
-        themeContent.implicitHeight + Style.paddingSmall * 2)
+    implicitHeight: Math.max(Theme.Style.launcherSchemeItemHeight,
+        themeContent.implicitHeight + Theme.Style.paddingSmall * 2)
 
-    radius: Style.cardRadius
+    radius: Theme.Style.cardRadius
 
     color: hoverHandler.hovered && !root.selected
-            ? Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, Style.hoverOpacity)
+            ? Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, Theme.Style.hoverOpacity)
             : "transparent"
 
     Behavior on color {
         ColorAnimation {
-            duration: Style.motionFast
+            duration: Theme.Style.motionFast
             easing.type: Easing.OutCubic
         }
     }
@@ -35,12 +35,12 @@ Rectangle {
         id: themeContent
         anchors.fill: parent
 
-        anchors.leftMargin: Style.paddingLarge
-        anchors.rightMargin: Style.paddingLarge
-        anchors.topMargin: Style.paddingSmall
-        anchors.bottomMargin: Style.paddingSmall
+        anchors.leftMargin: Theme.Style.paddingLarge
+        anchors.rightMargin: Theme.Style.paddingLarge
+        anchors.topMargin: Theme.Style.paddingSmall
+        anchors.bottomMargin: Theme.Style.paddingSmall
 
-        spacing: Style.spacingMedium
+        spacing: Theme.Style.spacingMedium
 
         Item {
             Layout.alignment: Qt.AlignVCenter
@@ -48,11 +48,11 @@ Rectangle {
             Layout.minimumWidth: 36
             Layout.maximumWidth: 36
             Layout.preferredHeight: 36
-            MaterialIcon {
+            Theme.MaterialIcon {
                 anchors.centerIn: parent
                 text: "palette"
                 iconSize: 26
-                iconColor: Color.foregroundMuted
+                iconColor: Theme.Color.foregroundMuted
             }
         }
 
@@ -60,46 +60,46 @@ Rectangle {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
 
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
 
             RowLayout {
                 Layout.fillWidth: true
 
-                spacing: Style.spacingMedium
+                spacing: Theme.Style.spacingMedium
 
                 Text {
                     Layout.fillWidth: true
 
                     text: root.theme.name
 
-                    font.pixelSize: Style.fontNormal
-                    color: Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
+                    color: Theme.Color.foreground
 
                     elide: Text.ElideRight
                     maximumLineCount: 1
                 }
 
                 Rectangle {
-                    radius: Style.radiusFull
-                    color: Qt.alpha(Color.primary, 0.12)
-                    implicitHeight: Style.launcherSchemeBadgeHeight
+                    radius: Theme.Style.radiusFull
+                    color: Qt.alpha(Theme.Color.primary, 0.12)
+                    implicitHeight: Theme.Style.launcherSchemeBadgeHeight
                     implicitWidth:
                         currentText.implicitWidth
-                        + Style.paddingSmall * 2
+                        + Theme.Style.paddingSmall * 2
                     visible: root.current
                     opacity: root.current ? 1.0 : 0.0
                     scale: root.current ? 1.0 : 0.96
 
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: Style.motionFast
+                            duration: Theme.Style.motionFast
                             easing.type: Easing.OutCubic
                         }
                     }
 
                     Behavior on scale {
                         NumberAnimation {
-                            duration: Style.motionFast
+                            duration: Theme.Style.motionFast
                             easing.type: Easing.OutCubic
                         }
                     }
@@ -110,8 +110,8 @@ Rectangle {
                         anchors.centerIn: parent
 
                         text: "Current"
-                        font.pixelSize: Style.fontSmall
-                        color: Color.primary
+                        font.pixelSize: Theme.Style.fontSmall
+                        color: Theme.Color.primary
                     }
                 }
             }
@@ -119,12 +119,12 @@ Rectangle {
             Text {
                 text: root.theme.mode
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             Row {
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
                 Repeater {
                     model: root.theme.preview ?? []
@@ -132,10 +132,10 @@ Rectangle {
                     Rectangle {
                         required property var modelData
 
-                        width: Style.launcherSchemePreviewWidth
-                        height: Style.launcherSchemePreviewHeight
+                        width: Theme.Style.launcherSchemePreviewWidth
+                        height: Theme.Style.launcherSchemePreviewHeight
 
-                        radius: Style.launcherSchemePreviewRadius
+                        radius: Theme.Style.launcherSchemePreviewRadius
 
                         color: modelData
                     }

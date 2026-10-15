@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 
-import "../../../theme"
+import "../../../theme" as Theme
 import "../../../utils"
 
 Rectangle {
@@ -36,7 +36,7 @@ Rectangle {
         )
 
     readonly property int baseSize:
-        Style.barWorkspaceBaseSize
+        Theme.Style.barWorkspaceBaseSize
 
     readonly property bool hasWindows:
         root.showWindowIcons && windowCount > 0
@@ -46,49 +46,49 @@ Rectangle {
     // moving pill, occupied workspaces by a rounded square and empty ones by
     // a small dot.
     readonly property color contentColor:
-        root.active ? Color.onPrimary : Color.foregroundMuted
+        root.active ? Theme.Color.onPrimary : Theme.Color.foregroundMuted
     readonly property real contentOpacity:
         root.active || root.occupied ? 1.0 : 0.42
 
     implicitWidth: root.shouldShow ? Math.max(
         root.baseSize,
-        content.implicitWidth + Style.spacingSm
+        content.implicitWidth + Theme.Style.spacingSm
     ) : 0
     implicitHeight: root.baseSize
     opacity: root.shouldShow ? 1 : 0
 
-    radius: Style.radiusFull
+    radius: Theme.Style.radiusFull
 
     color:
             root.interactive
             && !root.active
             && mouseArea.containsMouse
-            ? Color.surfaceHover
+            ? Theme.Color.surfaceHover
             : "transparent"
 
     Behavior on color {
-        ColorAnim { }
+        Theme.ColorAnim { }
     }
-    Behavior on opacity { Anim { duration: Style.motionFast } }
-    Behavior on implicitWidth { Anim { duration: Style.motionNormal } }
-    Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutBack } }
+    Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
+    Behavior on implicitWidth { Theme.Anim { duration: Theme.Style.motionNormal } }
+    Behavior on scale { Theme.Anim { duration: Theme.Style.motionNormal; easing.type: Easing.OutBack } }
 
     Row {
         id: content
 
         anchors.centerIn: parent
-        spacing: Style.barWorkspaceContentSpacing
+        spacing: Theme.Style.barWorkspaceContentSpacing
 
         Item {
-            width: Style.barWorkspaceIconSize
-            height: Style.barWorkspaceIconSize
+            width: Theme.Style.barWorkspaceIconSize
+            height: Theme.Style.barWorkspaceIconSize
 
             Text {
                 anchors.centerIn: parent
                 text: root.workspaceId
                 color: root.contentColor
                 opacity: root.contentOpacity
-                font.pixelSize: Style.barFontSmall
+                font.pixelSize: Theme.Style.barFontSmall
                 font.bold: root.active
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
@@ -98,7 +98,7 @@ Rectangle {
         Row {
             id: windowIcons
 
-            spacing: Style.barWorkspaceContentSpacing
+            spacing: Theme.Style.barWorkspaceContentSpacing
             visible: root.hasWindows
 
             Repeater {
@@ -107,16 +107,16 @@ Rectangle {
                 Item {
                     required property int index
 
-                    width: Style.barWorkspaceIconSize
-                    height: Style.barWorkspaceIconSize
+                    width: Theme.Style.barWorkspaceIconSize
+                    height: Theme.Style.barWorkspaceIconSize
 
-                    MaterialIcon {
+                    Theme.MaterialIcon {
                         anchors.centerIn: parent
                         text: Icons.iconForWindow(
                             root.windows[index],
                             "apps"
                         )
-                        iconSize: Style.barWorkspaceIconSize
+                        iconSize: Theme.Style.barWorkspaceIconSize
                         iconColor: root.contentColor
                         opacity: root.contentOpacity
                         fill: 0

@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -26,7 +26,7 @@ Item {
     }
 
     implicitWidth: trayLayout.implicitWidth
-    implicitHeight: Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
     Rectangle {
         anchors.fill: parent
@@ -39,9 +39,9 @@ Item {
         id: trayLayout
 
         anchors.fill: parent
-        anchors.leftMargin: Style.barPaddingSmall
-        anchors.rightMargin: Style.barPaddingSmall
-        spacing: Style.barSpacingSmall
+        anchors.leftMargin: Theme.Style.barPaddingSmall
+        anchors.rightMargin: Theme.Style.barPaddingSmall
+        spacing: Theme.Style.barSpacingSmall
 
         Repeater {
             model: SystemTray.items
@@ -51,29 +51,29 @@ Item {
 
             required property var modelData
 
-            implicitWidth: Style.barControlHeight
-            implicitHeight: Style.barControlHeight
+            implicitWidth: Theme.Style.barControlHeight
+            implicitHeight: Theme.Style.barControlHeight
 
-            radius: Style.radiusFull
+            radius: Theme.Style.radiusFull
 
             color: "transparent"
             border.width: 0
 
             IconImage {
                 anchors.centerIn: parent
-                implicitSize: Style.barIconSmall
+                implicitSize: Theme.Style.barIconSmall
                 visible: root.materialFallback(trayItem.modelData.icon) === ""
                 source: root.materialFallback(trayItem.modelData.icon) === ""
                     ? trayItem.modelData.icon
                     : ""
             }
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 anchors.centerIn: parent
-                iconSize: Style.barIconSmall
+                iconSize: Theme.Style.barIconSmall
                 text: root.materialFallback(trayItem.modelData.icon)
                 visible: text !== ""
-                iconColor: Color.foreground
+                iconColor: Theme.Color.foreground
             }
 
             TrayMenu {
@@ -86,7 +86,7 @@ Item {
 
             Timer {
                 id: menuHoverDelay
-                interval: Style.trayHoverDelay
+                interval: Theme.Style.trayHoverDelay
                 repeat: false
                 onTriggered: {
                     if (mouseArea.containsMouse && trayItem.modelData.hasMenu)
@@ -96,7 +96,7 @@ Item {
 
             Timer {
                 id: menuCloseDelay
-                interval: Style.trayHoverDelay
+                interval: Theme.Style.trayHoverDelay
                 repeat: false
                 onTriggered: {
                     if (!mouseArea.containsMouse && !menuAnchor.menuHovered)

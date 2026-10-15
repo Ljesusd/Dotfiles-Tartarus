@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -10,38 +10,38 @@ Rectangle {
     required property var monitorContext
     required property var shellState
 
-    implicitWidth: Style.launcherSearchWidth
-    implicitHeight: Style.launcherSearchHeight
+    implicitWidth: Theme.Style.launcherSearchWidth
+    implicitHeight: Theme.Style.launcherSearchHeight
 
-    radius: Style.radiusFull
+    radius: Theme.Style.radiusFull
 
     color: root.monitorContext.launcherOpened || input.activeFocus
-        ? Color.surfaceContainerHigh
+        ? Theme.Color.surfaceContainerHigh
         : "transparent"
 
     Behavior on color {
         ColorAnimation {
-            duration: Style.animationFast
+            duration: Theme.Style.animationFast
         }
     }
 
     border.width: input.activeFocus || hoverHandler.hovered
-        ? Style.panelBorderWidth
+        ? Theme.Style.panelBorderWidth
         : 0
-    border.color: Color.primary
+    border.color: Theme.Color.primary
 
     RowLayout {
         anchors.fill: parent
 
-        anchors.leftMargin: Style.barPaddingNormal
-        anchors.rightMargin: Style.barPaddingNormal
+        anchors.leftMargin: Theme.Style.barPaddingNormal
+        anchors.rightMargin: Theme.Style.barPaddingNormal
 
-        spacing: Style.barSpacingSmall
+        spacing: Theme.Style.barSpacingSmall
 
-        MaterialIcon {
+        Theme.MaterialIcon {
             text: "search"
-            iconSize: Style.barIconNormal
-            iconColor: Color.foregroundMuted
+            iconSize: Theme.Style.barIconNormal
+            iconColor: Theme.Color.foregroundMuted
         }
 
         Item {
@@ -58,8 +58,8 @@ Rectangle {
 
                 text: "Search"
 
-                font.pixelSize: Style.barFontNormal
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.barFontNormal
+                color: Theme.Color.foregroundMuted
             }
 
             TextInput {
@@ -73,8 +73,8 @@ Rectangle {
 
                 text: root.launcherState.query
 
-                font.pixelSize: Style.barFontNormal
-                color: Color.foreground
+                font.pixelSize: Theme.Style.barFontNormal
+                color: Theme.Color.foreground
 
                 selectByMouse: true
 

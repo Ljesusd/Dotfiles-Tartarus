@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../.." && pwd)"
+source_dir="$repo_root/tools/tartarus-rashin"
+binary="$repo_root/.local/bin/.tartarus-rashin.bin"
+
+needs_build=0
+if [[ ! -x "$binary" ]]; then
+    needs_build=1
+elif find "$source_dir" -type f -newer "$binary" -print -quit | grep -q .; then
+    needs_build=1
+fi
+
+if (( needs_build )); then
+    (cd "$source_dir" && /usr/bin/go build -o "$binary" .)
+fi
+
+exec "$binary" "$@"

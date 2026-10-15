@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -8,11 +8,11 @@ Rectangle {
     required property string value
     property string detail: ""
     property string icon: ""
-    property color accent: Color.primary
+    property color accent: Theme.Color.primary
     property real level: -1
     implicitHeight: body.implicitHeight + 24
-    radius: Style.controlRadius
-    color: Color.surfaceContainerHigh
+    radius: Theme.Style.controlRadius
+    color: Theme.Color.surfaceContainerHigh
     ColumnLayout {
         id: body
         x: 12
@@ -21,11 +21,11 @@ Rectangle {
         spacing: 5
         RowLayout {
             Layout.fillWidth: true
-            MaterialIcon { text: root.icon; iconSize: 17; iconColor: root.accent }
-            Text { text: root.label; textFormat: Text.PlainText; color: Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+            Theme.MaterialIcon { text: root.icon; iconSize: 17; iconColor: root.accent }
+            Text { text: root.label; textFormat: Text.PlainText; color: Theme.Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
         }
-        Text { text: root.value; textFormat: Text.PlainText; color: Color.foreground; font.pixelSize: 23; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
-        Text { text: root.detail || "\u00a0"; textFormat: Text.PlainText; color: Color.foregroundMuted; font.pixelSize: 11; Layout.fillWidth: true; elide: Text.ElideRight }
+        Text { text: root.value; textFormat: Text.PlainText; color: Theme.Color.foreground; font.pixelSize: 23; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
+        Text { text: root.detail || "\u00a0"; textFormat: Text.PlainText; color: Theme.Color.foregroundMuted; font.pixelSize: 11; Layout.fillWidth: true; elide: Text.ElideRight }
         Rectangle {
             opacity: root.level >= 0 ? 1 : 0
             Layout.fillWidth: true

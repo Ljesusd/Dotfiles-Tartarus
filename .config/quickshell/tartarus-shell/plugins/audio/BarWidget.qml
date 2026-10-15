@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -25,26 +25,26 @@ Rectangle {
         return true
     }
 
-    implicitWidth: Style.barControlHeight
+    implicitWidth: Theme.Style.barControlHeight
 
-    implicitHeight: Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
     color: "transparent"
 
-    radius: Style.barControlRadius
+    radius: Theme.Style.barControlRadius
     border.width: 0
 
-    MaterialIcon {
+    Theme.MaterialIcon {
         id: audioIcon
 
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Style.barPaddingNormal
+        anchors.leftMargin: Theme.Style.barPaddingNormal
         text: root.plugin.service.muted ? "volume_off" : "volume_up"
-        font.pixelSize: Style.barIconNormal
+        font.pixelSize: Theme.Style.barIconNormal
         color: root.plugin.service.muted
-            ? Color.foregroundMuted
-            : Color.foreground
+            ? Theme.Color.foregroundMuted
+            : Theme.Color.foreground
     }
 
     Text {
@@ -53,20 +53,20 @@ Rectangle {
 
         anchors.left: audioIcon.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Style.barSpacingSmall
+        anchors.leftMargin: Theme.Style.barSpacingSmall
 
-        font.pixelSize: Style.barFontNormal
+        font.pixelSize: Theme.Style.barFontNormal
 
         text: root.plugin.service.displayText
 
         color: {
             if (!root.plugin.service.available)
-                return Color.foregroundMuted
+                return Theme.Color.foregroundMuted
 
             if (root.plugin.service.muted)
-                return Color.foregroundMuted
+                return Theme.Color.foregroundMuted
 
-            return Color.foreground
+            return Theme.Color.foreground
         }
     }
 

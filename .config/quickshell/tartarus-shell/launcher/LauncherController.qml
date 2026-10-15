@@ -1,21 +1,11 @@
 import QtQml
 import "../services" as Services
+import "LauncherModes.js" as Modes
 
 QtObject {
     id: root
 
     signal closeRequested()
-
-    enum Mode {
-        Applications,
-        Actions,
-        Schemes,
-        Wallpaper,
-        Docker,
-        Calculator,
-        Weather,
-        Installer
-    }
 
     required property var launcherState
     required property var applications
@@ -23,6 +13,7 @@ QtObject {
     required property var actions
     required property var wallpapers
     required property string monitorName
+    property var shellState: null
     property var dockerPage: null
 
     property int selectedIndex: 0
@@ -32,50 +23,37 @@ QtObject {
             .trim()
             .toLowerCase()
 
-    readonly property int mode: {
-        if (/^>docker(?:\s|$)/.test(root.normalizedQuery))
-            return LauncherController.Mode.Docker
-        if (/^>calc(?:\s|$)/.test(root.normalizedQuery))
-            return LauncherController.Mode.Calculator
-        if (/^>weather(?:\s|$)/.test(root.normalizedQuery))
-            return LauncherController.Mode.Weather
-        if (/^>install(?:er)?(?:\s|$)/.test(root.normalizedQuery))
-            return LauncherController.Mode.Installer
-        if (root.normalizedQuery.startsWith(">scheme"))
-            return LauncherController.Mode.Schemes
-
-        if (root.normalizedQuery.startsWith(">wallpaper"))
-            return LauncherController.Mode.Wallpaper
-
-        if (root.normalizedQuery.startsWith(">"))
-            return LauncherController.Mode.Actions
-
-        return LauncherController.Mode.Applications
-    }
+    readonly property int mode: Modes.resolve(root.normalizedQuery)
 
     readonly property string applicationQuery:
-        root.mode === LauncherController.Mode.Applications
+        root.mode === Modes.Mode.Applications
             ? root.launcherState.query
             : ""
 
-    readonly property string dockerQuery: root.mode === LauncherController.Mode.Docker
+    readonly property string dockerQuery: root.mode === Modes.Mode.Docker
         ? root.launcherState.query.trim().slice(7).trim() : ""
 
-    readonly property string calculatorQuery: root.mode === LauncherController.Mode.Calculator
+    readonly property string calculatorQuery: root.mode === Modes.Mode.Calculator
         ? root.launcherState.query.trim().slice(5).trim() : ""
 
-    readonly property string installerQuery: root.mode === LauncherController.Mode.Installer
+    readonly property string installerQuery: root.mode === Modes.Mode.Installer
         ? root.launcherState.query.trim().replace(/^>install(?:er)?\s*/, "") : ""
 
+    readonly property string storeQuery: root.mode === Modes.Mode.Store
+        ? root.launcherState.query.trim().slice(6).trim() : ""
+
+    readonly property string rashinQuery: root.mode === Modes.Mode.Rashin
+        ? root.launcherState.query.trim().slice(1).trim() : ""
+
     readonly property string actionQuery:
-        root.mode === LauncherController.Mode.Actions
+        root.mode === Modes.Mode.Actions
             ? root.launcherState.query
                 .slice(1)
                 .trim()
             : ""
 
     readonly property string wallpaperQuery: {
-        if (root.mode !== LauncherController.Mode.Wallpaper)
+        if (root.mode !== Modes.Mode.Wallpaper)
             return ""
 
         const prefix = ">wallpaper"
@@ -86,7 +64,7 @@ QtObject {
     }
 
     readonly property string schemeQuery: {
-        if (root.mode !== LauncherController.Mode.Schemes)
+        if (root.mode !== Modes.Mode.Schemes)
             return ""
 
         const prefix = ">scheme"
@@ -99,30 +77,34 @@ QtObject {
     readonly property int currentCount: {
         let itemCount = 0
         switch (root.mode) {
-        case LauncherController.Mode.Docker:
+        case Modes.Mode.Docker:
             return Services.DockerService.grouped(root.dockerQuery).length
-        case LauncherController.Mode.Applications:
+        case Modes.Mode.Applications:
             return root.applications
                 ? root.applications.filtered(root.applicationQuery).length
                 : 0
-        case LauncherController.Mode.Actions:
+        case Modes.Mode.Actions:
             itemCount = root.actions
                 ? root.actions.filtered(root.actionQuery).length
                 : 0
             return itemCount
-        case LauncherController.Mode.Schemes:
+        case Modes.Mode.Schemes:
             itemCount = root.themes
                 ? root.themes.filtered(root.schemeQuery).length
                 : 0
             return itemCount
-        case LauncherController.Mode.Wallpaper:
+        case Modes.Mode.Wallpaper:
             itemCount = root.wallpapers
                 ? root.wallpapers.filtered(root.wallpaperQuery).length
                 : 0
             return itemCount
-        case LauncherController.Mode.Calculator:
+        case Modes.Mode.Calculator:
             return 0
-        case LauncherController.Mode.Installer:
+        case Modes.Mode.Installer:
+            return 0
+        case Modes.Mode.Store:
+            return Services.FlatpakStoreService.results.length
+        case Modes.Mode.Rashin:
             return 0
         default:
             return 0
@@ -172,7 +154,7 @@ QtObject {
         if (root.currentCount <= 0)
             return
 
-        if (root.mode === LauncherController.Mode.Wallpaper) {
+        if (root.mode === Modes.Mode.Wallpaper) {
             root.selectedIndex = root.wrapIndex(
                 root.selectedIndex - 1,
                 root.currentCount
@@ -187,7 +169,7 @@ QtObject {
         if (root.currentCount <= 0)
             return
 
-        if (root.mode === LauncherController.Mode.Wallpaper) {
+        if (root.mode === Modes.Mode.Wallpaper) {
             root.selectedIndex = root.wrapIndex(
                 root.selectedIndex + 1,
                 root.currentCount
@@ -268,6 +250,13 @@ QtObject {
             return
         }
 
+        if (action.command === "store") {
+            root.launcherState.query = ">store"
+            root.launcherState.focusSearch()
+            root.resetSelection()
+            return
+        }
+
         if (action.command === "timer") {
             Services.TimerService.startTimer(
                 root.actionQuery.slice("timer".length).trim()
@@ -336,29 +325,36 @@ QtObject {
     }
 
     function accept() {
-        if (root.mode === LauncherController.Mode.Docker) {
+        if (root.mode === Modes.Mode.Docker) {
             if (root.dockerPage) root.dockerPage.acceptSelection()
+            return
+        }
+        if (root.mode === Modes.Mode.Rashin) {
+            root.acceptRashin()
             return
         }
         if (root.selectedIndex < 0)
             return
 
         switch (root.mode) {
-        case LauncherController.Mode.Applications:
+        case Modes.Mode.Applications:
             root.acceptApplication()
             break
-        case LauncherController.Mode.Actions:
+        case Modes.Mode.Actions:
             root.acceptAction()
             break
-        case LauncherController.Mode.Schemes:
+        case Modes.Mode.Schemes:
             root.acceptScheme()
             break
-        case LauncherController.Mode.Wallpaper:
+        case Modes.Mode.Wallpaper:
             root.acceptWallpaper()
             break
-        case LauncherController.Mode.Calculator:
-        case LauncherController.Mode.Weather:
-        case LauncherController.Mode.Installer:
+        case Modes.Mode.Calculator:
+        case Modes.Mode.Weather:
+        case Modes.Mode.Installer:
+            break
+        case Modes.Mode.Store:
+            root.acceptStore()
             break
         }
     }
@@ -379,6 +375,28 @@ QtObject {
         }
 
         root.wallpapers.setWallpaper(wallpaper.path, root.monitorName)
+    }
+
+    function acceptStore() {
+        const items = Services.FlatpakStoreService.results
+        const index = root.selectedIndex
+
+        if (!items || index < 0 || index >= items.length)
+            return
+
+        Services.FlatpakStoreService.install(items[index])
+    }
+
+    function acceptRashin() {
+        Services.RashinService.ask(root.rashinQuery)
+        root.launcherState.query = "\\"
+        root.launcherState.focusSearch()
+    }
+
+    function openRashinSettings() {
+        root.closeRequested()
+        if (root.shellState)
+            root.shellState.openControlCenterPage(18)
     }
 
     function close() {
@@ -402,27 +420,35 @@ QtObject {
 
     function goBack() {
         switch (root.mode) {
-        case LauncherController.Mode.Docker:
+        case Modes.Mode.Docker:
             if (root.dockerPage && root.dockerPage.back()) return
             root.launcherState.query = ">"
             root.launcherState.focusSearch()
             break
-        case LauncherController.Mode.Schemes:
+        case Modes.Mode.Schemes:
             root.backFromSchemes()
             break
-        case LauncherController.Mode.Actions:
+        case Modes.Mode.Actions:
             root.backFromActions()
             break
-        case LauncherController.Mode.Wallpaper:
+        case Modes.Mode.Wallpaper:
             root.backFromWallpapers()
             break
-        case LauncherController.Mode.Calculator:
-        case LauncherController.Mode.Weather:
-        case LauncherController.Mode.Installer:
+        case Modes.Mode.Calculator:
+        case Modes.Mode.Weather:
+        case Modes.Mode.Installer:
+        case Modes.Mode.Store:
+            if (root.mode === Modes.Mode.Installer
+                    && Services.InstallerService.busy)
+                return
             root.launcherState.query = ">"
             root.launcherState.focusSearch()
             break
-        case LauncherController.Mode.Applications:
+        case Modes.Mode.Rashin:
+            root.launcherState.query = ""
+            root.launcherState.focusSearch()
+            break
+        case Modes.Mode.Applications:
         default:
             root.close()
             break

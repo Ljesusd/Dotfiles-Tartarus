@@ -2,15 +2,15 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Item {
     id: root
     required property var monitorContext
     property var hw: Services.HardwareService
-    property color muted: Color.foregroundMuted
-    property color line: Color.outlineVariant
-    property color accent: Color.primary
+    property color muted: Theme.Color.foregroundMuted
+    property color line: Theme.Color.outlineVariant
+    property color accent: Theme.Color.primary
     property string na: "No disponible"
 
     function activeChanged() {
@@ -35,9 +35,9 @@ Item {
         Column {
             id: body
             width: parent.width
-            spacing: Style.spacingMedium
-            Text { text: "Monitor de hardware"; color: Color.foreground; font.pixelSize: Style.fontLarge; font.bold: true }
-            Text { text: hw.available ? "Lecturas en directo · cada 2 s" : "Preparando lecturas…"; color: muted; font.pixelSize: Style.fontSmall }
+            spacing: Theme.Style.spacingMedium
+            Text { text: "Monitor de hardware"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontLarge; font.bold: true }
+            Text { text: hw.available ? "Lecturas en directo · cada 2 s" : "Preparando lecturas…"; color: muted; font.pixelSize: Theme.Style.fontSmall }
             Card {
                 visible: hw.showCpu
                 alert: hw.cpuUsage >= 90 ? "ALTA" : hw.cpuUsage >= 75 ? "ELEVADA" : ""
@@ -47,12 +47,12 @@ Item {
                 subtitle: hw.cpuModel + "  ·  " + hw.cpuCores + " núcleos · " + hw.cpuThreads + " hilos"
                 Meter { value: hw.cpuUsage }
                 Sparkline { values: hw.cpuHistory; color: accent }
-                Text { text: "Carga  " + hw.load1.toFixed(2) + "   " + hw.load5.toFixed(2) + "   " + hw.load15.toFixed(2); color: muted; font.pixelSize: Style.fontSmall }
-                Text { text: "NÚCLEOS · " + hw.coreUsages.length; color: accent; font.bold: true; font.pixelSize: Style.fontSmall }
+                Text { text: "Carga  " + hw.load1.toFixed(2) + "   " + hw.load5.toFixed(2) + "   " + hw.load15.toFixed(2); color: muted; font.pixelSize: Theme.Style.fontSmall }
+                Text { text: "NÚCLEOS · " + hw.coreUsages.length; color: accent; font.bold: true; font.pixelSize: Theme.Style.fontSmall }
                 GridLayout {
                     columns: 2
-                    columnSpacing: Style.spacingMedium
-                    rowSpacing: Style.spacingSmall
+                    columnSpacing: Theme.Style.spacingMedium
+                    rowSpacing: Theme.Style.spacingSmall
                     Repeater {
                         model: hw.coreUsages
                         delegate: RowLayout {
@@ -61,7 +61,7 @@ Item {
                             Layout.fillWidth: true
                             Text { text: "C" + (index < hw.corePhysical.length ? hw.corePhysical[index] : "?") + " · T" + index; color: muted; font.pixelSize: 10; Layout.preferredWidth: 52 }
                             Meter { value: modelData; Layout.fillWidth: true }
-                            Text { text: Math.round(modelData) + "%"; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 34; horizontalAlignment: Text.AlignRight }
+                            Text { text: Math.round(modelData) + "%"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; Layout.preferredWidth: 34; horizontalAlignment: Text.AlignRight }
                             Text { text: index < hw.coreFrequencies.length && hw.coreFrequencies[index] > 0 ? hw.coreFrequencies[index].toFixed(2) + " GHz" : ""; color: muted; font.pixelSize: 10; Layout.preferredWidth: 54 }
                         }
                     }
@@ -108,7 +108,7 @@ Item {
                 title: "SENSORES"
                 icon: "thermostat"
                 Stat { label: hw.cpuTemperatureLabel || "CPU"; value: hw.cpuTemperature >= 0 ? Math.round(hw.cpuTemperature) + " °C" : na }
-                Sparkline { values: hw.temperatureHistory; color: hw.cpuTemperature >= 85 ? Color.error : accent }
+                Sparkline { values: hw.temperatureHistory; color: hw.cpuTemperature >= 85 ? Theme.Color.error : accent }
                 Stat { label: "Ventilador"; value: hw.fanRpm >= 0 ? Math.round(hw.fanRpm) + " RPM" : na }
                 Stat { label: "Batería"; value: hw.batteryPercent >= 0 ? hw.batteryPercent + "% " + hw.batteryStatus : na }
             }
@@ -122,15 +122,15 @@ Item {
                 title: "MOSTRAR"
                 Flow {
                     width: parent.width
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
                     Repeater {
                         model: [{l:"CPU",k:"showCpu"},{l:"GPU",k:"showGpu"},{l:"RAM",k:"showMemory"},{l:"Disco",k:"showStorage"},{l:"Sensores",k:"showThermals"},{l:"Procesos",k:"showProcesses"}]
                         delegate: Rectangle {
                             required property var modelData
-                            width: 86; height: 30; radius: Style.radiusSmall
-                            color: hw[modelData.k] ? Color.primaryContainer : Color.surfaceContainerHigh
+                            width: 86; height: 30; radius: Theme.Style.radiusSmall
+                            color: hw[modelData.k] ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
                             border.color: line
-                            Text { anchors.centerIn: parent; text: (hw[modelData.k] ? "✓  " : "＋  ") + modelData.l; color: Color.foreground; font.pixelSize: Style.fontSmall }
+                            Text { anchors.centerIn: parent; text: (hw[modelData.k] ? "✓  " : "＋  ") + modelData.l; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall }
                             TapHandler { onTapped: hw.setMetric(modelData.k, !hw[modelData.k]) }
                         }
                     }
@@ -147,29 +147,29 @@ Item {
         property string alert: ""
         default property alias content: inside.data
         width: body.width
-        radius: Style.cardRadius
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: card.alert !== "" ? Color.error : Qt.rgba(line.r,line.g,line.b,0.35)
-        implicitHeight: inside.implicitHeight + Style.paddingMedium * 2
+        radius: Theme.Style.cardRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: card.alert !== "" ? Theme.Color.error : Qt.rgba(line.r,line.g,line.b,0.35)
+        implicitHeight: inside.implicitHeight + Theme.Style.paddingMedium * 2
         Column {
             id: inside
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: Style.paddingMedium }
-            spacing: Style.spacingSmall
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: Theme.Style.paddingMedium }
+            spacing: Theme.Style.spacingSmall
             Row {
                 width: parent.width
-                MaterialIcon { text: card.icon; iconColor: accent; iconSize: Style.sectionIconSize; width: 30 }
-                Text { text: card.title; color: accent; font.bold: true; font.pixelSize: Style.fontSmall; verticalAlignment: Text.AlignVCenter; width: parent.width - (card.value !== "" ? valueText.width + 40 : 30) }
-                Text { id: valueText; text: card.value; color: Color.foreground; font.bold: true; font.pixelSize: Style.fontLarge; verticalAlignment: Text.AlignVCenter }
-                Text { visible: card.alert !== ""; text: card.alert; color: Color.error; font.bold: true; font.pixelSize: 10; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                Theme.MaterialIcon { text: card.icon; iconColor: accent; iconSize: Theme.Style.sectionIconSize; width: 30 }
+                Text { text: card.title; color: accent; font.bold: true; font.pixelSize: Theme.Style.fontSmall; verticalAlignment: Text.AlignVCenter; width: parent.width - (card.value !== "" ? valueText.width + 40 : 30) }
+                Text { id: valueText; text: card.value; color: Theme.Color.foreground; font.bold: true; font.pixelSize: Theme.Style.fontLarge; verticalAlignment: Text.AlignVCenter }
+                Text { visible: card.alert !== ""; text: card.alert; color: Theme.Color.error; font.bold: true; font.pixelSize: 10; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             }
-            Text { visible: card.subtitle !== ""; text: card.subtitle; color: muted; font.pixelSize: Style.fontSmall; width: parent.width; elide: Text.ElideRight }
+            Text { visible: card.subtitle !== ""; text: card.subtitle; color: muted; font.pixelSize: Theme.Style.fontSmall; width: parent.width; elide: Text.ElideRight }
         }
     }
     component Meter: Item {
         property real value: -1
         implicitHeight: 6
-        Rectangle { anchors.fill: parent; radius: 3; color: Qt.rgba(Color.foreground.r,Color.foreground.g,Color.foreground.b,0.12) }
+        Rectangle { anchors.fill: parent; radius: 3; color: Qt.rgba(Theme.Color.foreground.r,Theme.Color.foreground.g,Theme.Color.foreground.b,0.12) }
         Rectangle { width: value >= 0 ? Math.max(4,parent.width * Math.min(100,value)/100) : 0; height: parent.height; radius: 3; color: accent; Behavior on width { NumberAnimation { duration: 180 } } }
     }
     component Stat: RowLayout {
@@ -177,11 +177,11 @@ Item {
         property string label: ""
         property string value: ""
         width: parent ? parent.width : body.width
-        spacing: Style.spacingSmall
+        spacing: Theme.Style.spacingSmall
         Text {
             text: stat.label
             color: muted
-            font.pixelSize: Style.fontSmall
+            font.pixelSize: Theme.Style.fontSmall
             Layout.fillWidth: true
             Layout.minimumWidth: 0
             elide: Text.ElideRight
@@ -189,8 +189,8 @@ Item {
         Text {
             id: statValue
             text: stat.value
-            color: Color.foreground
-            font.pixelSize: Style.fontSmall
+            color: Theme.Color.foreground
+            font.pixelSize: Theme.Style.fontSmall
             Layout.preferredWidth: Math.min(230, Math.max(110, stat.width * 0.46))
             Layout.minimumWidth: 80
             elide: Text.ElideRight
@@ -202,7 +202,7 @@ Item {
         property color color: accent
         width: body.width; height: 42
         onPaint: {
-            var c=getContext("2d"); c.clearRect(0,0,width,height); c.strokeStyle=Qt.rgba(Color.foreground.r,Color.foreground.g,Color.foreground.b,.12); c.lineWidth=1
+            var c=getContext("2d"); c.clearRect(0,0,width,height); c.strokeStyle=Qt.rgba(Theme.Color.foreground.r,Theme.Color.foreground.g,Theme.Color.foreground.b,.12); c.lineWidth=1
             c.beginPath(); c.moveTo(0,height-1); c.lineTo(width,height-1); c.stroke()
             if (!values || values.length<2) return
             c.strokeStyle=color; c.lineWidth=2; c.beginPath()

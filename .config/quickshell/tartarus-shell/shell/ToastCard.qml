@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Item {
     id: root
@@ -14,7 +14,7 @@ Item {
     implicitWidth: 360
     implicitHeight:
         content.implicitHeight
-        + Style.paddingMedium * 2
+        + Theme.Style.paddingMedium * 2
 
     opacity: 0
     scale: 0.96
@@ -49,13 +49,13 @@ Item {
             ParallelAnimation {
                 NumberAnimation {
                     property: "opacity"
-                    duration: Style.motionFast
+                    duration: Theme.Style.motionFast
                     easing.type: Easing.OutCubic
                 }
 
                 NumberAnimation {
                     property: "scale"
-                    duration: Style.motionNormal
+                    duration: Theme.Style.motionNormal
                     easing.type: Easing.OutCubic
                 }
             }
@@ -68,13 +68,13 @@ Item {
             ParallelAnimation {
                 NumberAnimation {
                     property: "opacity"
-                    duration: Style.motionSlow
+                    duration: Theme.Style.motionSlow
                     easing.type: Easing.InCubic
                 }
 
                 NumberAnimation {
                     property: "scale"
-                    duration: Style.motionSlow
+                    duration: Theme.Style.motionSlow
                     easing.type: Easing.InCubic
                 }
             }
@@ -88,10 +88,10 @@ Item {
     Rectangle {
         anchors.fill: parent
 
-        radius: Style.cardRadius
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outline
+        radius: Theme.Style.cardRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outline
     }
 
     RowLayout {
@@ -101,11 +101,11 @@ Item {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
-            leftMargin: Style.paddingMedium
-            rightMargin: Style.paddingMedium
+            leftMargin: Theme.Style.paddingMedium
+            rightMargin: Theme.Style.paddingMedium
         }
 
-        spacing: Style.spacingMedium
+        spacing: Theme.Style.spacingMedium
 
         Image {
             id: thumbnail
@@ -135,12 +135,12 @@ Item {
             }
         }
 
-        MaterialIcon {
+        Theme.MaterialIcon {
             Layout.alignment: Qt.AlignTop
             visible: (root.toast.icon ?? "").length > 0
             text: root.toast.icon ?? ""
-            iconColor: Color.accent
-            iconSize: Style.materialIconLarge
+            iconColor: Theme.Color.accent
+            iconSize: Theme.Style.materialIconLarge
         }
 
         ColumnLayout {
@@ -152,9 +152,9 @@ Item {
                 visible: (root.toast.title ?? "").length > 0
 
                 text: root.toast.title ?? ""
-                font.pixelSize: Style.fontSmall
+                font.pixelSize: Theme.Style.fontSmall
                 font.bold: true
-                color: Color.foreground
+                color: Theme.Color.foreground
                 elide: Text.ElideRight
             }
 
@@ -163,16 +163,16 @@ Item {
                 visible: (root.toast.body ?? "").length > 0
 
                 text: root.toast.body ?? ""
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
                 wrapMode: Text.Wrap
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: Style.spacingSmall
+                Layout.topMargin: Theme.Style.spacingSmall
 
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
                 visible: (root.toast.actions ?? []).length > 0
 
                 Item {
@@ -189,35 +189,35 @@ Item {
 
                         implicitWidth:
                             actionContent.implicitWidth
-                            + Style.paddingSmall * 2
+                            + Theme.Style.paddingSmall * 2
                         implicitHeight: 28
 
-                        radius: Style.radiusSmall
+                        radius: Theme.Style.radiusSmall
                         color: actionHover.hovered
-                            ? Color.surfaceHover
-                            : Color.surface
+                            ? Theme.Color.surfaceHover
+                            : Theme.Color.surface
 
                         RowLayout {
                             id: actionContent
 
                             anchors.centerIn: parent
-                            spacing: Style.spacingSmall
+                            spacing: Theme.Style.spacingSmall
 
-                            MaterialIcon {
+                            Theme.MaterialIcon {
                                 visible:
                                     (actionButton.modelData.icon ?? "")
                                         .length > 0
                                 text:
                                     actionButton.modelData.icon ?? ""
-                                iconSize: Style.materialIconSmall
-                                iconColor: Color.accent
+                                iconSize: Theme.Style.materialIconSmall
+                                iconColor: Theme.Color.accent
                             }
 
                             Text {
                                 text: actionButton.modelData.label ?? ""
-                                font.pixelSize: Style.fontSmall
+                                font.pixelSize: Theme.Style.fontSmall
                                 font.weight: Font.DemiBold
-                                color: Color.foreground
+                                color: Theme.Color.foreground
                             }
                         }
 

@@ -1,5 +1,5 @@
 import QtQuick
-import "../theme"
+import "../theme" as Theme
 
 Rectangle {
     id: root
@@ -10,8 +10,8 @@ Rectangle {
     implicitHeight: root.ready && preview.implicitWidth > 0
         ? Math.min(root.maxHeight, Math.max(0, width - 8) * preview.implicitHeight / preview.implicitWidth + 8) : 0
     height: implicitHeight
-    radius: Style.controlRadius
-    color: Color.surfaceContainerHigh
+    radius: Theme.Style.controlRadius
+    color: Theme.Color.surfaceContainerHigh
     clip: true
     Image {
         id: preview

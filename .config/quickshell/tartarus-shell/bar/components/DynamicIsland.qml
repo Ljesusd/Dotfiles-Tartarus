@@ -3,7 +3,7 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../services" as Services
 
 Item {
@@ -24,8 +24,10 @@ Item {
         : "cloud"
     readonly property bool weatherLoading: Services.WeatherService.loading
     property string currentTime: Qt.formatTime(new Date(), "HH:mm")
+    // Screen recording has its own floating HUD. Keep the island available
+    // for music and running apps while a capture is in progress.
     readonly property bool primaryActivityActive:
-        Services.TimerService.active || Services.RecorderService.active
+        Services.TimerService.active
     readonly property bool musicActive: !root.primaryActivityActive
         && Services.MediaService.available
         && (Services.DynamicActivityService.mediaActive || Services.MediaService.title !== "")
@@ -38,40 +40,40 @@ Item {
     }
 
     implicitWidth: root.monitorContext.launcherOpened
-        ? Style.launcherSearchWidth
-        : Math.max(54, centerIsland.implicitWidth + (activityRow.implicitWidth > 0 ? activityRow.implicitWidth + Style.spacingMedium : 0))
-    implicitHeight: Style.barInnerHeight
+        ? Theme.Style.launcherSearchWidth
+        : Math.max(54, centerIsland.implicitWidth + (activityRow.implicitWidth > 0 ? activityRow.implicitWidth + Theme.Style.spacingMedium : 0))
+    implicitHeight: Theme.Style.barInnerHeight
 
     Behavior on implicitWidth {
-        Anim { duration: Style.motionPanel; easing.type: Easing.OutCubic }
+        Theme.Anim { duration: Theme.Style.motionPanel; easing.type: Easing.OutCubic }
     }
 
     Item {
         id: centerIsland
         anchors.centerIn: parent
         implicitWidth: root.monitorContext.launcherOpened
-            ? Style.launcherSearchWidth
+            ? Theme.Style.launcherSearchWidth
             : Math.max(54, (root.primaryActivityActive
                 ? primaryRow.implicitWidth
                 : root.musicActive ? mediaRow.implicitWidth
-                : statusRow.implicitWidth) + Style.barPaddingNormal * 2)
+                : statusRow.implicitWidth) + Theme.Style.barPaddingNormal * 2)
         width: implicitWidth
         height: parent.height
 
         Rectangle {
         id: islandSurface
         anchors.fill: parent
-        radius: Style.radiusFull
+        radius: Theme.Style.radiusFull
         color: root.monitorContext.launcherOpened
             ? "transparent"
-            : Qt.rgba(Color.backgroundAlt.r, Color.backgroundAlt.g, Color.backgroundAlt.b, 0.92)
+            : Qt.rgba(Theme.Color.backgroundAlt.r, Theme.Color.backgroundAlt.g, Theme.Color.backgroundAlt.b, 0.92)
         border.width: root.monitorContext.launcherOpened
-            ? Style.panelBorderWidth
+            ? Theme.Style.panelBorderWidth
             : 0
-        border.color: Color.primary
+        border.color: Theme.Color.primary
 
-        Behavior on color { ColorAnimation { duration: Style.motionFast } }
-        Behavior on border.width { NumberAnimation { duration: Style.motionFast } }
+        Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
+        Behavior on border.width { NumberAnimation { duration: Theme.Style.motionFast } }
         }
 
         LauncherSearch {
@@ -82,24 +84,24 @@ Item {
             launcherState: root.launcherState
             monitorContext: root.monitorContext
             shellState: root.shellState
-            Behavior on opacity { Anim { duration: Style.motionFast } }
+            Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
         }
     }
 
     RowLayout {
         id: activityRow
         anchors.right: centerIsland.left
-        anchors.rightMargin: Style.spacingMedium
+        anchors.rightMargin: Theme.Style.spacingMedium
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Style.barSpacingSmall
+        spacing: Theme.Style.barSpacingSmall
         visible: !root.monitorContext.launcherOpened
 
         Repeater {
             model: [
-                { active: (root.primaryActivityActive || root.musicActive), icon: "schedule", label: "Hora", detail: root.currentTime, accent: Color.primary },
-                { active: Services.DynamicActivityService.vpnActive, icon: "vpn_lock", label: "VPN", accent: Color.primary },
-                { active: root.primaryActivityActive && Services.DynamicActivityService.mediaActive, icon: "music_note", label: "Media", accent: Color.accent, compact: true },
-                { active: Services.DynamicActivityService.localSendActive, icon: "upload", label: "LocalSend", accent: Color.primary }
+                { active: (root.primaryActivityActive || root.musicActive), icon: "schedule", label: "Hora", detail: root.currentTime, accent: Theme.Color.primary },
+                { active: Services.DynamicActivityService.vpnActive, icon: "vpn_lock", label: "VPN", accent: Theme.Color.primary },
+                { active: root.primaryActivityActive && Services.DynamicActivityService.mediaActive, icon: "music_note", label: "Media", accent: Theme.Color.accent, compact: true },
+                { active: Services.DynamicActivityService.localSendActive, icon: "upload", label: "LocalSend", accent: Theme.Color.primary }
             ].filter(activity => activity.active)
 
             delegate: ActivityBubble {
@@ -129,74 +131,67 @@ Item {
         workspaceService: root.workspaceService
         screen: root.screen
 
-        Behavior on opacity { Anim { duration: Style.motionFast } }
-        Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
+        Behavior on scale { Theme.Anim { duration: Theme.Style.motionNormal; easing.type: Easing.OutCubic } }
     }
 
     RowLayout {
         id: primaryRow
 
         anchors.centerIn: parent
-        spacing: Style.spacingSmall
+        spacing: Theme.Style.spacingSmall
         opacity: root.monitorContext.launcherOpened || !root.primaryActivityActive ? 0 : 1
         scale: root.monitorContext.launcherOpened || !root.primaryActivityActive ? 0.82 : 1
         enabled: !root.monitorContext.launcherOpened && root.primaryActivityActive
 
-        Behavior on opacity { Anim { duration: Style.motionFast } }
-        Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
+        Behavior on scale { Theme.Anim { duration: Theme.Style.motionNormal; easing.type: Easing.OutCubic } }
 
         TimerDial {
             visible: Services.TimerService.active
             progress: Services.TimerService.totalSeconds > 0
                 ? Services.TimerService.remainingSeconds / Services.TimerService.totalSeconds
                 : 0
-            accent: Color.warning
+            accent: Theme.Color.warning
         }
 
-        MaterialIcon {
+        Theme.MaterialIcon {
             visible: !Services.TimerService.active
-            text: Services.TimerService.active ? "timer" : "fiber_manual_record"
-            iconSize: Style.barIconSmall
-            iconColor: Services.TimerService.active ? Color.warning : Color.error
+            text: "timer"
+            iconSize: Theme.Style.barIconSmall
+            iconColor: Theme.Color.warning
         }
 
         Text {
-            text: Services.TimerService.active
-                ? Services.TimerService.label + (Services.TimerService.mode === "pomodoro"
-                    ? " " + Services.TimerService.cycleText
-                    : "")
-                : "Grabando"
-            color: Color.foreground
-            font.pixelSize: Style.barFontSmall
+            text: Services.TimerService.label + (Services.TimerService.mode === "pomodoro"
+                ? " " + Services.TimerService.cycleText
+                : "")
+            color: Theme.Color.foreground
+            font.pixelSize: Theme.Style.barFontSmall
         }
 
         Text {
-            text: Services.TimerService.active
-                ? Services.TimerService.displayTime
-                : Services.RecorderService.displayTime
-            color: Color.foreground
-            font.pixelSize: Style.barFontSmall
+            text: Services.TimerService.displayTime
+            color: Theme.Color.foreground
+            font.pixelSize: Theme.Style.barFontSmall
             font.weight: Font.DemiBold
         }
 
         Rectangle {
-            Layout.preferredWidth: Style.barIconSmall + Style.spacingXs
-            Layout.preferredHeight: Style.barIconSmall + Style.spacingXs
-            radius: Style.radiusFull
-            color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.12)
+            Layout.preferredWidth: Theme.Style.barIconSmall + Theme.Style.spacingXs
+            Layout.preferredHeight: Theme.Style.barIconSmall + Theme.Style.spacingXs
+            radius: Theme.Style.radiusFull
+            color: Qt.rgba(Theme.Color.foreground.r, Theme.Color.foreground.g, Theme.Color.foreground.b, 0.12)
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 anchors.centerIn: parent
                 text: "stop"
-                iconSize: Style.barIconSmall
-                iconColor: Color.foregroundMuted
+                iconSize: Theme.Style.barIconSmall
+                iconColor: Theme.Color.foregroundMuted
             }
 
             TapHandler {
-                onTapped: {
-                    Services.TimerService.stop()
-                    Services.RecorderService.stop()
-                }
+                onTapped: Services.TimerService.stop()
             }
         }
 
@@ -211,20 +206,20 @@ Item {
     RowLayout {
         id: mediaRow
         anchors.centerIn: parent
-        spacing: Style.spacingSmall
+        spacing: Theme.Style.spacingSmall
         opacity: root.monitorContext.launcherOpened || !root.musicActive ? 0 : 1
         scale: root.monitorContext.launcherOpened || !root.musicActive ? 0.82 : 1
         enabled: !root.monitorContext.launcherOpened && root.musicActive
 
-        Behavior on opacity { Anim { duration: Style.motionFast } }
-        Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
+        Behavior on scale { Theme.Anim { duration: Theme.Style.motionNormal; easing.type: Easing.OutCubic } }
 
         Rectangle {
-            Layout.preferredWidth: Style.barInnerHeight - 4
-            Layout.preferredHeight: Style.barInnerHeight - 4
-            radius: Style.radiusSmall
+            Layout.preferredWidth: Theme.Style.barInnerHeight - 4
+            Layout.preferredHeight: Theme.Style.barInnerHeight - 4
+            radius: Theme.Style.radiusSmall
             clip: true
-            color: Color.surfaceContainerHigh
+            color: Theme.Color.surfaceContainerHigh
 
             Image {
                 id: albumArt
@@ -235,19 +230,19 @@ Item {
                 visible: status === Image.Ready
             }
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 anchors.centerIn: parent
                 visible: albumArt.status !== Image.Ready
                 text: "music_note"
-                iconSize: Style.barIconSmall
-                iconColor: Color.foreground
+                iconSize: Theme.Style.barIconSmall
+                iconColor: Theme.Color.foreground
             }
         }
 
         Text {
             text: Services.MediaService.title || Services.MediaService.identity || "Música"
-            color: Color.foreground
-            font.pixelSize: Style.barFontSmall
+            color: Theme.Color.foreground
+            font.pixelSize: Theme.Style.barFontSmall
             Layout.preferredWidth: Math.min(110, implicitWidth)
             Layout.minimumWidth: 0
             Layout.maximumWidth: 110
@@ -263,7 +258,7 @@ Item {
                     width: 3
                     height: 5 + (index % 3) * 3
                     radius: 2
-                    color: Color.foregroundMuted
+                    color: Theme.Color.foregroundMuted
                     anchors.verticalCenter: parent.verticalCenter
 
                     SequentialAnimation on height {
@@ -283,49 +278,49 @@ Item {
         id: statusRow
 
         anchors.centerIn: parent
-        spacing: Style.spacingSmall
+        spacing: Theme.Style.spacingSmall
         opacity: root.monitorContext.launcherOpened || root.primaryActivityActive || root.musicActive ? 0 : 1
         scale: root.monitorContext.launcherOpened || root.primaryActivityActive || root.musicActive ? 0.82 : 1
         enabled: !root.monitorContext.launcherOpened && !root.primaryActivityActive && !root.musicActive
 
-        Behavior on opacity { Anim { duration: Style.motionFast } }
-        Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
+        Behavior on scale { Theme.Anim { duration: Theme.Style.motionNormal; easing.type: Easing.OutCubic } }
 
         Rectangle {
             Layout.preferredWidth: weatherLabel.implicitWidth + 28
-            Layout.preferredHeight: Style.barControlHeight
+            Layout.preferredHeight: Theme.Style.barControlHeight
             color: "transparent"
 
             Row {
                 anchors.centerIn: parent
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     text: root.weatherIcon
-                    iconSize: Style.barIconSmall
-                    iconColor: Color.foreground
+                    iconSize: Theme.Style.barIconSmall
+                    iconColor: Theme.Color.foreground
                 }
 
                 Text {
                     id: weatherLabel
                     text: root.weatherText
-                    color: Color.foreground
-                    font.pixelSize: Style.barFontSmall
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.barFontSmall
                 }
             }
         }
 
         Rectangle {
             Layout.preferredWidth: clockLabel.implicitWidth + 28
-            Layout.preferredHeight: Style.barControlHeight
+            Layout.preferredHeight: Theme.Style.barControlHeight
             color: "transparent"
 
             Text {
                 id: clockLabel
                 anchors.centerIn: parent
                 text: Services.LocationService.currentTime
-                color: Color.foreground
-                font.pixelSize: Style.barFontSmall
+                color: Theme.Color.foreground
+                font.pixelSize: Theme.Style.barFontSmall
             }
         }
     }

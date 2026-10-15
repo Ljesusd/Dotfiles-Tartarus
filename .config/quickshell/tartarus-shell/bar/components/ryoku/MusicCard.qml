@@ -4,7 +4,7 @@
 // See LICENSE and NOTICE.md in this directory.
 import QtQuick
 import Quickshell.Widgets
-import "../../../theme"
+import "../../../theme" as Theme
 
 // The record's own card: the sleeve bled across the plate and washed out until
 // only its colour is left, so the widget wears whatever is playing. The bleed is
@@ -14,14 +14,14 @@ ClippingRectangle {
     id: card
 
     property string art: ""
-    property color accent: Color.primary
+    property color accent: Theme.Color.primary
     property real s: 1
     property bool hovered: false
     property bool showArtwork: true
 
-    property color plate: Color.surface
+    property color plate: Theme.Color.surface
 
-    radius: Style.panelRadius * card.s
+    radius: Theme.Style.panelRadius * card.s
     color: card.plate
     contentUnderBorder: true
     border.width: 1

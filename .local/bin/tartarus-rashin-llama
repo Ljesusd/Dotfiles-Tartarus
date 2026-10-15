@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}/tartarus-shell"
+profile="$state_root/rashin-active-model.json"
+default_model="${TARTARUS_LLM_MODEL:-$HOME/Models/LLM/gemma-4-E4B-it-qat/gemma-4-E4B-it-qat-UD-Q4_K_XL.gguf}"
+default_alias="gemma-4-E4B-it-qat-UD-Q4_K_XL"
+model_path="$default_model"
+model_alias="$default_alias"
+
+if [[ -s "$profile" ]]; then
+    readarray -t model_values < <(/usr/bin/python3 - "$profile" <<'PY'
+import json, sys
+try:
+    data = json.load(open(sys.argv[1], encoding="utf-8"))
+    print(data.get("path", ""))
+    print(data.get("modelId", ""))
+except Exception:
+    print("")
+    print("")
+PY
+)
+    if [[ -n "${model_values[0]:-}" && -f "${model_values[0]}" ]]; then
+        model_path="${model_values[0]}"
+        model_alias="${model_values[1]:-$default_alias}"
+    fi
+fi
+
+# A projector belongs to this model; it is not a separately selectable LLM.
+model_dir="${model_path%/*}"
+multimodal_args=()
+if [[ -f "$model_dir/mmproj-F16.gguf" ]]; then
+    multimodal_args=(--mmproj "$model_dir/mmproj-F16.gguf")
+fi
+
+llama_server="${TARTARUS_LLAMA_SERVER:-$(command -v llama-server || true)}"
+if [[ -z "$llama_server" ]]; then
+    llama_server="$HOME/Code/llama.cpp/build-hip/bin/llama-server"
+fi
+if [[ ! -x "$llama_server" || ! -f "$model_path" ]]; then
+    printf 'Missing llama-server or model. Set TARTARUS_LLAMA_SERVER / TARTARUS_LLM_MODEL.\n' >&2
+    exit 1
+fi
+
+exec "$llama_server" \
+    -m "$model_path" "${multimodal_args[@]}" \
+    --host 127.0.0.1 --port 8081 --alias "$model_alias" \
+    --gpu-layers all --ctx-size "${TARTARUS_LLM_CONTEXT:-98304}" --parallel 1 \
+    --cache-type-k f16 --cache-type-v f16 \
+    --flash-attn auto --n-predict 512 --reasoning off --jinja --no-webui \
+    --temp 1.0 --top-p 0.95 --top-k 64

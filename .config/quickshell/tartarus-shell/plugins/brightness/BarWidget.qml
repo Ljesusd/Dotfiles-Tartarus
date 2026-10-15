@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -61,11 +61,11 @@ Rectangle {
         return true
     }
 
-    implicitWidth: Style.barControlHeight
+    implicitWidth: Theme.Style.barControlHeight
 
-    implicitHeight: Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
-    radius: Style.barControlRadius
+    radius: Theme.Style.barControlRadius
     border.width: 0
 
     color: "transparent"
@@ -75,26 +75,26 @@ Rectangle {
 
         anchors.centerIn: parent
 
-        spacing: Style.barSpacingSmall
+        spacing: Theme.Style.barSpacingSmall
 
-        MaterialIcon {
+        Theme.MaterialIcon {
             text: root.brightnessIcon
-            font.pixelSize: Style.barIconNormal
+            font.pixelSize: Theme.Style.barIconNormal
 
             color: root.brightnessAvailable
-                ? Color.foreground
-                : Color.foregroundMuted
+                ? Theme.Color.foreground
+                : Theme.Color.foregroundMuted
         }
 
         Text {
             visible: false
             text: root.brightnessText
 
-            font.pixelSize: Style.barFontNormal
+            font.pixelSize: Theme.Style.barFontNormal
 
             color: root.brightnessAvailable
-                ? Color.foreground
-                : Color.foregroundMuted
+                ? Theme.Color.foreground
+                : Theme.Color.foregroundMuted
         }
     }
 

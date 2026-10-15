@@ -7,7 +7,7 @@ import QtQuick.Dialogs
 import Quickshell.Services.Pipewire
 import Quickshell.Io
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 import "../launcher/components" as LauncherComponents
 
 FloatingWindow {
@@ -75,7 +75,9 @@ FloatingWindow {
         { label: "Sound", icon: "volume_up", page: 3 },
         { label: "Shortcuts", icon: "keyboard", page: 7 },
         { label: "Calendar", icon: "calendar_month", page: 10 },
-        { label: "Session", icon: "power_settings_new", page: 8 }
+        { label: "Session", icon: "power_settings_new", page: 8 },
+        { label: "Recording", icon: "fiber_manual_record", page: 17 },
+        { label: "Rashin", icon: "psychology", page: 18 }
     ]
     property real presentationOpacity: shellState.controlCenterOpen ? 1 : 0
     visible: shellState.controlCenterOpen || presentationOpacity > 0
@@ -285,25 +287,25 @@ FloatingWindow {
     Rectangle {
         id: panelSurface
         anchors.fill: parent
-        radius: Style.panelRadius + 4
+        radius: Theme.Style.panelRadius + 4
         color: root.lyneBackground
-        border.width: Style.panelBorderWidth
+        border.width: Theme.Style.panelBorderWidth
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
 
         ToolButton {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: Style.paddingSmall
-            anchors.rightMargin: Style.paddingSmall
+            anchors.topMargin: Theme.Style.paddingSmall
+            anchors.rightMargin: Theme.Style.paddingSmall
             z: 3
             display: AbstractButton.IconOnly
-            contentItem: MaterialIcon {
+            contentItem: Theme.MaterialIcon {
                 text: "close"
-                iconSize: Style.materialIconSmall
+                iconSize: Theme.Style.materialIconSmall
                 iconColor: root.lyneMuted
             }
             background: Rectangle {
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 color: parent.hovered ? root.lyneSurfaceHover : "transparent"
             }
             onClicked: root.shellState.closeControlCenter()
@@ -313,18 +315,18 @@ FloatingWindow {
 
     RowLayout {
         anchors.fill: panelSurface
-        anchors.margins: Style.paddingMedium
-        spacing: Style.spacingMedium
+        anchors.margins: Theme.Style.paddingMedium
+        spacing: Theme.Style.spacingMedium
         z: 1
         opacity: root.presentationOpacity
         scale: root.presentationOpacity > 0 ? 1 : 0.985
         transformOrigin: Item.Center
-        Behavior on opacity { Anim { duration: Motion.fast } }
+        Behavior on opacity { Theme.Anim { duration: Theme.Motion.fast } }
         Behavior on scale {
-            Anim {
-                duration: Motion.popupOpen
+            Theme.Anim {
+                duration: Theme.Motion.popupOpen
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.popupOpenCurve
+                easing.bezierCurve: Theme.Motion.popupOpenCurve
             }
         }
 
@@ -332,17 +334,17 @@ FloatingWindow {
             Layout.fillHeight: true
             Layout.preferredWidth: 236
             color: root.lyneSurface
-            radius: Style.cardRadius
+            radius: Theme.Style.cardRadius
             border.width: 0
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Style.paddingMedium
-                spacing: Style.spacingSmall
+                anchors.margins: Theme.Style.paddingMedium
+                spacing: Theme.Style.spacingSmall
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.bottomMargin: Style.spacingMedium
-                    Rectangle { Layout.preferredWidth: 32; Layout.preferredHeight: 32; radius: Style.radiusMedium; color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16); MaterialIcon { anchors.centerIn: parent; text: "settings"; iconSize: Style.sectionIconSize; iconColor: root.lyneAccent } }
-                    Text { text: "Configuración"; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true }
+                    Layout.bottomMargin: Theme.Style.spacingMedium
+                    Rectangle { Layout.preferredWidth: 32; Layout.preferredHeight: 32; radius: Theme.Style.radiusMedium; color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16); Theme.MaterialIcon { anchors.centerIn: parent; text: "settings"; iconSize: Theme.Style.sectionIconSize; iconColor: root.lyneAccent } }
+                    Text { text: "Configuración"; color: root.lyneText; font.pixelSize: Theme.Style.fontNormal; font.bold: true; Layout.fillWidth: true }
                 }
                 TextField {
                     Layout.fillWidth: true
@@ -355,17 +357,17 @@ FloatingWindow {
                     selectByMouse: true
                     leftPadding: 34
                     background: Rectangle {
-                        radius: Style.radiusFull
+                        radius: Theme.Style.radiusFull
                         color: root.lyneSurfaceHigh
                         border.width: 0
                     }
-                    MaterialIcon { anchors.left: parent.left; anchors.leftMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: "search"; iconSize: Style.materialIconSmall; iconColor: root.lyneMuted }
+                    Theme.MaterialIcon { anchors.left: parent.left; anchors.leftMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: "search"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneMuted }
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: Style.spacingXs
-                    MaterialIcon { text: "arrow_back"; iconSize: Style.materialIconSmall; iconColor: root.pageHistoryIndex > 0 ? root.lyneText : root.lyneMuted; opacity: root.pageHistoryIndex > 0 ? 1 : .45; TapHandler { onTapped: root.goBack() } }
-                    MaterialIcon { text: "arrow_forward"; iconSize: Style.materialIconSmall; iconColor: root.pageHistoryIndex < root.pageHistory.length - 1 ? root.lyneText : root.lyneMuted; opacity: root.pageHistoryIndex < root.pageHistory.length - 1 ? 1 : .45; TapHandler { onTapped: root.goForward() } }
+                    spacing: Theme.Style.spacingXs
+                    Theme.MaterialIcon { text: "arrow_back"; iconSize: Theme.Style.materialIconSmall; iconColor: root.pageHistoryIndex > 0 ? root.lyneText : root.lyneMuted; opacity: root.pageHistoryIndex > 0 ? 1 : .45; TapHandler { onTapped: root.goBack() } }
+                    Theme.MaterialIcon { text: "arrow_forward"; iconSize: Theme.Style.materialIconSmall; iconColor: root.pageHistoryIndex < root.pageHistory.length - 1 ? root.lyneText : root.lyneMuted; opacity: root.pageHistoryIndex < root.pageHistory.length - 1 ? 1 : .45; TapHandler { onTapped: root.goForward() } }
                     Item { Layout.fillWidth: true }
                 }
                 Flickable {
@@ -379,31 +381,33 @@ FloatingWindow {
                     ColumnLayout {
                         id: navList
                         width: parent.width
-                        spacing: Style.spacingXs
+                        spacing: Theme.Style.spacingXs
                         Text { text: "OVERVIEW"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1 }
                         Nav { label: "Profile"; icon: "badge"; visible: root.matchesNavigation(label); selected: root.page === 0; onClicked: root.navigate(0) }
                         Nav { label: "Global"; icon: "tune"; visible: root.matchesNavigation(label); selected: root.page === 11; onClicked: root.navigate(11) }
-                        Text { text: "DEVICES"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
+                        Text { text: "DEVICES"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Theme.Style.spacingSmall }
                         Nav { label: "Displays"; icon: "monitor"; visible: root.matchesNavigation(label); selected: root.page === 9; onClicked: root.navigate(9) }
                         Nav { label: "Connections"; icon: "wifi"; visible: root.matchesNavigation(label); selected: root.page === 1; onClicked: root.navigate(1) }
                         Nav { label: "Bluetooth"; icon: "bluetooth"; visible: root.matchesNavigation(label); selected: root.page === 2; onClicked: root.navigate(2) }
                         Nav { label: "Input"; icon: "mic"; visible: root.matchesNavigation(label); selected: root.page === 4; onClicked: root.navigate(4) }
                         Nav { label: "Cursor"; icon: "mouse"; visible: root.matchesNavigation(label); selected: root.page === 13; onClicked: root.navigate(13) }
                         Nav { label: "Machine"; icon: "memory"; visible: root.matchesNavigation(label); selected: root.page === 6; onClicked: root.navigate(6) }
-                        Text { text: "DESKTOP"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
+                        Text { text: "DESKTOP"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Theme.Style.spacingSmall }
                         Nav { label: "Windows"; icon: "window"; visible: root.matchesNavigation(label); selected: root.page === 12; onClicked: root.navigate(12) }
                         Nav { label: "Appearance"; icon: "palette"; visible: root.matchesNavigation(label); selected: root.page === 5; onClicked: root.navigate(5) }
                         Nav { label: "Bar Studio"; icon: "view_quilt"; visible: root.matchesNavigation(label); selected: root.page === 15; onClicked: root.navigate(15) }
                         Nav { label: "Desktop"; icon: "desktop_windows"; visible: root.matchesNavigation(label); selected: root.page === 14; onClicked: root.navigate(14) }
                         Nav { label: "Widgets"; icon: "widgets"; visible: root.matchesNavigation(label); selected: root.page === 16; onClicked: root.navigate(16) }
-                        Text { text: "TOOLS"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Style.spacingSmall }
+                        Text { text: "TOOLS"; color: root.lyneAccent; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1; Layout.topMargin: Theme.Style.spacingSmall }
                         Nav { label: "Sound"; icon: "volume_up"; visible: root.matchesNavigation(label); selected: root.page === 3; onClicked: root.navigate(3) }
                         Nav { label: "Shortcuts"; icon: "keyboard"; visible: root.matchesNavigation(label); selected: root.page === 7; onClicked: root.navigate(7) }
                         Nav { label: "Calendar"; icon: "calendar_month"; visible: root.matchesNavigation(label); selected: root.page === 10; onClicked: root.navigate(10) }
                         Nav { label: "Session"; icon: "power_settings_new"; visible: root.matchesNavigation(label); selected: root.page === 8; onClicked: root.navigate(8) }
+                        Nav { label: "Grabación"; icon: "fiber_manual_record"; visible: root.matchesNavigation(label); selected: root.page === 17; onClicked: root.navigate(17) }
+                        Nav { label: "Rashin"; icon: "psychology"; visible: root.matchesNavigation(label); selected: root.page === 18; onClicked: root.navigate(18) }
                     }
                 }
-                Nav { label: "Cerrar"; icon: "close"; Layout.topMargin: Style.spacingSmall; onClicked: root.shellState.closeControlCenter() }
+                Nav { label: "Cerrar"; icon: "close"; Layout.topMargin: Theme.Style.spacingSmall; onClicked: root.shellState.closeControlCenter() }
             }
         }
 
@@ -423,7 +427,7 @@ FloatingWindow {
                 subtitle: root.net?.connected ? "Conectado a " + root.net.ssid : root.net?.wifiEnabled ? "Redes inalámbricas cercanas" : "Wi‑Fi desactivado"
                 SettingCard {
                     title: "Red Wi‑Fi"; icon: "wifi"; subtitle: root.net?.connected ? root.net.ssid : root.net?.wifiEnabled ? "Sin red conectada" : "Wi‑Fi desactivado"
-                    Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: root.net?.wifiEnabled ? "Desactivar Wi‑Fi" : "Activar Wi‑Fi"; enabled: Boolean(root.net?.wifiHardwareEnabled); onClicked: if (root.net) root.net.setWifiEnabled(!root.net.wifiEnabled) } ActionButton { text: root.net?.scanning ? "Detener búsqueda" : "Buscar redes"; enabled: Boolean(root.net?.wifiDevice && root.net?.wifiEnabled); onClicked: if (root.net) root.net.setScanning(!root.net.scanning) } }
+                    Flow { Layout.fillWidth: true; spacing: Theme.Style.spacingSmall; ActionButton { text: root.net?.wifiEnabled ? "Desactivar Wi‑Fi" : "Activar Wi‑Fi"; enabled: Boolean(root.net?.wifiHardwareEnabled); onClicked: if (root.net) root.net.setWifiEnabled(!root.net.wifiEnabled) } ActionButton { text: root.net?.scanning ? "Detener búsqueda" : "Buscar redes"; enabled: Boolean(root.net?.wifiDevice && root.net?.wifiEnabled); onClicked: if (root.net) root.net.setScanning(!root.net.scanning) } }
                     Repeater { model: root.net?.networks || []; delegate: RowItem { required property var modelData; name: modelData.ssid; detail: modelData.connected ? "Conectado" : "Señal " + modelData.strength + "%"; active: modelData.connected; onClicked: if (root.net) modelData.connected ? root.net.disconnect() : root.net.connectNetwork(modelData) } }
                 }
                 SettingCard {
@@ -433,22 +437,22 @@ FloatingWindow {
                     subtitle: "Velocidad actual · " + (root.net?.activeInterface || "Wi‑Fi")
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Style.spacingMedium
+                        spacing: Theme.Style.spacingMedium
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 112
-                            radius: Style.controlRadius
+                            radius: Theme.Style.controlRadius
                             color: root.lyneSurfaceHigh
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: Style.paddingMedium
+                                anchors.margins: Theme.Style.paddingMedium
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    MaterialIcon { text: "download"; iconSize: Style.materialIconMedium; iconColor: "#f26d78" }
+                                    Theme.MaterialIcon { text: "download"; iconSize: Theme.Style.materialIconMedium; iconColor: "#f26d78" }
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        Text { text: "Descarga"; color: root.lyneMuted; font.pixelSize: Style.fontSmall }
-                                        Text { text: root.net?.formatRate(root.net.downloadSpeed) || "0 B/s"; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true }
+                                        Text { text: "Descarga"; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall }
+                                        Text { text: root.net?.formatRate(root.net.downloadSpeed) || "0 B/s"; color: root.lyneText; font.pixelSize: Theme.Style.fontNormal; font.bold: true }
                                     }
                                 }
                                 NetworkWave { Layout.fillWidth: true; Layout.fillHeight: true; values: root.net?.downloadHistory || []; accent: "#f26d78" }
@@ -457,18 +461,18 @@ FloatingWindow {
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 112
-                            radius: Style.controlRadius
+                            radius: Theme.Style.controlRadius
                             color: root.lyneSurfaceHigh
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: Style.paddingMedium
+                                anchors.margins: Theme.Style.paddingMedium
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    MaterialIcon { text: "upload"; iconSize: Style.materialIconMedium; iconColor: root.lyneAccent }
+                                    Theme.MaterialIcon { text: "upload"; iconSize: Theme.Style.materialIconMedium; iconColor: root.lyneAccent }
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        Text { text: "Subida"; color: root.lyneMuted; font.pixelSize: Style.fontSmall }
-                                        Text { text: root.net?.formatRate(root.net.uploadSpeed) || "0 B/s"; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true }
+                                        Text { text: "Subida"; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall }
+                                        Text { text: root.net?.formatRate(root.net.uploadSpeed) || "0 B/s"; color: root.lyneText; font.pixelSize: Theme.Style.fontNormal; font.bold: true }
                                     }
                                 }
                                 NetworkWave { Layout.fillWidth: true; Layout.fillHeight: true; values: root.net?.uploadHistory || []; accent: root.lyneAccent }
@@ -486,7 +490,7 @@ FloatingWindow {
                             ? "Midiendo conexión… puede tardar unos segundos"
                             : "Mide tu conexión usando Fast.com sin salir del centro de control."
                         color: root.lyneMuted
-                        font.pixelSize: Style.fontSmall
+                        font.pixelSize: Theme.Style.fontSmall
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -499,7 +503,7 @@ FloatingWindow {
                     Text {
                         visible: root.speedTestPhase === "error" && root.speedTestError !== ""
                         text: root.speedTestError
-                        color: Color.error
+                        color: Theme.Color.error
                         font.pixelSize: 12
                         Layout.fillWidth: true
                         elide: Text.ElideRight
@@ -518,7 +522,7 @@ FloatingWindow {
                 subtitle: root.bt?.enabled ? (root.bt.connectedDevices?.length || 0) + " dispositivos conectados" : "Bluetooth desactivado"
                 SettingCard {
                     title: "Bluetooth"; icon: "bluetooth"; subtitle: root.bt?.enabled ? "Disponible para conectar dispositivos" : "Bluetooth desactivado"
-                    Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: root.bt?.enabled ? "Desactivar Bluetooth" : "Activar Bluetooth"; enabled: Boolean(root.bt?.available); onClicked: if (root.bt) root.bt.setEnabled(!root.bt.enabled) } ActionButton { text: root.bt?.discovering ? "Detener búsqueda" : "Buscar dispositivos"; enabled: Boolean(root.bt?.enabled); onClicked: if (root.bt) root.bt.discovering ? root.bt.stopScan() : root.bt.startScan() } }
+                    Flow { Layout.fillWidth: true; spacing: Theme.Style.spacingSmall; ActionButton { text: root.bt?.enabled ? "Desactivar Bluetooth" : "Activar Bluetooth"; enabled: Boolean(root.bt?.available); onClicked: if (root.bt) root.bt.setEnabled(!root.bt.enabled) } ActionButton { text: root.bt?.discovering ? "Detener búsqueda" : "Buscar dispositivos"; enabled: Boolean(root.bt?.enabled); onClicked: if (root.bt) root.bt.discovering ? root.bt.stopScan() : root.bt.startScan() } }
                     Repeater { model: root.bt?.devices || []; delegate: RowItem { required property var modelData; name: modelData.name; detail: modelData.connected ? "Conectado" : modelData.paired ? "Emparejado" : "Disponible"; active: modelData.connected; onClicked: if (root.bt) modelData.connected ? root.bt.disconnectDevice(modelData) : root.bt.connectDevice(modelData) } }
                 }
             }
@@ -527,7 +531,7 @@ FloatingWindow {
                 title: "Output"
                 subtitle: "Salida principal y volumen por aplicación"
                 SettingCard { title: "Salida de audio"; icon: "speaker"; subtitle: root.audio?.outputName || "Salida predeterminada"; Repeater { model: root.audio?.outputsModel || []; delegate: RowItem { required property var modelData; name: root.audio.outputDisplayName(modelData); detail: modelData === Pipewire.defaultAudioSink ? "Activo" : "Disponible"; active: modelData === Pipewire.defaultAudioSink; onClicked: root.audio.selectOutput(modelData) } } AudioRow { name: "Volumen principal"; node: root.audio?.sink } }
-                SettingCard { title: "Aplicaciones"; icon: "apps"; subtitle: "Volumen independiente por aplicación"; Repeater { model: root.audio?.applicationGroupsModel || []; delegate: AudioRow { required property var modelData; name: modelData.name; group: modelData } } Text { visible: (root.audio?.applicationGroupsModel?.values || []).length === 0; text: "No hay aplicaciones reproduciendo audio"; color: root.lyneMuted; font.pixelSize: Style.fontSmall } }
+                SettingCard { title: "Aplicaciones"; icon: "apps"; subtitle: "Volumen independiente por aplicación"; Repeater { model: root.audio?.applicationGroupsModel || []; delegate: AudioRow { required property var modelData; name: modelData.name; group: modelData } } Text { visible: (root.audio?.applicationGroupsModel?.values || []).length === 0; text: "No hay aplicaciones reproduciendo audio"; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall } }
             }
             Page {
                 icon: "mic"
@@ -538,8 +542,8 @@ FloatingWindow {
                     title: "Filtros del micrófono"
                     icon: "graphic_eq"
                     subtitle: root.effects.available ? (root.effects.running ? "EasyEffects activo" : "EasyEffects instalado") : "EasyEffects no disponible"
-                    Text { Layout.fillWidth: true; text: root.effects.running ? "Los efectos pueden salir por una fuente virtual Easy Effects Source." : "Abre EasyEffects, activa los efectos de entrada y selecciona su fuente virtual en la llamada."; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap }
-                    Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: root.effects.running ? "EasyEffects abierto" : "Abrir EasyEffects"; enabled: root.effects.available && !root.effects.running; onClicked: root.effects.open() } ActionButton { text: "Usar fuente procesada"; enabled: root.effectsSource !== null; onClicked: root.audio.selectInput(root.effectsSource) } ActionButton { text: "Actualizar estado"; onClicked: root.effects.refresh() } }
+                    Text { Layout.fillWidth: true; text: root.effects.running ? "Los efectos pueden salir por una fuente virtual Easy Effects Source." : "Abre EasyEffects, activa los efectos de entrada y selecciona su fuente virtual en la llamada."; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; wrapMode: Text.WordWrap }
+                    Flow { Layout.fillWidth: true; spacing: Theme.Style.spacingSmall; ActionButton { text: root.effects.running ? "EasyEffects abierto" : "Abrir EasyEffects"; enabled: root.effects.available && !root.effects.running; onClicked: root.effects.open() } ActionButton { text: "Usar fuente procesada"; enabled: root.effectsSource !== null; onClicked: root.audio.selectInput(root.effectsSource) } ActionButton { text: "Actualizar estado"; onClicked: root.effects.refresh() } }
                 }
             }
             Page {
@@ -552,7 +556,7 @@ FloatingWindow {
                         visible: root.settingsThemes.themes.length === 0
                         text: "No se encontraron schemes"
                         color: root.lyneMuted
-                        font.pixelSize: Style.fontSmall
+                        font.pixelSize: Theme.Style.fontSmall
                     }
                     Item {
                         id: schemesCarouselViewport
@@ -589,7 +593,7 @@ FloatingWindow {
                             highlightRangeMode: PathView.StrictlyEnforceRange
                             preferredHighlightBegin: 0.5
                             preferredHighlightEnd: 0.5
-                            highlightMoveDuration: Style.motionSlow
+                            highlightMoveDuration: Theme.Style.motionSlow
                             interactive: false
 
                             onCurrentIndexChanged: root.appearanceSchemeIndex = currentIndex
@@ -629,10 +633,10 @@ FloatingWindow {
                         Rectangle {
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 32; height: 32; radius: Style.radiusFull
+                            width: 32; height: 32; radius: Theme.Style.radiusFull
                             color: root.lyneSurfaceHover
                             z: 4
-                            MaterialIcon { anchors.centerIn: parent; text: "chevron_left"; iconSize: Style.materialIconSmall; iconColor: root.lyneText }
+                            Theme.MaterialIcon { anchors.centerIn: parent; text: "chevron_left"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneText }
                             TapHandler {
                                 enabled: schemeCarousel.count > 0
                                 onTapped: schemeCarousel.currentIndex = Math.max(0, schemeCarousel.currentIndex - 1)
@@ -642,10 +646,10 @@ FloatingWindow {
                         Rectangle {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 32; height: 32; radius: Style.radiusFull
+                            width: 32; height: 32; radius: Theme.Style.radiusFull
                             color: root.lyneSurfaceHover
                             z: 4
-                            MaterialIcon { anchors.centerIn: parent; text: "chevron_right"; iconSize: Style.materialIconSmall; iconColor: root.lyneText }
+                            Theme.MaterialIcon { anchors.centerIn: parent; text: "chevron_right"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneText }
                             TapHandler {
                                 enabled: schemeCarousel.count > 0
                                 onTapped: schemeCarousel.currentIndex = Math.min(schemeCarousel.count - 1, schemeCarousel.currentIndex + 1)
@@ -663,10 +667,10 @@ FloatingWindow {
                     Flow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: childrenRect.height
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
                         Repeater { model: Services.Wallpapers.wallpapers || []; delegate: WallpaperChoice { required property var modelData; wallpaper: modelData; current: modelData.path === Services.Wallpapers.currentPath; onClicked: Services.Wallpapers.setWallpaper(wallpaper.path, "") } }
                     }
-                    Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: "Actualizar lista"; onClicked: Services.Wallpapers.refresh() } ActionButton { text: "Reaplicar guardados"; onClicked: Services.Wallpapers.applySaved() } Text { text: Services.Wallpapers.currentCount + " wallpapers disponibles"; color: root.lyneMuted; font.pixelSize: Style.fontSmall; Layout.alignment: Qt.AlignVCenter } }
+                    Flow { Layout.fillWidth: true; spacing: Theme.Style.spacingSmall; ActionButton { text: "Actualizar lista"; onClicked: Services.Wallpapers.refresh() } ActionButton { text: "Reaplicar guardados"; onClicked: Services.Wallpapers.applySaved() } Text { text: Services.Wallpapers.currentCount + " wallpapers disponibles"; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; Layout.alignment: Qt.AlignVCenter } }
                 }
             }
             Page {
@@ -680,8 +684,8 @@ FloatingWindow {
                     // space. On compact monitors, stack them instead of
                     // squeezing labels and gauges into narrow columns.
                     columns: width >= 860 ? 2 : 1
-                    columnSpacing: Style.spacingMedium
-                    rowSpacing: Style.spacingMedium
+                    columnSpacing: Theme.Style.spacingMedium
+                    rowSpacing: Theme.Style.spacingMedium
                     HardwareHero {
                         Layout.fillWidth: true
                         Layout.columnSpan: 1
@@ -742,8 +746,8 @@ FloatingWindow {
                 title: "Sesión"
                 subtitle: "Notificaciones y acciones de energía"
                 SettingCard { title: "No molestar"; icon: "notifications_off"; subtitle: Services.NotificationService.dnd ? "Activo" : "Desactivado"; ActionButton { text: Services.NotificationService.dnd ? "Desactivar" : "Activar"; onClicked: Services.NotificationService.toggleDnd() } }
-                SettingCard { title: "Modo nocturno"; icon: "nightlight"; subtitle: "Se controla desde la sidebar rápida"; Text { text: "El control aparece en la sidebar cuando hay un backend compatible disponible."; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true } }
-                    SettingCard { title: "Energía y sesión"; icon: "power_settings_new"; subtitle: "Las acciones destructivas requieren confirmación"; Flow { Layout.fillWidth: true; spacing: Style.spacingSmall; ActionButton { text: "Bloquear"; onClicked: Services.PowerService.lock() } ActionButton { text: "Suspender"; onClicked: Services.SidebarService.requestPower("suspend") } ActionButton { text: "Cerrar sesión"; onClicked: Services.SidebarService.requestPower("logout") } ActionButton { text: "Reiniciar"; onClicked: Services.SidebarService.requestPower("reboot") } ActionButton { text: "Apagar"; onClicked: Services.SidebarService.requestPower("shutdown") } } RowLayout { visible: Services.SidebarService.pendingPower !== ""; Text { text: "¿Confirmar " + Services.SidebarService.pendingPower + "?"; color: Color.warning; Layout.fillWidth: true } ActionButton { text: "Cancelar"; onClicked: Services.SidebarService.cancelPower() } ActionButton { text: "Confirmar"; onClicked: Services.SidebarService.confirmPower() } } }
+                SettingCard { title: "Modo nocturno"; icon: "nightlight"; subtitle: "Se controla desde la sidebar rápida"; Text { text: "El control aparece en la sidebar cuando hay un backend compatible disponible."; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true } }
+                    SettingCard { title: "Energía y sesión"; icon: "power_settings_new"; subtitle: "Las acciones destructivas requieren confirmación"; Flow { Layout.fillWidth: true; spacing: Theme.Style.spacingSmall; ActionButton { text: "Bloquear"; onClicked: Services.PowerService.lock() } ActionButton { text: "Suspender"; onClicked: Services.SidebarService.requestPower("suspend") } ActionButton { text: "Cerrar sesión"; onClicked: Services.SidebarService.requestPower("logout") } ActionButton { text: "Reiniciar"; onClicked: Services.SidebarService.requestPower("reboot") } ActionButton { text: "Apagar"; onClicked: Services.SidebarService.requestPower("shutdown") } } RowLayout { visible: Services.SidebarService.pendingPower !== ""; Text { text: "¿Confirmar " + Services.SidebarService.pendingPower + "?"; color: Theme.Color.warning; Layout.fillWidth: true } ActionButton { text: "Cancelar"; onClicked: Services.SidebarService.cancelPower() } ActionButton { text: "Confirmar"; onClicked: Services.SidebarService.confirmPower() } } }
             }
             Page {
                 icon: "monitor"
@@ -781,7 +785,7 @@ FloatingWindow {
                             placeholderTextColor: root.lyneMuted
                             leftPadding: 12
                             rightPadding: 12
-                            background: Rectangle { radius: Style.controlRadius; color: root.lyneSurfaceHigh; border.width: calendarUrlField.activeFocus ? 1 : 0; border.color: root.lyneAccent }
+                            background: Rectangle { radius: Theme.Style.controlRadius; color: root.lyneSurfaceHigh; border.width: calendarUrlField.activeFocus ? 1 : 0; border.color: root.lyneAccent }
                         }
                         ActionButton { text: "Guardar"; onClicked: Services.CalendarService.configure(calendarUrlField.text, "Calendario") }
                     }
@@ -824,6 +828,28 @@ FloatingWindow {
                 subtitle: "Elementos flotantes del escritorio"
                 detail: "Aquí se podrán activar y organizar los widgets flotantes de Tartarus."
             }
+            RecordingPage {
+                active: root.visible && root.page === 17
+                settings: Services.RecorderSettings
+                recorder: Services.RecorderService
+                backgroundColor: root.lyneBackground
+                surfaceColor: root.lyneSurface
+                surfaceHighColor: root.lyneSurfaceHigh
+                hoverColor: root.lyneSurfaceHover
+                accentColor: root.lyneAccent
+                textColor: root.lyneText
+                mutedColor: root.lyneMuted
+            }
+            RashinSettingsPage {
+                active: root.visible && root.page === 18
+                backgroundColor: root.lyneBackground
+                surfaceColor: root.lyneSurface
+                surfaceHighColor: root.lyneSurfaceHigh
+                hoverColor: root.lyneSurfaceHover
+                accentColor: root.lyneAccent
+                textColor: root.lyneText
+                mutedColor: root.lyneMuted
+            }
         }
     }
 
@@ -835,17 +861,17 @@ FloatingWindow {
         signal clicked()
         Layout.fillWidth: true
         Layout.preferredHeight: 34
-        radius: selected ? Style.radiusSmall : Style.radiusFull
+        radius: selected ? Theme.Style.radiusSmall : Theme.Style.radiusFull
         color: selected ? root.lyneText : navHover.hovered ? root.lyneSurfaceHover : "transparent"
-        Behavior on color { ColorAnimation { duration: Style.motionFast } }
+        Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
         HoverHandler { id: navHover }
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Style.paddingSmall
-            anchors.rightMargin: Style.paddingSmall
-            spacing: Style.spacingSmall
-            MaterialIcon { Layout.preferredWidth: 20; text: nav.icon; iconSize: Style.materialIconSmall; iconColor: nav.selected ? root.lyneBackground : root.lyneMuted }
-            Text { text: nav.label; color: nav.selected ? root.lyneBackground : root.lyneText; font.pixelSize: Style.fontSmall; font.bold: nav.selected; Layout.fillWidth: true }
+            anchors.leftMargin: Theme.Style.paddingSmall
+            anchors.rightMargin: Theme.Style.paddingSmall
+            spacing: Theme.Style.spacingSmall
+            Theme.MaterialIcon { Layout.preferredWidth: 20; text: nav.icon; iconSize: Theme.Style.materialIconSmall; iconColor: nav.selected ? root.lyneBackground : root.lyneMuted }
+            Text { text: nav.label; color: nav.selected ? root.lyneBackground : root.lyneText; font.pixelSize: Theme.Style.fontSmall; font.bold: nav.selected; Layout.fillWidth: true }
         }
         TapHandler { onTapped: nav.clicked() }
     }
@@ -866,28 +892,28 @@ FloatingWindow {
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
         ColumnLayout {
             id: body
-            x: Style.paddingLarge
-            y: Style.paddingLarge
-            width: page.width - Style.paddingLarge * 2
-            spacing: Style.spacingMedium
+            x: Theme.Style.paddingLarge
+            y: Theme.Style.paddingLarge
+            width: page.width - Theme.Style.paddingLarge * 2
+            spacing: Theme.Style.spacingMedium
             RowLayout {
                 Layout.fillWidth: true
                 Layout.bottomMargin: 4
-                spacing: Style.spacingMedium
+                spacing: Theme.Style.spacingMedium
                 Rectangle {
                     Layout.preferredWidth: 44
                     Layout.preferredHeight: 44
-                    radius: Style.radiusSmall
+                    radius: Theme.Style.radiusSmall
                     color: root.lyneSurfaceHigh
                     border.width: 1
                     border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.35)
-                    MaterialIcon { anchors.centerIn: parent; text: page.icon; iconSize: Style.materialIconLarge; iconColor: root.lyneAccent }
+                    Theme.MaterialIcon { anchors.centerIn: parent; text: page.icon; iconSize: Theme.Style.materialIconLarge; iconColor: root.lyneAccent }
                 }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 1
                     Text { text: page.title; color: root.lyneText; font.pixelSize: 27; font.bold: true; font.letterSpacing: 0.2 }
-                    Text { text: page.subtitle; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                    Text { text: page.subtitle; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 }
             }
             Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16) }
@@ -905,7 +931,7 @@ FloatingWindow {
             subtitle: "Se usa para el clima y el reloj de la Dynamic Island"
             RowLayout {
                 Layout.fillWidth: true
-                Text { text: "Ubicación del PC"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
+                Text { text: "Ubicación del PC"; color: root.lyneText; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true }
                 StyledSwitch {
                     checked: Services.QuickSettingsState.weatherAutoLocation
                     onToggled: Services.QuickSettingsState.setWeatherAutoLocation(checked)
@@ -922,7 +948,7 @@ FloatingWindow {
             }
             RowLayout {
                 Layout.fillWidth: true
-                Text { text: "Lugar"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120; Layout.alignment: Qt.AlignTop; topPadding: 10 }
+                Text { text: "Lugar"; color: root.lyneText; font.pixelSize: Theme.Style.fontSmall; Layout.preferredWidth: 120; Layout.alignment: Qt.AlignTop; topPadding: 10 }
                 LauncherComponents.WeatherLocationPicker {
                     id: globalLocationField
                     enabled: !Services.QuickSettingsState.weatherAutoLocation
@@ -938,7 +964,7 @@ FloatingWindow {
             }
             RowLayout {
                 Layout.fillWidth: true
-                Text { text: "Zona horaria"; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.preferredWidth: 120 }
+                Text { text: "Zona horaria"; color: root.lyneText; font.pixelSize: Theme.Style.fontSmall; Layout.preferredWidth: 120 }
                 TextField {
                     id: globalTimezoneField
                     Layout.fillWidth: true
@@ -949,7 +975,7 @@ FloatingWindow {
                     selectByMouse: true
                     leftPadding: 12
                     rightPadding: 12
-                    background: Rectangle { radius: Style.controlRadius; color: root.lyneSurfaceHigh; border.width: globalTimezoneField.activeFocus ? 1 : 0; border.color: root.lyneAccent }
+                    background: Rectangle { radius: Theme.Style.controlRadius; color: root.lyneSurfaceHigh; border.width: globalTimezoneField.activeFocus ? 1 : 0; border.color: root.lyneAccent }
                     onEditingFinished: Services.QuickSettingsState.setTimeZone(text)
                 }
             }
@@ -964,7 +990,7 @@ FloatingWindow {
             GridLayout {
                 Layout.fillWidth: true
                 columns: width >= 560 ? 2 : 1
-                columnSpacing: Style.paddingLarge
+                columnSpacing: Theme.Style.paddingLarge
                 rowSpacing: 2
                 FastfetchLine { label: "kernel"; value: root.hardware.data?.os?.kernel || "—"; accent: root.lyneAccent }
                 FastfetchLine { label: "uptime"; value: root.hardware.data?.os?.uptime || "—"; accent: "#f5b86b" }
@@ -990,7 +1016,7 @@ FloatingWindow {
             title: placeholder.title
             icon: placeholder.icon
             subtitle: placeholder.subtitle
-            Text { text: placeholder.detail; color: root.lyneMuted; font.pixelSize: Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            Text { text: placeholder.detail; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; wrapMode: Text.WordWrap; Layout.fillWidth: true }
         }
     }
 
@@ -998,7 +1024,7 @@ FloatingWindow {
         id: dossier
         Layout.fillWidth: true
         implicitHeight: 610
-        radius: Style.cardRadius
+        radius: Theme.Style.cardRadius
         color: "#0d0e12"
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.5)
@@ -1107,7 +1133,7 @@ FloatingWindow {
             Text { text: "TARTARUS / LIVE PROFILE"; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 9; font.letterSpacing: 2 }
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
                 ActionButton { text: "Cambiar foto"; onClicked: profileFileDialog.open() }
                 Text { text: "~/.face · ~/Pictures/Face"; color: root.lyneMuted; font.family: "monospace"; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true }
             }
@@ -1139,21 +1165,21 @@ FloatingWindow {
     component ProfileHeader: Rectangle {
         Layout.fillWidth: true
         implicitHeight: 104
-        radius: Style.cardRadius
+        radius: Theme.Style.cardRadius
         color: root.lyneSurfaceHigh
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12)
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Style.paddingLarge
-            anchors.rightMargin: Style.paddingLarge
-            anchors.topMargin: Style.paddingMedium
-            anchors.bottomMargin: Style.paddingMedium
-            spacing: Style.spacingMedium
+            anchors.leftMargin: Theme.Style.paddingLarge
+            anchors.rightMargin: Theme.Style.paddingLarge
+            anchors.topMargin: Theme.Style.paddingMedium
+            anchors.bottomMargin: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingMedium
             Rectangle {
                 Layout.preferredWidth: 68
                 Layout.preferredHeight: 68
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.18)
                 border.width: 2
                 border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
@@ -1185,10 +1211,10 @@ FloatingWindow {
                     maskSource: profileImageMask
                     autoPaddingEnabled: false
                 }
-                MaterialIcon {
+                Theme.MaterialIcon {
                     anchors.centerIn: parent
                     text: "person"
-                    iconSize: Style.materialIconLarge
+                    iconSize: Theme.Style.materialIconLarge
                     iconColor: root.lyneAccent
                     visible: profileImage.status !== Image.Ready
                 }
@@ -1196,16 +1222,16 @@ FloatingWindow {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 3
-                Text { text: "Leandro"; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true }
-                Text { text: "Tartarus · Arch Linux · Quickshell"; color: root.lyneMuted; font.pixelSize: Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
+                Text { text: "Leandro"; color: root.lyneText; font.pixelSize: Theme.Style.fontNormal; font.bold: true }
+                Text { text: "Tartarus · Arch Linux · Quickshell"; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
                 Text { text: "Sesión activa"; color: root.lyneAccent; font.pixelSize: 12; font.bold: true }
             }
             Rectangle {
                 Layout.preferredWidth: 34
                 Layout.preferredHeight: 34
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.14)
-                MaterialIcon { anchors.centerIn: parent; text: "check"; iconSize: Style.materialIconSmall; iconColor: root.lyneAccent }
+                Theme.MaterialIcon { anchors.centerIn: parent; text: "check"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneAccent }
             }
         }
     }
@@ -1225,16 +1251,16 @@ FloatingWindow {
             border.color: styledSwitch.checked
                 ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.9)
                 : Qt.rgba(root.lyneMuted.r, root.lyneMuted.g, root.lyneMuted.b, 0.42)
-            Behavior on color { ColorAnimation { duration: Style.motionFast } }
+            Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
             Rectangle {
                 width: 20
                 height: 20
                 y: 3
                 x: styledSwitch.checked ? parent.width - width - 3 : 3
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 color: styledSwitch.checked ? root.lyneBackground : root.lyneText
-                Behavior on x { NumberAnimation { duration: Style.motionFast; easing.type: Easing.OutCubic } }
-                Behavior on color { ColorAnimation { duration: Style.motionFast } }
+                Behavior on x { NumberAnimation { duration: Theme.Style.motionFast; easing.type: Easing.OutCubic } }
+                Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
             }
         }
     }
@@ -1246,16 +1272,16 @@ FloatingWindow {
         property color accent: root.lyneAccent
         Layout.fillWidth: true
         implicitHeight: 70
-        radius: Style.radiusSmall
+        radius: Theme.Style.radiusSmall
         color: root.lyneSurfaceHigh
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12)
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
+            anchors.margins: Theme.Style.paddingSmall
             spacing: 2
             Text { text: speedMetric.label; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true }
-            Text { text: speedMetric.value; color: speedMetric.accent; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
+            Text { text: speedMetric.value; color: speedMetric.accent; font.pixelSize: Theme.Style.fontNormal; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
         }
     }
 
@@ -1267,32 +1293,32 @@ FloatingWindow {
         property string headerInfo: ""
         default property alias content: cardBody.data
         Layout.fillWidth: true
-        implicitHeight: cardBody.implicitHeight + Style.paddingMedium * 2
-        radius: Style.radiusMedium
+        implicitHeight: cardBody.implicitHeight + Theme.Style.paddingMedium * 2
+        radius: Theme.Style.radiusMedium
         color: root.lyneSurface
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.18)
         ColumnLayout {
             id: cardBody
             anchors.fill: parent
-            anchors.margins: Style.paddingLarge
-            spacing: Style.spacingMedium
+            anchors.margins: Theme.Style.paddingLarge
+            spacing: Theme.Style.spacingMedium
             RowLayout {
                 Layout.fillWidth: true
                 Rectangle {
                     Layout.preferredWidth: 28
                     Layout.preferredHeight: 28
-                    radius: Style.radiusSmall
+                    radius: Theme.Style.radiusSmall
                     color: "transparent"
                     border.width: 1
                     border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
-                    MaterialIcon { anchors.centerIn: parent; text: card.icon; iconSize: Style.sectionIconSize - 2; iconColor: root.lyneAccent }
+                    Theme.MaterialIcon { anchors.centerIn: parent; text: card.icon; iconSize: Theme.Style.sectionIconSize - 2; iconColor: root.lyneAccent }
                 }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
                     Text { text: card.title; color: root.lyneText; font.pixelSize: 16; font.bold: true; Layout.fillWidth: true; elide: Text.ElideRight }
-                    Text { visible: card.subtitle !== ""; text: card.subtitle; color: root.lyneMuted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Text { visible: card.subtitle !== ""; text: card.subtitle; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
                 }
                 Text { visible: card.headerInfo !== ""; text: card.headerInfo; color: root.lyneAccent; font.family: "monospace"; font.pixelSize: 11; font.bold: true; Layout.alignment: Qt.AlignTop }
             }
@@ -1307,16 +1333,16 @@ FloatingWindow {
         signal clicked()
         Layout.fillWidth: true
         implicitHeight: 52
-        radius: Style.radiusSmall
+        radius: Theme.Style.radiusSmall
         color: active ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12) : root.lyneSurfaceHigh
         border.width: 1
         border.color: active ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.45) : Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.10)
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
-            MaterialIcon { text: item.active ? "check_circle" : "radio_button_unchecked"; iconSize: Style.materialIconMedium; iconColor: item.active ? root.lyneAccent : root.lyneMuted }
-            ColumnLayout { Layout.fillWidth: true; Text { text: item.name; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight } Text { text: item.detail; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight } }
-            MaterialIcon { text: "chevron_right"; iconSize: Style.materialIconSmall; iconColor: root.lyneMuted }
+            anchors.margins: Theme.Style.paddingSmall
+            Theme.MaterialIcon { text: item.active ? "check_circle" : "radio_button_unchecked"; iconSize: Theme.Style.materialIconMedium; iconColor: item.active ? root.lyneAccent : root.lyneMuted }
+            ColumnLayout { Layout.fillWidth: true; Text { text: item.name; color: root.lyneText; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight } Text { text: item.detail; color: root.lyneMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight } }
+            Theme.MaterialIcon { text: "chevron_right"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneMuted }
         }
         TapHandler { onTapped: item.clicked() }
     }
@@ -1329,9 +1355,9 @@ FloatingWindow {
         Layout.fillWidth: true
         RowLayout {
             Layout.fillWidth: true
-            MaterialIcon { text: audioRow.group ? root.audio.applicationIcon(audioRow.group) : "volume_up"; iconSize: Style.materialIconSmall; iconColor: root.lyneAccent }
-            Text { text: audioRow.name; color: root.lyneText; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
-            Text { text: audioRow.group ? Math.round(root.audio.groupVolume(audioRow.group) * 100) + "%" : audioRow.node?.audio ? Math.round(audioRow.node.audio.volume * 100) + "%" : "—"; color: root.lyneMuted; font.pixelSize: Style.fontSmall }
+            Theme.MaterialIcon { text: audioRow.group ? root.audio.applicationIcon(audioRow.group) : "volume_up"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneAccent }
+            Text { text: audioRow.name; color: root.lyneText; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
+            Text { text: audioRow.group ? Math.round(root.audio.groupVolume(audioRow.group) * 100) + "%" : audioRow.node?.audio ? Math.round(audioRow.node.audio.volume * 100) + "%" : "—"; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall }
             ActionButton { text: audioRow.group ? (root.audio.groupMuted(audioRow.group) ? "Activar" : "Silenciar") : (audioRow.node?.audio?.muted ? "Activar" : "Silenciar"); enabled: Boolean(audioRow.group || (audioRow.node?.ready && audioRow.node?.audio)); onClicked: audioRow.group ? root.audio.toggleGroupMute(audioRow.group) : audioRow.node.audio.muted = !audioRow.node.audio.muted }
         }
         StyledSlider { Layout.fillWidth: true; enabled: Boolean(audioRow.group || (audioRow.node?.ready && audioRow.node?.audio)); from: 0; to: 1; value: audioRow.group ? root.audio.groupVolume(audioRow.group) : audioRow.node?.audio?.volume ?? 0; onMoved: audioRow.group ? root.audio.setGroupVolume(audioRow.group, value) : audioRow.node.audio.volume = value }
@@ -1344,22 +1370,22 @@ FloatingWindow {
         contentItem: Text {
             text: button.text
             color: button.down ? root.lyneBackground : button.enabled ? root.lyneText : root.lyneMuted
-            font.pixelSize: Style.fontSmall
+            font.pixelSize: Theme.Style.fontSmall
             font.bold: button.down
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }
         background: Rectangle {
-            radius: Style.radiusSmall
+            radius: Theme.Style.radiusSmall
             color: button.down ? root.lyneAccent : button.hovered ? root.lyneSurfaceHover : "transparent"
             border.width: 1
             border.color: button.down || button.hovered
                 ? root.lyneAccent
                 : Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.42)
             opacity: button.enabled ? 1 : 0.5
-            Behavior on color { ColorAnimation { duration: Style.motionFast } }
-            Behavior on border.color { ColorAnimation { duration: Style.motionFast } }
+            Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
+            Behavior on border.color { ColorAnimation { duration: Theme.Style.motionFast } }
         }
     }
 
@@ -1444,32 +1470,32 @@ FloatingWindow {
         property bool showCoreUsage: false
         readonly property color accent: usage < 0 ? root.lyneMuted : usage >= 90 ? "#f26d78" : usage >= 70 ? "#f2b36d" : root.lyneAccent
         implicitHeight: hero.showCoreUsage ? 246 : 172
-        radius: Style.radiusMedium
+        radius: Theme.Style.radiusMedium
         color: root.lyneSurface
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingSmall
+            anchors.margins: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingSmall
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.spacingMedium
-                HardwareRing { value: hero.usage; accent: hero.accent; MaterialIcon { anchors.centerIn: parent; text: hero.icon; iconSize: Style.materialIconMedium; iconColor: hero.accent } }
+                spacing: Theme.Style.spacingMedium
+                HardwareRing { value: hero.usage; accent: hero.accent; Theme.MaterialIcon { anchors.centerIn: parent; text: hero.icon; iconSize: Theme.Style.materialIconMedium; iconColor: hero.accent } }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
-                    Text { text: hero.label; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true }
-                    Text { text: hero.description; color: root.lyneMuted; font.pixelSize: Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
+                    Text { text: hero.label; color: root.lyneText; font.pixelSize: Theme.Style.fontNormal; font.bold: true }
+                    Text { text: hero.description; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
                 }
                 Text { text: hero.usage >= 0 ? Math.round(hero.usage) + "%" : "—"; color: hero.accent; font.pixelSize: 27; font.bold: true }
             }
             NetworkWave { Layout.fillWidth: true; Layout.preferredHeight: 38; values: hero.history; accent: hero.accent; maximumFloor: 100 }
             RowLayout {
                 Layout.fillWidth: true
-                Text { text: hero.detail; color: root.lyneMuted; font.pixelSize: Style.fontSmall }
+                Text { text: hero.detail; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall }
                 Item { Layout.fillWidth: true }
-                Text { text: hero.extra; color: root.lyneMuted; font.pixelSize: Style.fontSmall; elide: Text.ElideRight; Layout.maximumWidth: hero.width * 0.48 }
+                Text { text: hero.extra; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; elide: Text.ElideRight; Layout.maximumWidth: hero.width * 0.48 }
             }
             Text {
                 visible: hero.showCoreUsage
@@ -1526,20 +1552,20 @@ FloatingWindow {
         property string detail: ""
         readonly property color accent: value >= 90 ? "#f26d78" : value >= 70 ? "#f2b36d" : root.lyneAccent
         implicitHeight: 172
-        radius: Style.radiusMedium
+        radius: Theme.Style.radiusMedium
         color: root.lyneSurface
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingMedium
-            HardwareRing { implicitWidth: 76; implicitHeight: 76; value: gaugeCard.value; accent: gaugeCard.accent; Text { anchors.centerIn: parent; text: Math.round(gaugeCard.value) + "%"; color: gaugeCard.accent; font.pixelSize: Style.fontNormal; font.bold: true } }
+            anchors.margins: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingMedium
+            HardwareRing { implicitWidth: 76; implicitHeight: 76; value: gaugeCard.value; accent: gaugeCard.accent; Text { anchors.centerIn: parent; text: Math.round(gaugeCard.value) + "%"; color: gaugeCard.accent; font.pixelSize: Theme.Style.fontNormal; font.bold: true } }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 4
-                RowLayout { MaterialIcon { text: gaugeCard.icon; iconSize: Style.materialIconSmall; iconColor: gaugeCard.accent } Text { text: gaugeCard.label; color: root.lyneText; font.pixelSize: Style.fontNormal; font.bold: true } }
-                Text { text: gaugeCard.detail; color: root.lyneMuted; font.pixelSize: Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
+                RowLayout { Theme.MaterialIcon { text: gaugeCard.icon; iconSize: Theme.Style.materialIconSmall; iconColor: gaugeCard.accent } Text { text: gaugeCard.label; color: root.lyneText; font.pixelSize: Theme.Style.fontNormal; font.bold: true } }
+                Text { text: gaugeCard.detail; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; elide: Text.ElideRight; Layout.fillWidth: true }
             }
         }
     }
@@ -1552,19 +1578,19 @@ FloatingWindow {
         property color accent: root.lyneAccent
         property var history: []
         implicitHeight: 94
-        radius: Style.radiusSmall
+        radius: Theme.Style.radiusSmall
         color: root.lyneSurfaceHigh
         border.width: 1
         border.color: Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.12)
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
+            anchors.margins: Theme.Style.paddingSmall
             spacing: 2
             RowLayout {
                 Layout.fillWidth: true
-                MaterialIcon { text: rateCard.icon; iconSize: Style.materialIconSmall; iconColor: rateCard.accent }
-                Text { text: rateCard.label; color: root.lyneMuted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
-                Text { text: root.net?.formatRate(rateCard.rate) || "0 B/s"; color: rateCard.accent; font.pixelSize: Style.fontSmall; font.bold: true }
+                Theme.MaterialIcon { text: rateCard.icon; iconSize: Theme.Style.materialIconSmall; iconColor: rateCard.accent }
+                Text { text: rateCard.label; color: root.lyneMuted; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true }
+                Text { text: root.net?.formatRate(rateCard.rate) || "0 B/s"; color: rateCard.accent; font.pixelSize: Theme.Style.fontSmall; font.bold: true }
             }
             NetworkWave { Layout.fillWidth: true; Layout.fillHeight: true; values: rateCard.history; accent: rateCard.accent }
         }
@@ -1622,18 +1648,18 @@ FloatingWindow {
         signal clicked()
         implicitWidth: 190
         implicitHeight: 82
-        radius: Style.radiusSmall
+        radius: Theme.Style.radiusSmall
         color: themeChoice.theme.slug === root.settingsThemes.currentSlug ? Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.22) : root.lyneSurfaceHigh
         border.width: 1
         border.color: root.lyneAccent
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
-            spacing: Style.spacingXs
+            anchors.margins: Theme.Style.paddingSmall
+            spacing: Theme.Style.spacingXs
             RowLayout {
                 Layout.fillWidth: true
-                Rectangle { Layout.preferredWidth: 28; Layout.preferredHeight: 28; radius: Style.radiusFull; color: root.lyneAccent; MaterialIcon { anchors.centerIn: parent; text: "palette"; iconSize: Style.materialIconSmall; iconColor: root.lyneBackground } }
-                ColumnLayout { Layout.fillWidth: true; Text { text: themeChoice.theme.name; color: root.lyneText; font.pixelSize: Style.fontSmall; font.bold: true; elide: Text.ElideRight; Layout.fillWidth: true } Text { text: themeChoice.theme.slug === root.settingsThemes.currentSlug ? "Activo" : "Disponible"; color: root.lyneMuted; font.pixelSize: 12 } }
+                Rectangle { Layout.preferredWidth: 28; Layout.preferredHeight: 28; radius: Theme.Style.radiusFull; color: root.lyneAccent; Theme.MaterialIcon { anchors.centerIn: parent; text: "palette"; iconSize: Theme.Style.materialIconSmall; iconColor: root.lyneBackground } }
+                ColumnLayout { Layout.fillWidth: true; Text { text: themeChoice.theme.name; color: root.lyneText; font.pixelSize: Theme.Style.fontSmall; font.bold: true; elide: Text.ElideRight; Layout.fillWidth: true } Text { text: themeChoice.theme.slug === root.settingsThemes.currentSlug ? "Activo" : "Disponible"; color: root.lyneMuted; font.pixelSize: 12 } }
             }
             Row {
                 Layout.fillWidth: true
@@ -1654,7 +1680,7 @@ FloatingWindow {
         signal clicked()
         implicitWidth: 190
         implicitHeight: 126
-        radius: Style.radiusSmall
+        radius: Theme.Style.radiusSmall
         clip: true
         color: root.lyneSurfaceHigh
         border.width: 1
@@ -1663,7 +1689,7 @@ FloatingWindow {
             : Qt.rgba(root.lyneAccent.r, root.lyneAccent.g, root.lyneAccent.b, 0.16)
         Image { anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right; height: 92; source: wallpaperChoice.wallpaper.path; sourceSize.width: 480; sourceSize.height: 270; fillMode: Image.PreserveAspectCrop; asynchronous: true }
         Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 36; color: root.lyneSurfaceHigh }
-        Text { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: Style.paddingSmall; text: wallpaperChoice.wallpaper.name; color: root.lyneText; font.pixelSize: 12; elide: Text.ElideRight }
+        Text { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: Theme.Style.paddingSmall; text: wallpaperChoice.wallpaper.name; color: root.lyneText; font.pixelSize: 12; elide: Text.ElideRight }
         TapHandler { onTapped: wallpaperChoice.clicked() }
     }
 

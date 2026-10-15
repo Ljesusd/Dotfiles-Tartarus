@@ -1,14 +1,14 @@
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
 
     property real progress: 1
-    property color accent: Color.warning
+    property color accent: Theme.Color.warning
 
-    implicitWidth: Style.barIconSmall + Style.spacingXs
+    implicitWidth: Theme.Style.barIconSmall + Theme.Style.spacingXs
     implicitHeight: implicitWidth
 
     Behavior on progress {

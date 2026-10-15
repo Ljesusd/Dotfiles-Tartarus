@@ -1,7 +1,7 @@
 import Quickshell
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 PopupWindow {
     id: root
@@ -67,7 +67,7 @@ PopupWindow {
         Math.min(
             Math.max(1, root.panelImplicitWidth),
             root.barScreen && root.barScreen.width > 0
-                ? Math.max(260, root.barScreen.width - Style.paddingLarge * 2)
+                ? Math.max(260, root.barScreen.width - Theme.Style.paddingLarge * 2)
                 : 520
         )
 
@@ -377,9 +377,9 @@ PopupWindow {
         enabled: root.positionInitialized && root.visible
 
         NumberAnimation {
-            duration: Motion.normal
+            duration: Theme.Motion.normal
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: Motion.spatialCurve
+            easing.bezierCurve: Theme.Motion.spatialCurve
         }
     }
 
@@ -387,9 +387,9 @@ PopupWindow {
         enabled: root.sizeInitialized && root.visible
 
         NumberAnimation {
-            duration: Motion.popupResize
+            duration: Theme.Motion.popupResize
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: Motion.spatialCurve
+            easing.bezierCurve: Theme.Motion.spatialCurve
         }
     }
 
@@ -397,9 +397,9 @@ PopupWindow {
         enabled: root.sizeInitialized && root.visible
 
         NumberAnimation {
-            duration: Motion.popupResize
+            duration: Theme.Motion.popupResize
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: Motion.spatialCurve
+            easing.bezierCurve: Theme.Motion.spatialCurve
         }
     }
 
@@ -411,9 +411,9 @@ PopupWindow {
 
         from: 0.0
         to: 1.0
-        duration: Motion.fast
+        duration: Theme.Motion.fast
         easing.type: Easing.BezierSpline
-        easing.bezierCurve: Motion.effectCurve
+        easing.bezierCurve: Theme.Motion.effectCurve
 
         onFinished: {
             root.finishContentTransition()
@@ -466,20 +466,20 @@ PopupWindow {
 
         AttachedPopupSurface {
             anchors.fill: parent
-            fillColor: Color.surfaceContainer
-            neckHeight: Style.barPopupGap * 2
+            fillColor: Theme.Color.surfaceContainer
+            neckHeight: Theme.Style.barPopupGap * 2
             surfaceInset: 14
         }
 
         Behavior on opacity {
-            Anim { duration: Motion.fast }
+            Theme.Anim { duration: Theme.Motion.fast }
         }
 
         Behavior on scale {
-            Anim {
-                duration: Motion.popupOpen
+            Theme.Anim {
+                duration: Theme.Motion.popupOpen
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.popupOpenCurve
+                easing.bezierCurve: Theme.Motion.popupOpenCurve
             }
         }
 
@@ -642,7 +642,7 @@ PopupWindow {
                 0,
                 0,
                 Math.max(1, root.anchorSurface.width),
-                Math.max(1, root.anchorSurface.height + Style.barPopupGap)
+                Math.max(1, root.anchorSurface.height + Theme.Style.barPopupGap)
             )
         }
     }

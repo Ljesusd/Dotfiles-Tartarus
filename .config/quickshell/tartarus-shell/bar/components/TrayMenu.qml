@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Widgets
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../launcher/components" as LauncherComponents
 
 PopupWindow {
@@ -49,8 +49,8 @@ PopupWindow {
         Math.min(
             560,
             (root.anchorSurface?.screen?.height ?? 800)
-                - (root.anchorSurface?.height ?? Style.barHeight)
-                - Style.paddingLarge * 2
+                - (root.anchorSurface?.height ?? Theme.Style.barHeight)
+                - Theme.Style.paddingLarge * 2
         )
     )
     readonly property real menuWidth: Math.min(
@@ -59,7 +59,7 @@ PopupWindow {
     )
     readonly property real menuHeight: Math.min(
         root.maxMenuHeight,
-        Math.max(96, menuColumn.implicitHeight + Style.paddingMedium * 2 + Style.barPopupGap * 2)
+        Math.max(96, menuColumn.implicitHeight + Theme.Style.paddingMedium * 2 + Theme.Style.barPopupGap * 2)
     )
     // As in the launcher, only the inner surface animates. Reserve space for
     // the curves/shadow and avoid native-window resizing for every submenu.
@@ -97,10 +97,10 @@ PopupWindow {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            anchors.leftMargin: Style.paddingMedium
-            anchors.rightMargin: Style.paddingMedium
-            anchors.topMargin: Style.paddingSmall
-            anchors.bottomMargin: Style.paddingMedium + Style.barPopupGap * 2
+            anchors.leftMargin: Theme.Style.paddingMedium
+            anchors.rightMargin: Theme.Style.paddingMedium
+            anchors.topMargin: Theme.Style.paddingSmall
+            anchors.bottomMargin: Theme.Style.paddingMedium + Theme.Style.barPopupGap * 2
             clip: true
             contentWidth: width
             contentHeight: menuColumn.implicitHeight
@@ -110,14 +110,14 @@ PopupWindow {
         ColumnLayout {
             id: menuColumn
             width: menuViewport.width
-            spacing: Style.spacingXs
+            spacing: Theme.Style.spacingXs
 
             Text {
                 Layout.fillWidth: true
                 visible: root.menuStack.length > 0
                 text: "‹ Back"
-                color: Color.foreground
-                font.pixelSize: Style.fontSmall
+                color: Theme.Color.foreground
+                font.pixelSize: Theme.Style.fontSmall
                 TapHandler { onTapped: root.menuStack = root.menuStack.slice(0, -1) }
             }
 
@@ -128,48 +128,48 @@ PopupWindow {
                     required property var modelData
                     Layout.fillWidth: true
                     implicitHeight: modelData.isSeparator ? 1 : 36
-                    radius: Style.controlRadius
+                    radius: Theme.Style.controlRadius
                     color: modelData.isSeparator
-                        ? Color.outlineVariant
-                        : itemHover.hovered ? Color.surfaceHover : "transparent"
+                        ? Theme.Color.outlineVariant
+                        : itemHover.hovered ? Theme.Color.surfaceHover : "transparent"
 
                     HoverHandler { id: itemHover }
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Style.paddingSmall
-                        anchors.rightMargin: Style.paddingSmall
+                        anchors.leftMargin: Theme.Style.paddingSmall
+                        anchors.rightMargin: Theme.Style.paddingSmall
                         visible: !modelData.isSeparator
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
                         IconImage {
                             visible: modelData.icon !== "" && root.materialFallback(modelData.icon) === ""
-                            implicitSize: Style.iconSmall
+                            implicitSize: Theme.Style.iconSmall
                             source: root.materialFallback(modelData.icon) === ""
                                 ? modelData.icon
                                 : ""
                         }
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             visible: root.materialFallback(modelData.icon) !== ""
                             text: root.materialFallback(modelData.icon)
-                            iconSize: Style.iconSmall
-                            iconColor: Color.foregroundMuted
+                            iconSize: Theme.Style.iconSmall
+                            iconColor: Theme.Color.foregroundMuted
                         }
 
                         Text {
                             Layout.fillWidth: true
                             text: modelData.text
                             elide: Text.ElideRight
-                            font.pixelSize: Style.fontSmall
-                            color: modelData.enabled ? Color.foreground : Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
+                            color: modelData.enabled ? Theme.Color.foreground : Theme.Color.foregroundMuted
                         }
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             visible: modelData.hasChildren
                             text: "chevron_right"
-                            iconSize: Style.materialIconSmall
-                            iconColor: Color.foregroundMuted
+                            iconSize: Theme.Style.materialIconSmall
+                            iconColor: Theme.Color.foregroundMuted
                         }
                     }
 

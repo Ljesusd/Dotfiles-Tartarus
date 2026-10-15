@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -9,7 +9,7 @@ Item {
     required property string icon
     required property string label
     property string detail: ""
-    property color accent: Color.primary
+    property color accent: Theme.Color.primary
     property bool visualizer: false
     property bool visualizerRunning: false
     property bool compact: false
@@ -17,33 +17,33 @@ Item {
     signal activated()
 
     implicitWidth: root.compact
-        ? Style.barInnerHeight
+        ? Theme.Style.barInnerHeight
         : Math.min(190, activityText.implicitWidth + 38)
-    implicitHeight: Style.barInnerHeight
+    implicitHeight: Theme.Style.barInnerHeight
 
     Rectangle {
         anchors.fill: parent
-        radius: Style.radiusFull
+        radius: Theme.Style.radiusFull
         color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.16)
-        border.width: Style.panelBorderWidth
+        border.width: Theme.Style.panelBorderWidth
         border.color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.55)
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: root.compact ? 0 : Style.paddingSmall
-            anchors.rightMargin: root.compact ? 0 : Style.paddingSmall
-            spacing: Style.spacingXs
+            anchors.leftMargin: root.compact ? 0 : Theme.Style.paddingSmall
+            anchors.rightMargin: root.compact ? 0 : Theme.Style.paddingSmall
+            spacing: Theme.Style.spacingXs
 
             Item {
                 Layout.alignment: root.compact ? Qt.AlignHCenter : Qt.AlignVCenter
-                Layout.preferredWidth: root.compact ? Style.barInnerHeight - 4 : Style.barIconSmall
-                Layout.preferredHeight: root.compact ? Style.barInnerHeight - 4 : Style.barIconSmall
+                Layout.preferredWidth: root.compact ? Theme.Style.barInnerHeight - 4 : Theme.Style.barIconSmall
+                Layout.preferredHeight: root.compact ? Theme.Style.barInnerHeight - 4 : Theme.Style.barIconSmall
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Style.radiusSmall
+                    radius: Theme.Style.radiusSmall
                     clip: true
-                    color: Color.surfaceContainerHigh
+                    color: Theme.Color.surfaceContainerHigh
                     visible: root.compact && root.artworkUrl !== ""
 
                     Image {
@@ -55,10 +55,10 @@ Item {
                     }
                 }
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     anchors.centerIn: parent
                     text: root.icon
-                    iconSize: Style.barIconSmall
+                    iconSize: Theme.Style.barIconSmall
                     iconColor: root.accent
                     visible: !root.visualizer
                         && (!root.compact || bubbleArt.status !== Image.Ready)
@@ -94,8 +94,8 @@ Item {
                 Layout.fillWidth: true
                 visible: !root.compact
                 text: root.detail !== "" ? root.detail : root.label
-                color: Color.foreground
-                font.pixelSize: Style.barFontSmall
+                color: Theme.Color.foreground
+                font.pixelSize: Theme.Style.barFontSmall
                 elide: Text.ElideRight
                 maximumLineCount: 1
             }

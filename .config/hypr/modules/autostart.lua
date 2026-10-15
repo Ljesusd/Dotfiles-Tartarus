@@ -8,6 +8,11 @@
 -- Or execute your favorite apps at launch like this:
 --
 hl.on("hyprland.start", function()
+    hl.exec_cmd(
+        os.getenv("HOME")
+        .. "/.config/quickshell/tartarus-shell/scripts/polkit-agent.sh"
+    )
+
     hl.exec_cmd("qs -c tartarus-shell")
 
     hl.exec_cmd(

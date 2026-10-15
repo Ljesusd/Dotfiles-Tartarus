@@ -1,5 +1,5 @@
 import QtQuick
-import "../../../theme"
+import "../../../theme" as Theme
 
 Item {
     id: root
@@ -16,7 +16,7 @@ Item {
     property int shape: MaterialShape.Circle
     property color color: "white"
     property real animationProgress: 1
-    property int animationDuration: Style.motionNormal
+    property int animationDuration: Theme.Style.motionNormal
     property real scale: 1
 
     implicitWidth: 20

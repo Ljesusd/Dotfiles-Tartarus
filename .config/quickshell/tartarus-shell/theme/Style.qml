@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQml
+import "." as Theme
 
 QtObject {
     readonly property int spacingXs: 4
@@ -118,14 +119,14 @@ QtObject {
     readonly property int animationNormal: motionNormal
     readonly property int animationSlow: motionSlow
 
-    readonly property int motionFast: Motion.gamingMode ? 0 : 80
-    readonly property int motionNormal: Motion.gamingMode ? 0 : 100
-    readonly property int motionSlow: Motion.gamingMode ? 0 : 140
-    readonly property int motionPopup: Motion.gamingMode ? 0 : 100
-    readonly property int motionPanel: Motion.gamingMode ? 0 : 140
+    readonly property int motionFast: Theme.Motion.gamingMode ? 0 : 80
+    readonly property int motionNormal: Theme.Motion.gamingMode ? 0 : 100
+    readonly property int motionSlow: Theme.Motion.gamingMode ? 0 : 140
+    readonly property int motionPopup: Theme.Motion.gamingMode ? 0 : 100
+    readonly property int motionPanel: Theme.Motion.gamingMode ? 0 : 140
     readonly property int trayHoverDelay: 140
-    readonly property int launcherMotionFast: Motion.gamingMode ? 0 : 60
-    readonly property int launcherMotionPanel: Motion.gamingMode ? 0 : 80
+    readonly property int launcherMotionFast: Theme.Motion.gamingMode ? 0 : 60
+    readonly property int launcherMotionPanel: Theme.Motion.gamingMode ? 0 : 80
     readonly property real hoverOpacity: 0.08
     readonly property real selectedOpacity: 0.16
 }

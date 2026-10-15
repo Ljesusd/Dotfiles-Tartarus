@@ -145,6 +145,12 @@ ShellRoot {
         function toggleGaming(): void { PerformanceService.toggleGaming() }
     }
 
+    IpcHandler {
+        target: "rashin"
+        function setEnabled(enabled: bool): void { RashinService.setEnabled(enabled) }
+        function status(): string { return RashinService.connectionText }
+    }
+
     GlobalShortcut {
         name: "notification-dnd"
         description: "Toggle notification Do Not Disturb"

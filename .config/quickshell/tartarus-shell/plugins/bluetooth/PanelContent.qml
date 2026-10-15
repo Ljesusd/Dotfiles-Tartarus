@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -38,7 +38,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: Style.barPopupGap
+        anchors.margins: Theme.Style.barPopupGap
 
         radius: 0
         color: "transparent"
@@ -58,16 +58,16 @@ Item {
         ColumnLayout {
             anchors {
                 fill: parent
-                margins: Style.paddingLarge
+                margins: Theme.Style.paddingLarge
             }
 
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
             Item {
                 id: header
 
                 Layout.fillWidth: true
-                implicitHeight: Style.barControlHeight
+                implicitHeight: Theme.Style.barControlHeight
 
                 Text {
                     anchors {
@@ -77,8 +77,8 @@ Item {
 
                     text: "Bluetooth"
 
-                    font.pixelSize: Style.fontNormal
-                    color: Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
+                    color: Theme.Color.foreground
                 }
 
                 Rectangle {
@@ -88,35 +88,35 @@ Item {
                     }
 
                     implicitWidth: toggleText.implicitWidth
-                        + Style.paddingMedium * 2
-                        + Style.materialIconSmall
-                        + Style.spacingSmall
+                        + Theme.Style.paddingMedium * 2
+                        + Theme.Style.materialIconSmall
+                        + Theme.Style.spacingSmall
 
                     implicitHeight: 32
 
-                    radius: Style.radiusFull
+                    radius: Theme.Style.radiusFull
 
                     color: root.service.enabled
-                        ? Color.primary
-                        : Color.surfaceContainerHigh
+                        ? Theme.Color.primary
+                        : Theme.Color.surfaceContainerHigh
 
-                    border.width: Style.panelBorderWidth
+                    border.width: Theme.Style.panelBorderWidth
                     border.color: root.service.enabled
-                        ? Color.primary
-                        : Color.outlineVariant
+                        ? Theme.Color.primary
+                        : Theme.Color.outlineVariant
 
                     Row {
                         anchors.centerIn: parent
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: root.service.enabled
                                 ? "bluetooth_connected"
                                 : "bluetooth_disabled"
                             color: root.service.enabled
-                                ? Color.onPrimary
-                                : Color.onSurfaceVariant
-                            font.pixelSize: Style.materialIconSmall
+                                ? Theme.Color.onPrimary
+                                : Theme.Color.onSurfaceVariant
+                            font.pixelSize: Theme.Style.materialIconSmall
                         }
 
                         Text {
@@ -126,11 +126,11 @@ Item {
                                 ? "ON"
                                 : "OFF"
 
-                            font.pixelSize: Style.fontSmall
+                            font.pixelSize: Theme.Style.fontSmall
                             font.weight: Font.DemiBold
                             color: root.service.enabled
-                                ? Color.onPrimary
-                                : Color.onSurfaceVariant
+                                ? Theme.Color.onPrimary
+                                : Theme.Color.onSurfaceVariant
                         }
                     }
 
@@ -154,8 +154,8 @@ Item {
 
                 text: "Bluetooth unavailable"
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             Item {
@@ -169,13 +169,13 @@ Item {
 
                     anchors.centerIn: parent
 
-                    spacing: Style.spacingMedium
+                    spacing: Theme.Style.spacingMedium
 
-                    MaterialIcon {
+                    Theme.MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
                         text: "bluetooth_disabled"
-                        font.pixelSize: Style.materialIconExtraLarge
-                        iconColor: Color.foregroundMuted
+                        font.pixelSize: Theme.Style.materialIconExtraLarge
+                        iconColor: Theme.Color.foregroundMuted
                     }
 
                     Text {
@@ -183,23 +183,23 @@ Item {
 
                         text: "Bluetooth disabled"
 
-                        font.pixelSize: Style.fontSmall
+                        font.pixelSize: Theme.Style.fontSmall
                         font.weight: Font.Medium
-                        color: Color.foregroundMuted
+                        color: Theme.Color.foregroundMuted
                     }
 
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: enableText.implicitWidth
-                            + Style.paddingLarge * 2
+                            + Theme.Style.paddingLarge * 2
 
                         implicitHeight: 38
 
-                        radius: Style.radiusFull
+                        radius: Theme.Style.radiusFull
                         color: enableHover.hovered
-                            ? Color.primary
-                            : Color.primaryContainer
+                            ? Theme.Color.primary
+                            : Theme.Color.primaryContainer
 
                         Text {
                             id: enableText
@@ -208,8 +208,8 @@ Item {
 
                             text: "Enable Bluetooth"
 
-                            font.pixelSize: Style.fontSmall
-                            color: Color.onPrimaryContainer
+                            font.pixelSize: Theme.Style.fontSmall
+                            color: Theme.Color.onPrimaryContainer
                         }
 
                         TapHandler {
@@ -229,7 +229,7 @@ Item {
 
                     anchors.fill: parent
 
-                    spacing: Style.spacingMedium
+                    spacing: Theme.Style.spacingMedium
 
                     Text {
                         visible:
@@ -239,8 +239,8 @@ Item {
 
                         text: "Connected"
 
-                        font.pixelSize: Style.fontSmall
-                        color: Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
+                        color: Theme.Color.foregroundMuted
                     }
 
                     Repeater {
@@ -261,8 +261,8 @@ Item {
 
                         text: "Devices"
 
-                        font.pixelSize: Style.fontSmall
-                        color: Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
+                        color: Theme.Color.foregroundMuted
                     }
 
                     Text {
@@ -277,8 +277,8 @@ Item {
 
                         text: "No Bluetooth devices found"
 
-                        font.pixelSize: Style.fontSmall
-                        color: Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
+                        color: Theme.Color.foregroundMuted
                     }
 
                     Text {
@@ -288,8 +288,8 @@ Item {
 
                         text: "Scanning for devices..."
 
-                        font.pixelSize: Style.fontSmall
-                        color: Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
+                        color: Theme.Color.foregroundMuted
                     }
 
                     ListView {
@@ -300,7 +300,7 @@ Item {
 
                         model: root.otherDevices
 
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
                         delegate: DeviceItem {
                             required property var modelData
@@ -317,11 +317,11 @@ Item {
 
                         implicitHeight: 38
 
-                        radius: Style.radiusMedium
+                        radius: Theme.Style.radiusMedium
 
                         color: scanHover.hovered
-                            ? Color.surfaceHover
-                            : Color.surface
+                            ? Theme.Color.surfaceHover
+                            : Theme.Color.surface
 
                         Text {
                             anchors.centerIn: parent
@@ -330,8 +330,8 @@ Item {
                                 ? "Stop scanning"
                                 : "Scan devices"
 
-                            font.pixelSize: Style.fontSmall
-                            color: Color.foreground
+                            font.pixelSize: Theme.Style.fontSmall
+                            color: Theme.Color.foreground
                         }
 
                         HoverHandler {
@@ -359,34 +359,34 @@ Item {
         required property var device
         required property var service
 
-        implicitHeight: Style.itemHeight
+        implicitHeight: Theme.Style.itemHeight
 
-        radius: Style.radiusMedium
+        radius: Theme.Style.radiusMedium
 
         color: deviceItem.device.connected
-            ? Color.selection
+            ? Theme.Color.selection
             : deviceHover.hovered
-                ? Color.surfaceHover
+                ? Theme.Color.surfaceHover
                 : "transparent"
 
         RowLayout {
             anchors {
                 fill: parent
-                leftMargin: Style.paddingMedium
-                rightMargin: Style.paddingMedium
+                leftMargin: Theme.Style.paddingMedium
+                rightMargin: Theme.Style.paddingMedium
             }
 
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: deviceItem.device.connected
                     ? "bluetooth_connected"
                     : "bluetooth"
 
-                iconSize: Style.iconMedium
+                iconSize: Theme.Style.iconMedium
                 iconColor: deviceItem.device.connected
-                    ? Color.accent
-                    : Color.foregroundMuted
+                    ? Theme.Color.accent
+                    : Theme.Color.foregroundMuted
             }
 
             ColumnLayout {
@@ -399,8 +399,8 @@ Item {
 
                     text: deviceItem.device.name
 
-                    font.pixelSize: Style.fontNormal
-                    color: Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
+                    color: Theme.Color.foreground
 
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -411,8 +411,8 @@ Item {
 
                     text: deviceItem.statusText()
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
 
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -425,21 +425,21 @@ Item {
 
                 text: deviceItem.device.battery + "%"
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             Rectangle {
                 implicitWidth: actionText.implicitWidth
-                    + Style.paddingMedium * 2
+                    + Theme.Style.paddingMedium * 2
 
                 implicitHeight: 30
 
-                radius: Style.radiusSmall
+                radius: Theme.Style.radiusSmall
 
                 color: actionHover.hovered
-                    ? Color.surfaceHover
-                    : Color.surface
+                    ? Theme.Color.surfaceHover
+                    : Theme.Color.surface
 
                 Text {
                     id: actionText
@@ -448,8 +448,8 @@ Item {
 
                     text: deviceItem.actionText()
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foreground
                 }
 
                 HoverHandler {
@@ -473,15 +473,15 @@ Item {
                     || deviceItem.device.bonded
 
                 implicitWidth: forgetText.implicitWidth
-                    + Style.paddingMedium * 2
+                    + Theme.Style.paddingMedium * 2
 
                 implicitHeight: 30
 
-                radius: Style.radiusSmall
+                radius: Theme.Style.radiusSmall
 
                 color: forgetHover.hovered
-                    ? Color.surfaceHover
-                    : Color.surface
+                    ? Theme.Color.surfaceHover
+                    : Theme.Color.surface
 
                 Text {
                     id: forgetText
@@ -490,8 +490,8 @@ Item {
 
                     text: "Forget"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 HoverHandler {

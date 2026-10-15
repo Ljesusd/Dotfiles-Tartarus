@@ -2,7 +2,7 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 import "../components"
 
 Item {
@@ -86,41 +86,41 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.paddingLarge
-        spacing: Style.spacingSmall
+        anchors.margins: Theme.Style.paddingLarge
+        spacing: Theme.Style.spacingSmall
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: "calculate"
-                iconSize: Style.materialIconMedium
-                iconColor: Color.primary
+                iconSize: Theme.Style.materialIconMedium
+                iconColor: Theme.Color.primary
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
 
                 Text {
                     text: "Calculadora científica"
-                    color: Color.foreground
-                    font.pixelSize: Style.fontNormal
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
                     font.weight: Font.DemiBold
                 }
 
                 Text {
                     text: "Qalculate · funciones, unidades y LaTeX"
-                    color: Color.foregroundMuted
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
                 }
             }
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: "backspace"
-                iconSize: Style.materialIconSmall
-                iconColor: Color.foregroundMuted
+                iconSize: Theme.Style.materialIconSmall
+                iconColor: Theme.Color.foregroundMuted
                 TapHandler { onTapped: root.backspace() }
             }
         }
@@ -128,23 +128,23 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 76
-            radius: Style.radiusMedium
-            color: Color.surfaceContainerHigh
-            border.width: Style.panelBorderWidth
-            border.color: Color.outlineVariant
+            radius: Theme.Style.radiusMedium
+            color: Theme.Color.surfaceContainerHigh
+            border.width: Theme.Style.panelBorderWidth
+            border.color: Theme.Color.outlineVariant
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Style.paddingSmall
-                spacing: Style.spacingXs
+                anchors.margins: Theme.Style.paddingSmall
+                spacing: Theme.Style.spacingXs
 
                 TextInput {
                     id: expressionInput
                     Layout.fillWidth: true
                     Layout.preferredHeight: 28
                     text: root.expression
-                    color: Color.foreground
-                    font.pixelSize: Style.fontNormal
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
                     selectByMouse: true
                     onTextChanged: {
                         if (root.expression !== text)
@@ -157,9 +157,9 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     text: root.latex !== "" ? root.latex : "Escribe una expresión…"
-                    color: root.latex !== "" ? Color.primary : Color.foregroundMuted
-                    font.family: Style.materialIconFont
-                    font.pixelSize: Style.fontSmall
+                    color: root.latex !== "" ? Theme.Color.primary : Theme.Color.foregroundMuted
+                    font.family: Theme.Style.materialIconFont
+                    font.pixelSize: Theme.Style.fontSmall
                     elide: Text.ElideRight
                 }
             }
@@ -167,21 +167,21 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
 
             Text {
                 Layout.fillWidth: true
                 text: root.errorText !== "" ? root.errorText : root.result
-                color: root.errorText !== "" ? Color.error : Color.foreground
-                font.pixelSize: Style.fontLarge
+                color: root.errorText !== "" ? Theme.Color.error : Theme.Color.foreground
+                font.pixelSize: Theme.Style.fontLarge
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
 
             Text {
                 text: "qalc"
-                color: Color.foregroundMuted
-                font.pixelSize: Style.fontSmall
+                color: Theme.Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
             }
         }
 
@@ -189,8 +189,8 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             columns: 5
-            rowSpacing: Style.spacingXs
-            columnSpacing: Style.spacingXs
+            rowSpacing: Theme.Style.spacingXs
+            columnSpacing: Theme.Style.spacingXs
 
             Repeater {
                 model: ["7", "8", "9", "÷", "sin(",
@@ -206,16 +206,16 @@ Item {
                     required property string modelData
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    radius: Style.radiusMedium
-                    color: modelData === "=" ? Color.primaryContainer : Color.surfaceContainerHigh
-                    border.width: Style.panelBorderWidth
-                    border.color: Color.outlineVariant
+                    radius: Theme.Style.radiusMedium
+                    color: modelData === "=" ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
+                    border.width: Theme.Style.panelBorderWidth
+                    border.color: Theme.Color.outlineVariant
 
                     Text {
                         anchors.centerIn: parent
                         text: modelData
-                        color: modelData === "=" ? Color.onPrimaryContainer : Color.foreground
-                        font.pixelSize: Style.fontSmall
+                        color: modelData === "=" ? Theme.Color.onPrimaryContainer : Theme.Color.foreground
+                        font.pixelSize: Theme.Style.fontSmall
                     }
 
                     TapHandler {

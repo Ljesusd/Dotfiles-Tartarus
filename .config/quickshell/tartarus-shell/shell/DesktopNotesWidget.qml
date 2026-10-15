@@ -2,26 +2,26 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Rectangle {
     id: root
     implicitWidth: 320
     implicitHeight: 220
-    radius: Style.panelRadius
-    color: Qt.alpha(Color.surfaceContainer, 0.94)
+    radius: Theme.Style.panelRadius
+    color: Qt.alpha(Theme.Color.surfaceContainer, 0.94)
     border.width: 1
-    border.color: Qt.alpha(Color.outlineVariant, 0.7)
+    border.color: Qt.alpha(Theme.Color.outlineVariant, 0.7)
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.paddingLarge
-        spacing: Style.spacingSmall
+        anchors.margins: Theme.Style.paddingLarge
+        spacing: Theme.Style.spacingSmall
         RowLayout {
             Layout.fillWidth: true
-            MaterialIcon { text: "sticky_note_2"; iconSize: 20; iconColor: Color.primary }
-            Text { text: "Notas"; color: Color.foreground; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true }
-            Text { text: "Guardado local"; color: Color.foregroundMuted; font.pixelSize: 11 }
+            Theme.MaterialIcon { text: "sticky_note_2"; iconSize: 20; iconColor: Theme.Color.primary }
+            Text { text: "Notas"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontNormal; font.bold: true; Layout.fillWidth: true }
+            Text { text: "Guardado local"; color: Theme.Color.foregroundMuted; font.pixelSize: 11 }
         }
         Controls.TextArea {
             id: editor
@@ -29,11 +29,11 @@ Rectangle {
             Layout.fillHeight: true
             text: Services.DesktopNotesService.text
             placeholderText: "Escribe una nota…"
-            color: Color.foreground
-            placeholderTextColor: Color.foregroundMuted
+            color: Theme.Color.foreground
+            placeholderTextColor: Theme.Color.foregroundMuted
             font.pixelSize: 13
             wrapMode: TextEdit.Wrap
-            background: Rectangle { radius: Style.controlRadius; color: Color.surfaceContainerHigh; border.width: editor.activeFocus ? 1 : 0; border.color: Color.primary }
+            background: Rectangle { radius: Theme.Style.controlRadius; color: Theme.Color.surfaceContainerHigh; border.width: editor.activeFocus ? 1 : 0; border.color: Theme.Color.primary }
             onTextChanged: if (activeFocus) Services.DesktopNotesService.save(text)
         }
     }

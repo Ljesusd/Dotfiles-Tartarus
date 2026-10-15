@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../../services" as Services
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -52,15 +52,15 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.paddingLarge
-        spacing: Style.spacingSmall
+        anchors.margins: Theme.Style.paddingLarge
+        spacing: Theme.Style.spacingSmall
         RowLayout {
             Layout.fillWidth: true
-            MaterialIcon { text: "deployed_code"; iconColor: Color.primary; iconSize: 24 }
+            Theme.MaterialIcon { text: "deployed_code"; iconColor: Theme.Color.primary; iconSize: 24 }
             Label {
                 Layout.fillWidth: true
                 text: root.viewingLogs ? "Docker · Logs" : "Docker · Contenedores"
-                font.pixelSize: Style.fontNormal
+                font.pixelSize: Theme.Style.fontNormal
                 font.bold: true
             }
             ActionButton {
@@ -84,7 +84,7 @@ Item {
             Label {
                 Layout.fillWidth: true
                 text: root.items.length + " contenedores"
-                color: Color.foregroundMuted
+                color: Theme.Color.foregroundMuted
                 horizontalAlignment: Text.AlignRight
             }
         }
@@ -92,7 +92,7 @@ Item {
             Layout.fillWidth: true
             visible: !root.viewingLogs && text !== ""
             text: root.service.error || root.service.warning || root.service.actionMessage
-            color: root.service.error ? Color.error : Color.foregroundMuted
+            color: root.service.error ? Theme.Color.error : Theme.Color.foregroundMuted
             wrapMode: Text.Wrap
             maximumLineCount: 3
             elide: Text.ElideRight
@@ -102,9 +102,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: confirmBody.implicitHeight + 20
             visible: root.pending !== null
-            radius: Style.radiusSmall
-            color: Color.surfaceContainerHigh
-            border.color: Color.outline
+            radius: Theme.Style.radiusSmall
+            color: Theme.Color.surfaceContainerHigh
+            border.color: Theme.Color.outline
             ColumnLayout {
                 id: confirmBody
                 x: 10; y: 10; width: parent.width - 20
@@ -146,10 +146,10 @@ Item {
                 property bool expanded: selected
                 width: containerList.width
                 implicitHeight: cardBody.implicitHeight + 24
-                radius: Style.radiusMedium
-                color: card.selected ? Color.primaryContainer : Color.surfaceContainerHigh
+                radius: Theme.Style.radiusMedium
+                color: card.selected ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
                 border.width: 1
-                border.color: card.selected ? Color.primary : Color.outlineVariant
+                border.color: card.selected ? Theme.Color.primary : Theme.Color.outlineVariant
                 ColumnLayout {
                     id: cardBody
                     x: 12; y: 12; width: parent.width - 24
@@ -157,9 +157,9 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: card.expanded ? "folder_open" : "folder"
-                            iconColor: Color.primary
+                            iconColor: Theme.Color.primary
                             iconSize: 21
                         }
                         Label {
@@ -167,37 +167,37 @@ Item {
                             Layout.minimumWidth: 0
                             text: card.modelData.project
                             font.bold: true
-                            font.pixelSize: Style.fontNormal
+                            font.pixelSize: Theme.Style.fontNormal
                             elide: Text.ElideRight
                         }
                         Label {
                             text: card.modelData.containers.length + " contenedor" + (card.modelData.containers.length === 1 ? "" : "es")
-                            color: Color.primary
+                            color: Theme.Color.primary
                             font.bold: true
                         }
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: card.expanded ? "expand_less" : "expand_more"
-                            iconColor: Color.foregroundMuted
+                            iconColor: Theme.Color.foregroundMuted
                             iconSize: 20
                         }
                     }
                     Label {
                         Layout.fillWidth: true
                         text: card.modelData.containers.filter(c => c.state === "running").length + " activos   ·   " + card.modelData.containers.filter(c => c.state !== "running").length + " detenidos"
-                        color: Color.foregroundMuted
+                        color: Theme.Color.foregroundMuted
                         elide: Text.ElideRight
                     }
                     Label {
                         Layout.fillWidth: true
                         text: card.expanded ? "Servicios de este proyecto" : "Pulsa para ver los servicios"
-                        color: Color.foregroundMuted
+                        color: Theme.Color.foregroundMuted
                         elide: Text.ElideRight
                     }
                     Label {
                         Layout.fillWidth: true
                         visible: !card.expanded
                         text: card.modelData.containers.map(c => c.name).join(" · ")
-                        color: Color.foregroundMuted
+                        color: Theme.Color.foregroundMuted
                         elide: Text.ElideRight
                     }
                     Flow {
@@ -216,10 +216,10 @@ Item {
                             width: cardBody.width
                             Layout.fillWidth: true
                             implicitHeight: serviceBody.implicitHeight + 16
-                            radius: Style.radiusSmall
-                            color: Color.surfaceContainer
+                            radius: Theme.Style.radiusSmall
+                            color: Theme.Color.surfaceContainer
                             border.width: 1
-                            border.color: Color.outlineVariant
+                            border.color: Theme.Color.outlineVariant
                             ColumnLayout {
                                 id: serviceBody
                                 x: 10; y: 8; width: parent.width - 20
@@ -227,9 +227,9 @@ Item {
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Label { Layout.fillWidth: true; text: modelData.name; font.bold: true; elide: Text.ElideRight }
-                                    Label { text: modelData.state; color: modelData.state === "running" ? Color.primary : Color.foregroundMuted; font.bold: true }
+                                    Label { text: modelData.state; color: modelData.state === "running" ? Theme.Color.primary : Theme.Color.foregroundMuted; font.bold: true }
                                 }
-                                Label { Layout.fillWidth: true; text: "CPU " + modelData.cpu + "  ·  RAM " + modelData.memory; color: Color.foregroundMuted; elide: Text.ElideRight }
+                                Label { Layout.fillWidth: true; text: "CPU " + modelData.cpu + "  ·  RAM " + modelData.memory; color: Theme.Color.foregroundMuted; elide: Text.ElideRight }
                                 Flow {
                                     Layout.fillWidth: true; Layout.preferredHeight: 30; spacing: 6
                                     ActionButton { text: "Logs"; onClicked: root.showLogs(modelData.id) }
@@ -253,7 +253,7 @@ Item {
                 text: root.service.busy ? "Consultando Docker…"
                     : root.service.error ? "No se pueden listar los contenedores."
                     : "No hay contenedores que coincidan."
-                color: Color.foregroundMuted
+                color: Theme.Color.foregroundMuted
             }
         }
         Controls.ScrollView {
@@ -272,25 +272,25 @@ Item {
                 textFormat: TextEdit.PlainText
                 wrapMode: TextEdit.WrapAnywhere
                 text: root.service.logs || "Leyendo logs…"
-                color: Color.foreground
+                color: Theme.Color.foreground
                 font.family: "monospace"
                 font.pixelSize: 12
-                background: Rectangle { color: Color.surfaceContainer; radius: 6 }
+                background: Rectangle { color: Theme.Color.surfaceContainer; radius: 6 }
             }
         }
         Label {
             Layout.fillWidth: true
             text: root.viewingLogs ? "Últimas 100 líneas · Esc para volver"
                 : "Busca con >docker nombre · ↑↓ seleccionar · Enter logs · Esc volver"
-            color: Color.foregroundMuted
+            color: Theme.Color.foregroundMuted
             font.pixelSize: 11
             elide: Text.ElideRight
         }
     }
     component Label: Text {
         textFormat: Text.PlainText
-        font.pixelSize: Style.fontSmall
-        color: Color.foreground
+        font.pixelSize: Theme.Style.fontSmall
+        color: Theme.Color.foreground
     }
     component ActionButton: Controls.Button {
         id: button
@@ -303,12 +303,12 @@ Item {
             text: button.text
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            color: button.emphasized ? Color.onPrimary : Color.foreground
+            color: button.emphasized ? Theme.Color.onPrimary : Theme.Color.foreground
         }
         background: Rectangle {
             radius: 8
-            color: button.emphasized ? Color.primary : button.hovered ? Color.surfaceHover : Color.surfaceContainerHigh
-            border.color: button.activeFocus ? Color.primary : Color.outlineVariant
+            color: button.emphasized ? Theme.Color.primary : button.hovered ? Theme.Color.surfaceHover : Theme.Color.surfaceContainerHigh
+            border.color: button.activeFocus ? Theme.Color.primary : Theme.Color.outlineVariant
         }
     }
 }

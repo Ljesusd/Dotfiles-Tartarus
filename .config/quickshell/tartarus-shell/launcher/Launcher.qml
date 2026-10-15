@@ -5,10 +5,11 @@ import Quickshell.Hyprland
 import QtQuick
 import "../services"
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 import "../bar/components"
 import "components"
 import "pages"
+import "LauncherModes.js" as Modes
 
 Scope {
     id: root
@@ -30,17 +31,22 @@ Scope {
             slots--
         return Math.max(1, slots)
     }
-    readonly property int panelWidth: controller.mode === LauncherController.Mode.Wallpaper
+    readonly property int panelWidth: controller.mode === Modes.Mode.Wallpaper
         ? Math.min(root.wallpaperSlots * 272 + 176,
             (root.barWindow.screen?.width ?? 1280) - 64)
-        : Math.min(controller.mode === LauncherController.Mode.Weather || controller.mode === LauncherController.Mode.Installer ? 680 : Style.launcherWidth,
+        : Math.min(controller.mode === Modes.Mode.Weather
+                || controller.mode === Modes.Mode.Installer
+                || controller.mode === Modes.Mode.Store
+                || controller.mode === Modes.Mode.Rashin ? 760 : Theme.Style.launcherWidth,
             Math.max(320, (root.barWindow.screen?.width ?? 1280) - 64))
     readonly property int panelHeight: Math.min(
-        controller.mode === LauncherController.Mode.Weather ? 660
-            : controller.mode === LauncherController.Mode.Installer ? 430
-            : controller.mode === LauncherController.Mode.Wallpaper ? 236 : Style.launcherHeight,
-        Math.max(180, (root.barWindow.screen?.height ?? 800) - Style.barHeight - Style.paddingLarge * 2)
-    ) + Style.barPopupGap * 2
+        controller.mode === Modes.Mode.Weather ? 660
+            : controller.mode === Modes.Mode.Installer ? 430
+            : controller.mode === Modes.Mode.Store ? 620
+            : controller.mode === Modes.Mode.Rashin ? 540
+            : controller.mode === Modes.Mode.Wallpaper ? 236 : Theme.Style.launcherHeight,
+        Math.max(180, (root.barWindow.screen?.height ?? 800) - Theme.Style.barHeight - Theme.Style.paddingLarge * 2)
+    ) + Theme.Style.barPopupGap * 2
 
         LauncherController {
             id: controller
@@ -51,6 +57,7 @@ Scope {
             actions: root.sharedLauncherActions
             wallpapers: root.wallpapers
             monitorName: root.monitorContext.name
+            shellState: root.shellState
             dockerPage: dockerPage
 
         onCloseRequested: {
@@ -97,12 +104,12 @@ Scope {
         // Reserve a stable envelope for every launcher page. Animating a native
         // Wayland popup's size also makes the compositor reposition it per frame.
         // Only the surface inside this transparent window changes geometry.
-        implicitWidth: Math.min(Math.max(Style.launcherWidth, 680, 5 * 272 + 176)
+        implicitWidth: Math.min(Math.max(Theme.Style.launcherWidth, 680, 5 * 272 + 176)
                 + launcherSurface.horizontalInset * 2,
-            Math.max(1, (root.barWindow.screen?.width ?? 1280) - Style.paddingLarge * 2))
-        implicitHeight: Math.min(Math.max(Style.launcherHeight, 660)
-                + Style.barPopupGap * 2 + launcherSurface.shadowPadding,
-            Math.max(1, (root.barWindow.screen?.height ?? 800) - Style.barHeight - Style.paddingLarge))
+            Math.max(1, (root.barWindow.screen?.width ?? 1280) - Theme.Style.paddingLarge * 2))
+        implicitHeight: Math.min(Math.max(Theme.Style.launcherHeight, 660)
+                + Theme.Style.barPopupGap * 2 + launcherSurface.shadowPadding,
+            Math.max(1, (root.barWindow.screen?.height ?? 800) - Theme.Style.barHeight - Theme.Style.paddingLarge))
         anchor.adjustment: PopupAdjustment.Slide
 
         // Transparent space must not intercept clicks destined for applications.
@@ -217,7 +224,7 @@ Scope {
                 controller: controller
                 active:
                     controller.mode
-                    === LauncherController.Mode.Applications
+                    === Modes.Mode.Applications
             }
 
             ActionsPage {
@@ -227,7 +234,7 @@ Scope {
                 controller: controller
                 active:
                     controller.mode
-                    === LauncherController.Mode.Actions
+                    === Modes.Mode.Actions
             }
 
             SchemesPage {
@@ -237,7 +244,7 @@ Scope {
                 controller: controller
                 active:
                     controller.mode
-                    === LauncherController.Mode.Schemes
+                    === Modes.Mode.Schemes
             }
 
             WallpapersPage {
@@ -249,7 +256,7 @@ Scope {
                 controller: controller
                 active:
                     controller.mode
-                    === LauncherController.Mode.Wallpaper
+                    === Modes.Mode.Wallpaper
             }
 
             DockerPage {
@@ -258,7 +265,7 @@ Scope {
                 controller: controller
                 consumerKey: root.monitorContext.name
                 active: root.monitorContext.launcherOpened
-                    && controller.mode === LauncherController.Mode.Docker
+                    && controller.mode === Modes.Mode.Docker
             }
 
             CalculatorPage {
@@ -266,18 +273,30 @@ Scope {
                 controller: controller
                 active:
                     controller.mode
-                    === LauncherController.Mode.Calculator
+                    === Modes.Mode.Calculator
             }
 
             WeatherPage {
                 anchors.fill: parent
-                active: root.monitorContext.launcherOpened && controller.mode === LauncherController.Mode.Weather
+                active: root.monitorContext.launcherOpened && controller.mode === Modes.Mode.Weather
             }
 
             InstallerPage {
                 anchors.fill: parent
                 controller: controller
-                active: root.monitorContext.launcherOpened && controller.mode === LauncherController.Mode.Installer
+                active: root.monitorContext.launcherOpened && controller.mode === Modes.Mode.Installer
+            }
+
+            StorePage {
+                anchors.fill: parent
+                controller: controller
+                active: root.monitorContext.launcherOpened && controller.mode === Modes.Mode.Store
+            }
+
+            RashinPage {
+                anchors.fill: parent
+                controller: controller
+                active: root.monitorContext.launcherOpened && controller.mode === Modes.Mode.Rashin
             }
         }
     }

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 import "../components"
 
 Item {
@@ -41,50 +41,50 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.leftMargin: Style.paddingXLarge
-        anchors.rightMargin: Style.paddingXLarge
-        anchors.topMargin: Style.paddingLarge
-        anchors.bottomMargin: Style.paddingXLarge
+        anchors.leftMargin: Theme.Style.paddingXLarge
+        anchors.rightMargin: Theme.Style.paddingXLarge
+        anchors.topMargin: Theme.Style.paddingLarge
+        anchors.bottomMargin: Theme.Style.paddingXLarge
 
-        spacing: Style.spacingMedium
+        spacing: Theme.Style.spacingMedium
 
         RowLayout {
             Layout.fillWidth: true
 
-            spacing: Style.spacingLarge
+            spacing: Theme.Style.spacingLarge
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: "palette"
-                iconSize: Style.materialIconMedium
-                iconColor: Color.primary
+                iconSize: Theme.Style.materialIconMedium
+                iconColor: Theme.Color.primary
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
 
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
 
                 Text {
                     text: "Schemes"
 
-                    font.pixelSize: Style.fontNormal
+                    font.pixelSize: Theme.Style.fontNormal
                     font.weight: Font.DemiBold
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                 }
 
                 Text {
                     text: "Select a color scheme"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
             }
 
             Text {
                 text: root.themes.currentSlug
 
-                font.pixelSize: Style.fontSmall
-                color: Color.tertiary
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.tertiary
             }
         }
 
@@ -101,7 +101,7 @@ Item {
                 model: root.themes.filtered(
                     root.controller.schemeQuery
                 )
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
                 currentIndex: root.active
                     ? root.controller.selectedIndex
@@ -141,8 +141,8 @@ Item {
                 visible: root.active && schemeList.count === 0
 
                 text: "No schemes found"
-                font.pixelSize: Style.fontNormal
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontNormal
+                color: Theme.Color.foregroundMuted
             }
         }
     }

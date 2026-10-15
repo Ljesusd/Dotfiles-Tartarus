@@ -6,7 +6,7 @@ import QtQuick.Controls
 import Quickshell.Services.Pipewire
 import Qt.labs.folderlistmodel
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 // Quick settings: one window owns its layout, controls and monitor lifecycle.
 PanelWindow {
@@ -15,6 +15,7 @@ PanelWindow {
     required property var monitorScreen
     required property var pluginRegistry
     required property var monitorContext
+    required property var shellState
 
     screen: root.monitorScreen
     anchors {
@@ -27,8 +28,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     property real offsetScale: monitorContext.sidebarOpened ? 0 : 1
     Behavior on offsetScale {
-        Anim {
-            duration: Style.motionPanel
+        Theme.Anim {
+            duration: Theme.Style.motionPanel
         }
     }
     visible: monitorContext.sidebarOpened || offsetScale < 1
@@ -154,13 +155,13 @@ PanelWindow {
             bottom: parent.bottom
         }
         anchors.topMargin: 12
-        anchors.bottomMargin: Style.barHeight + 16
+        anchors.bottomMargin: Theme.Style.barHeight + 16
         anchors.rightMargin: 12 - (width + 24) * root.offsetScale
         opacity: 1 - root.offsetScale
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
-        radius: Style.panelRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
+        radius: Theme.Style.panelRadius
         clip: true
         focus: root.monitorContext.sidebarOpened
         Keys.onEscapePressed: root.monitorContext.closeSidebar()
@@ -172,7 +173,7 @@ PanelWindow {
         Flickable {
             id: viewport
             anchors.fill: parent
-            anchors.margins: Style.paddingLarge
+            anchors.margins: Theme.Style.paddingLarge
             contentWidth: width
             contentHeight: contentColumn.implicitHeight
             clip: true
@@ -185,12 +186,12 @@ PanelWindow {
             ColumnLayout {
                 id: contentColumn
                 width: viewport.width
-                spacing: Style.spacingMedium
+                spacing: Theme.Style.spacingMedium
 
                 RowLayout {
                     id: panelHeader
                     Layout.fillWidth: true
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
 
                     QuickAction {
                         visible: root.quickPage !== ""
@@ -202,13 +203,13 @@ PanelWindow {
                     Rectangle {
                         Layout.preferredWidth: 38
                         Layout.preferredHeight: 38
-                        radius: Style.radiusFull
-                        color: Color.primaryContainer
-                        MaterialIcon {
+                        radius: Theme.Style.radiusFull
+                        color: Theme.Color.primaryContainer
+                        Theme.MaterialIcon {
                             anchors.centerIn: parent
                             text: root.quickPage === "" ? "tune" : "settings_input_component"
-                            iconSize: Style.materialIconMedium
-                            iconColor: Color.primary
+                            iconSize: Theme.Style.materialIconMedium
+                            iconColor: Theme.Color.primary
                         }
                     }
 
@@ -220,7 +221,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
                             text: root.pageTitle()
-                            color: Color.foreground
+                            color: Theme.Color.foreground
                             font.pixelSize: 22
                             font.bold: true
                             elide: Text.ElideRight
@@ -229,8 +230,8 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
                             text: root.quickPage === "" ? Qt.formatDate(root.today, "dddd, d MMMM") : "Controles del sistema"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                             elide: Text.ElideRight
                         }
                     }
@@ -260,7 +261,7 @@ PanelWindow {
                 RowLayout {
                     visible: root.quickPage === ""
                     Layout.fillWidth: true
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
                     Item {
                         Layout.fillWidth: true
                     }
@@ -290,8 +291,8 @@ PanelWindow {
                     visible: root.quickPage === ""
                     Layout.fillWidth: true
                     columns: 2
-                    rowSpacing: Style.spacingSmall
-                    columnSpacing: Style.spacingSmall
+                    rowSpacing: Theme.Style.spacingSmall
+                    columnSpacing: Theme.Style.spacingSmall
                     QuickTile {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
@@ -327,32 +328,32 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     Layout.preferredHeight: 152
-                    radius: Style.cardRadius
-                    color: Color.primaryContainer
-                    border.width: Style.panelBorderWidth
-                    border.color: Color.outlineVariant
+                    radius: Theme.Style.cardRadius
+                    color: Theme.Color.primaryContainer
+                    border.width: Theme.Style.panelBorderWidth
+                    border.color: Theme.Color.outlineVariant
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: Style.paddingMedium
-                        spacing: Style.spacingXs
+                        anchors.margins: Theme.Style.paddingMedium
+                        spacing: Theme.Style.spacingXs
                         Text {
                             text: Services.WeatherService.location || "Clima"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                         Text {
                             text: Services.WeatherService.current ? Services.WeatherService.current.temp + "°" : "--°"
-                            color: Color.foreground
+                            color: Theme.Color.foreground
                             font.pixelSize: 30
                             font.bold: true
                         }
                         Text {
                             text: Services.WeatherService.current ? Services.WeatherService.description(Services.WeatherService.current.code) : Services.WeatherService.loading ? "Consultando…" : "Sin datos"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -419,8 +420,8 @@ PanelWindow {
                     visible: root.quickPage === ""
                     Layout.fillWidth: true
                     columns: 2
-                    rowSpacing: Style.spacingSmall
-                    columnSpacing: Style.spacingSmall
+                    rowSpacing: Theme.Style.spacingSmall
+                    columnSpacing: Theme.Style.spacingSmall
                     QuickTile {
                         Layout.fillWidth: true
                         title: "Mantener despierto"
@@ -469,20 +470,20 @@ PanelWindow {
                     visible: root.quickPage === ""
                     Layout.fillWidth: true
                     implicitHeight: 94
-                    radius: Style.cardRadius
-                    color: Color.surfaceContainer
-                    border.width: Style.panelBorderWidth
-                    border.color: Color.outlineVariant
+                    radius: Theme.Style.cardRadius
+                    color: Theme.Color.surfaceContainer
+                    border.width: Theme.Style.panelBorderWidth
+                    border.color: Theme.Color.outlineVariant
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: Style.paddingMedium
-                        spacing: Style.spacingMedium
+                        anchors.margins: Theme.Style.paddingMedium
+                        spacing: Theme.Style.spacingMedium
                         Rectangle {
                             Layout.preferredWidth: 62
                             Layout.fillHeight: true
-                            radius: Style.controlRadius
-                            color: Color.surfaceContainerHigh
+                            radius: Theme.Style.controlRadius
+                            color: Theme.Color.surfaceContainerHigh
                             clip: true
                             Image {
                                 anchors.fill: parent
@@ -491,29 +492,29 @@ PanelWindow {
                                 asynchronous: true
                                 visible: status === Image.Ready
                             }
-                            MaterialIcon {
+                            Theme.MaterialIcon {
                                 anchors.centerIn: parent
                                 text: "music_note"
-                                iconSize: Style.materialIconLarge
-                                iconColor: Color.foregroundMuted
+                                iconSize: Theme.Style.materialIconLarge
+                                iconColor: Theme.Color.foregroundMuted
                                 visible: !Services.MediaService.artUrl
                             }
                         }
                         ColumnLayout {
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
-                            spacing: Style.spacingXs
+                            spacing: Theme.Style.spacingXs
                             Text {
                                 text: Services.MediaService.available ? Services.MediaService.title : "Sin reproducción"
-                                color: Color.foreground
-                                font.pixelSize: Style.fontSmall
+                                color: Theme.Color.foreground
+                                font.pixelSize: Theme.Style.fontSmall
                                 font.bold: true
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
                             Text {
                                 text: Services.MediaService.available ? Services.MediaService.artist : "Sung"
-                                color: Color.foregroundMuted
+                                color: Theme.Color.foregroundMuted
                                 font.pixelSize: 12
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
@@ -555,15 +556,15 @@ PanelWindow {
                     visible: root.quickPage === ""
                     Layout.fillWidth: true
                     implicitHeight: 236
-                    radius: Style.cardRadius
-                    color: Color.surfaceContainer
-                    border.width: Style.panelBorderWidth
-                    border.color: Color.outlineVariant
+                    radius: Theme.Style.cardRadius
+                    color: Theme.Color.surfaceContainer
+                    border.width: Theme.Style.panelBorderWidth
+                    border.color: Theme.Color.outlineVariant
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: Style.paddingMedium
-                        spacing: Style.spacingSmall
+                        anchors.margins: Theme.Style.paddingMedium
+                        spacing: Theme.Style.spacingSmall
                         RowLayout {
                             Layout.fillWidth: true
                             QsButton {
@@ -577,9 +578,9 @@ PanelWindow {
                                 Layout.minimumWidth: 0
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
-                                color: Color.foreground
+                                color: Theme.Color.foreground
                                 font.bold: true
-                                font.pixelSize: Style.fontSmall
+                                font.pixelSize: Theme.Style.fontSmall
                             }
                             QsButton {
                                 text: "›"
@@ -598,7 +599,7 @@ PanelWindow {
                                 delegate: Text {
                                     required property string modelData
                                     text: modelData
-                                    color: Color.foregroundMuted
+                                    color: Theme.Color.foregroundMuted
                                     font.pixelSize: 11
                                     horizontalAlignment: Text.AlignHCenter
                                     Layout.fillWidth: true
@@ -611,12 +612,12 @@ PanelWindow {
                                     required property var modelData
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    radius: Style.radiusSmall
-                                    color: modelData.current ? Color.primary : "transparent"
+                                    radius: Theme.Style.radiusSmall
+                                    color: modelData.current ? Theme.Color.primary : "transparent"
                                     Text {
                                         anchors.centerIn: parent
                                         text: dayCell.modelData.day
-                                        color: dayCell.modelData.current ? Color.onPrimary : Color.foreground
+                                        color: dayCell.modelData.current ? Theme.Color.onPrimary : Theme.Color.foreground
                                         font.pixelSize: 11
                                     }
                                     Rectangle {
@@ -626,7 +627,7 @@ PanelWindow {
                                         width: 4
                                         height: 4
                                         radius: 2
-                                        color: Color.primary
+                                        color: Theme.Color.primary
                                     }
                                 }
                             }
@@ -637,7 +638,7 @@ PanelWindow {
                 RowLayout {
                     visible: root.quickPage === ""
                     Layout.fillWidth: true
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
                     QuickTile {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
@@ -672,14 +673,14 @@ PanelWindow {
         display: AbstractButton.IconOnly
         ToolTip.visible: hovered && action.tooltip !== ""
         ToolTip.text: action.tooltip
-        contentItem: MaterialIcon {
+        contentItem: Theme.MaterialIcon {
             text: action.iconName
-            iconSize: Style.materialIconSmall
-            iconColor: action.enabled ? Color.foreground : Color.foregroundMuted
+            iconSize: Theme.Style.materialIconSmall
+            iconColor: action.enabled ? Theme.Color.foreground : Theme.Color.foregroundMuted
         }
         background: Rectangle {
-            radius: Style.radiusFull
-            color: action.hovered ? Color.surfaceHover : "transparent"
+            radius: Theme.Style.radiusFull
+            color: action.hovered ? Theme.Color.surfaceHover : "transparent"
         }
     }
 
@@ -689,10 +690,10 @@ PanelWindow {
         readonly property bool recording: Services.RecorderService.active
         Layout.fillWidth: true
         implicitHeight: 158
-        radius: Style.cardRadius
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: Theme.Style.cardRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
 
         FolderListModel {
             id: recentShots
@@ -718,15 +719,15 @@ PanelWindow {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingSmall
+            anchors.margins: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingSmall
 
             RowLayout {
                 Layout.fillWidth: true
                 Text {
                     text: "Capturas"
-                    color: Color.foreground
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall
                     font.bold: true
                     Layout.fillWidth: true
                 }
@@ -734,14 +735,14 @@ PanelWindow {
                     text: captureCard.recording
                         ? Services.RecorderService.displayTime
                         : Services.CaptureService.editorAvailable ? "Editor" : "Captura básica"
-                    color: captureCard.recording ? Color.error : Color.foregroundMuted
+                    color: captureCard.recording ? Theme.Color.error : Theme.Color.foregroundMuted
                     font.pixelSize: 12
                 }
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
                 QsButton {
                     Layout.fillWidth: true
                     text: "Área"
@@ -760,19 +761,28 @@ PanelWindow {
                     enabled: captureCard.recording || Services.RecorderService.available
                     onClicked: captureCard.toggleRecording()
                 }
+                QsButton {
+                    Layout.fillWidth: true
+                    text: "Ajustes"
+                    enabled: !captureCard.recording
+                    onClicked: {
+                        root.monitorContext.closeSidebar()
+                        root.shellState.openControlCenterPage(17)
+                    }
+                }
             }
 
             Row {
                 Layout.fillWidth: true
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
                 Repeater {
                     model: Math.min(recentShots.count, 4)
                     delegate: Rectangle {
                         required property int index
-                        width: (captureCard.width - Style.paddingMedium * 2 - Style.spacingSmall * 3) / 4
+                        width: (captureCard.width - Theme.Style.paddingMedium * 2 - Theme.Style.spacingSmall * 3) / 4
                         height: 54
-                        radius: Style.controlRadius
-                        color: Color.surfaceContainerHigh
+                        radius: Theme.Style.controlRadius
+                        color: Theme.Color.surfaceContainerHigh
                         clip: true
                         Image {
                             anchors.fill: parent
@@ -790,7 +800,7 @@ PanelWindow {
         id: wifiPage
         ColumnLayout {
             width: pageLoader.width
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
             PageCard {
                 title: "Redes Wi‑Fi"
                 icon: "wifi"
@@ -809,8 +819,8 @@ PanelWindow {
                 Text {
                     visible: Boolean(root.net?.scanning)
                     text: "Buscando redes…"
-                    color: Color.foregroundMuted
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
                     Layout.fillWidth: true
                 }
                 Repeater {
@@ -826,8 +836,8 @@ PanelWindow {
                 Text {
                     visible: Boolean(root.net?.wifiEnabled && !root.net?.scanning && (root.net?.networks || []).length === 0)
                     text: "No se encontraron redes"
-                    color: Color.foregroundMuted
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
                     Layout.fillWidth: true
                 }
             }
@@ -838,7 +848,7 @@ PanelWindow {
         id: bluetoothPage
         ColumnLayout {
             width: pageLoader.width
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
             PageCard {
                 title: "Dispositivos Bluetooth"
                 icon: "bluetooth"
@@ -867,8 +877,8 @@ PanelWindow {
                 Text {
                     visible: Boolean(root.bt?.enabled && !root.bt?.discovering && (root.bt?.devices || []).length === 0)
                     text: "No se encontraron dispositivos"
-                    color: Color.foregroundMuted
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
                     Layout.fillWidth: true
                 }
             }
@@ -879,7 +889,7 @@ PanelWindow {
         id: audioPage
         ColumnLayout {
             width: pageLoader.width
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
             PageCard {
                 title: "Salida de audio"
                 icon: "volume_up"
@@ -915,7 +925,7 @@ PanelWindow {
         id: microphonePage
         ColumnLayout {
             width: pageLoader.width
-            spacing: Style.spacingSmall
+            spacing: Theme.Style.spacingSmall
             PageCard {
                 title: "Micrófono"
                 icon: "mic"
@@ -976,8 +986,8 @@ PanelWindow {
                 Text {
                     visible: !Services.QuickSettingsService.nightAvailable
                     text: "Instala hyprsunset, wlsunset o gammastep para activar este control."
-                    color: Color.foregroundMuted
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -1025,12 +1035,12 @@ PanelWindow {
         id: sectionLabel
         property string label: ""
         text: "· " + sectionLabel.label.toUpperCase()
-        color: Color.foregroundMuted
+        color: Theme.Color.foregroundMuted
         font.pixelSize: 11
         font.bold: true
         font.letterSpacing: 1.2
         Layout.fillWidth: true
-        Layout.topMargin: Style.spacingSmall
+        Layout.topMargin: Theme.Style.spacingSmall
     }
 
     component PageCard: Rectangle {
@@ -1040,23 +1050,23 @@ PanelWindow {
         property string icon: ""
         default property alias content: pageBody.data
         Layout.fillWidth: true
-        implicitHeight: pageBody.implicitHeight + Style.paddingMedium * 2
-        radius: Style.cardRadius
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        implicitHeight: pageBody.implicitHeight + Theme.Style.paddingMedium * 2
+        radius: Theme.Style.cardRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
         ColumnLayout {
             id: pageBody
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingSmall
+            anchors.margins: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingSmall
             RowLayout {
                 Layout.fillWidth: true
-                MaterialIcon { text: pageCard.icon; iconSize: Style.sectionIconSize; iconColor: Color.primary }
+                Theme.MaterialIcon { text: pageCard.icon; iconSize: Theme.Style.sectionIconSize; iconColor: Theme.Color.primary }
                 ColumnLayout {
                     Layout.fillWidth: true
-                    Text { text: pageCard.title; color: Color.foreground; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true }
-                    Text { text: pageCard.subtitle; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Text { text: pageCard.title; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontNormal; font.bold: true; Layout.fillWidth: true }
+                    Text { text: pageCard.subtitle; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
                 }
             }
         }
@@ -1070,20 +1080,20 @@ PanelWindow {
         signal clicked
         Layout.fillWidth: true
         implicitHeight: 48
-        radius: Style.controlRadius
-        color: pageRow.active ? Color.primaryContainer : Color.surface
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: Theme.Style.controlRadius
+        color: pageRow.active ? Theme.Color.primaryContainer : Theme.Color.surface
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
-            MaterialIcon { text: pageRow.active ? "check_circle" : "radio_button_unchecked"; iconSize: Style.materialIconMedium; iconColor: pageRow.active ? Color.primary : Color.foregroundMuted }
+            anchors.margins: Theme.Style.paddingSmall
+            Theme.MaterialIcon { text: pageRow.active ? "check_circle" : "radio_button_unchecked"; iconSize: Theme.Style.materialIconMedium; iconColor: pageRow.active ? Theme.Color.primary : Theme.Color.foregroundMuted }
             ColumnLayout {
                 Layout.fillWidth: true
-                Text { text: pageRow.name; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
-                Text { text: pageRow.detail; color: Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                Text { text: pageRow.name; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; elide: Text.ElideRight }
+                Text { text: pageRow.detail; color: Theme.Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
             }
-            MaterialIcon { text: "chevron_right"; iconSize: Style.materialIconSmall; iconColor: Color.foregroundMuted }
+            Theme.MaterialIcon { text: "chevron_right"; iconSize: Theme.Style.materialIconSmall; iconColor: Theme.Color.foregroundMuted }
         }
         TapHandler { onTapped: pageRow.clicked() }
     }
@@ -1096,16 +1106,16 @@ PanelWindow {
         signal clicked
         Layout.fillWidth: true
         implicitHeight: 42
-        radius: Style.controlRadius
-        color: pageToggle.active ? Color.primaryContainer : Color.surface
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: Theme.Style.controlRadius
+        color: pageToggle.active ? Theme.Color.primaryContainer : Theme.Color.surface
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
-            MaterialIcon { text: pageToggle.icon; iconSize: Style.materialIconMedium; iconColor: pageToggle.active ? Color.primary : Color.foregroundMuted }
-            Text { text: pageToggle.label; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
-            MaterialIcon { text: pageToggle.active ? "toggle_on" : "toggle_off"; iconSize: Style.materialIconMedium; iconColor: pageToggle.active ? Color.primary : Color.foregroundMuted }
+            anchors.margins: Theme.Style.paddingSmall
+            Theme.MaterialIcon { text: pageToggle.icon; iconSize: Theme.Style.materialIconMedium; iconColor: pageToggle.active ? Theme.Color.primary : Theme.Color.foregroundMuted }
+            Text { text: pageToggle.label; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true }
+            Theme.MaterialIcon { text: pageToggle.active ? "toggle_on" : "toggle_off"; iconSize: Theme.Style.materialIconMedium; iconColor: pageToggle.active ? Theme.Color.primary : Theme.Color.foregroundMuted }
         }
         TapHandler { onTapped: pageToggle.clicked() }
     }
@@ -1120,9 +1130,9 @@ PanelWindow {
         Layout.fillWidth: true
         RowLayout {
             Layout.fillWidth: true
-            MaterialIcon { text: pageSlider.icon; iconSize: Style.materialIconSmall; iconColor: Color.foregroundMuted }
-            Text { text: pageSlider.label; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.fillWidth: true }
-            Text { text: Math.round(pageSlider.value * 100) + "%"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall }
+            Theme.MaterialIcon { text: pageSlider.icon; iconSize: Theme.Style.materialIconSmall; iconColor: Theme.Color.foregroundMuted }
+            Text { text: pageSlider.label; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true }
+            Text { text: Math.round(pageSlider.value * 100) + "%"; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall }
         }
         Slider {
             id: pageSliderControl
@@ -1138,8 +1148,8 @@ PanelWindow {
                 width: pageSliderControl.availableWidth
                 height: 6
                 radius: 3
-                color: Color.outlineVariant
-                Rectangle { width: pageSliderControl.visualPosition * parent.width; height: parent.height; radius: 3; color: Color.primary }
+                color: Theme.Color.outlineVariant
+                Rectangle { width: pageSliderControl.visualPosition * parent.width; height: parent.height; radius: 3; color: Theme.Color.primary }
             }
             handle: Rectangle {
                 x: pageSliderControl.leftPadding + pageSliderControl.visualPosition * (pageSliderControl.availableWidth - width)
@@ -1147,9 +1157,9 @@ PanelWindow {
                 width: 16
                 height: 16
                 radius: 8
-                color: pageSliderControl.pressed ? Color.primary : Color.primaryContainer
+                color: pageSliderControl.pressed ? Theme.Color.primary : Theme.Color.primaryContainer
                 border.width: 2
-                border.color: pageSliderControl.enabled ? Color.primary : Color.outlineVariant
+                border.color: pageSliderControl.enabled ? Theme.Color.primary : Theme.Color.outlineVariant
             }
         }
     }
@@ -1157,26 +1167,26 @@ PanelWindow {
     component QsButton: Button {
         id: qsButton
         property bool compact: false
-        implicitWidth: compact ? 30 : Math.max(84, contentItem.implicitWidth + Style.paddingMedium * 2)
+        implicitWidth: compact ? 30 : Math.max(84, contentItem.implicitWidth + Theme.Style.paddingMedium * 2)
         implicitHeight: compact ? 30 : 32
         padding: 0
         contentItem: Text {
             text: qsButton.text
-            color: qsButton.enabled ? Color.foreground : Color.foregroundMuted
-            font.pixelSize: Style.fontSmall
+            color: qsButton.enabled ? Theme.Color.foreground : Theme.Color.foregroundMuted
+            font.pixelSize: Theme.Style.fontSmall
             font.bold: !qsButton.compact
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-            radius: Style.radiusFull
-            color: qsButton.pressed ? Color.primary : qsButton.hovered ? Color.surfaceHover : Color.surfaceContainerHigh
+            radius: Theme.Style.radiusFull
+            color: qsButton.pressed ? Theme.Color.primary : qsButton.hovered ? Theme.Color.surfaceHover : Theme.Color.surfaceContainerHigh
             border.width: 1
-            border.color: qsButton.pressed ? Color.primary : Color.outlineVariant
+            border.color: qsButton.pressed ? Theme.Color.primary : Theme.Color.outlineVariant
             opacity: qsButton.enabled ? 1 : 0.55
             Behavior on color {
                 ColorAnimation {
-                    duration: Style.motionFast
+                    duration: Theme.Style.motionFast
                 }
             }
         }
@@ -1193,29 +1203,29 @@ PanelWindow {
         signal clicked
         signal detailsClicked
         implicitHeight: 64
-        radius: Style.cardRadius
-        color: tile.active ? Color.primaryContainer : Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: tile.active ? Color.primary : Color.outlineVariant
+        radius: Theme.Style.cardRadius
+        color: tile.active ? Theme.Color.primaryContainer : Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: tile.active ? Theme.Color.primary : Theme.Color.outlineVariant
         Behavior on color {
             ColorAnimation {
-                duration: Style.motionFast
+                duration: Theme.Style.motionFast
             }
         }
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingSmall
-            spacing: Style.spacingSmall
+            anchors.margins: Theme.Style.paddingSmall
+            spacing: Theme.Style.spacingSmall
             Rectangle {
                 Layout.preferredWidth: 32
                 Layout.preferredHeight: 32
-                radius: Style.radiusFull
-                color: tile.active ? Color.primary : Color.surfaceContainerHigh
-                MaterialIcon {
+                radius: Theme.Style.radiusFull
+                color: tile.active ? Theme.Color.primary : Theme.Color.surfaceContainerHigh
+                Theme.MaterialIcon {
                     anchors.centerIn: parent
                     text: tile.icon
-                    iconSize: Style.materialIconSmall
-                    iconColor: tile.active ? Color.onPrimary : Color.foregroundMuted
+                    iconSize: Theme.Style.materialIconSmall
+                    iconColor: tile.active ? Theme.Color.onPrimary : Theme.Color.foregroundMuted
                 }
                 TapHandler {
                     enabled: tile.iconOnlyToggle
@@ -1228,25 +1238,25 @@ PanelWindow {
                 spacing: 0
                 Text {
                     text: tile.title
-                    color: Color.foreground
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall
                     font.bold: true
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
                 Text {
                     text: tile.subtitle
-                    color: Color.foregroundMuted
+                    color: Theme.Color.foregroundMuted
                     font.pixelSize: 11
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
             }
-            MaterialIcon {
+            Theme.MaterialIcon {
                 visible: tile.showDetails
                 text: "chevron_right"
-                iconSize: Style.materialIconSmall
-                iconColor: Color.foregroundMuted
+                iconSize: Theme.Style.materialIconSmall
+                iconColor: Theme.Color.foregroundMuted
             }
         }
         TapHandler {
@@ -1272,14 +1282,14 @@ PanelWindow {
         signal detailsClicked
         Layout.fillWidth: true
         implicitHeight: 78
-        radius: Style.cardRadius
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
+        radius: Theme.Style.cardRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.paddingMedium
-            spacing: Style.spacingSmall
+            anchors.margins: Theme.Style.paddingMedium
+            spacing: Theme.Style.spacingSmall
             QuickAction {
                 iconName: sliderCard.icon
                 tooltip: "Control de " + sliderCard.title
@@ -1293,8 +1303,8 @@ PanelWindow {
                     Layout.minimumWidth: 0
                     text: sliderCard.title
                     elide: Text.ElideRight
-                    color: Color.foreground
-                    font.pixelSize: Style.fontSmall
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.fontSmall
                     font.bold: true
                 }
                 Slider {
@@ -1313,12 +1323,12 @@ PanelWindow {
                         width: slider.availableWidth
                         height: 5
                         radius: 3
-                        color: Color.surfaceContainerHigh
+                        color: Theme.Color.surfaceContainerHigh
                         Rectangle {
                             width: slider.visualPosition * parent.width
                             height: parent.height
                             radius: 3
-                            color: slider.enabled ? Color.primary : Color.outlineVariant
+                            color: slider.enabled ? Theme.Color.primary : Theme.Color.outlineVariant
                         }
                     }
                     handle: Rectangle {
@@ -1327,13 +1337,13 @@ PanelWindow {
                         width: 16
                         height: 16
                         radius: 8
-                        color: slider.pressed ? Color.primary : Color.primaryContainer
+                        color: slider.pressed ? Theme.Color.primary : Theme.Color.primaryContainer
                         border.width: 2
-                        border.color: slider.enabled ? Color.primary : Color.outlineVariant
+                        border.color: slider.enabled ? Theme.Color.primary : Theme.Color.outlineVariant
                         scale: slider.pressed ? 1.12 : slider.hovered ? 1.06 : 1
                         Behavior on scale {
                             NumberAnimation {
-                                duration: Style.motionFast
+                                duration: Theme.Style.motionFast
                             }
                         }
                     }
@@ -1349,7 +1359,7 @@ PanelWindow {
                 Layout.preferredWidth: 40
                 horizontalAlignment: Text.AlignRight
                 text: sliderCard.enabled ? Math.round(sliderCard.value * 100) + "%" : "—"
-                color: Color.foregroundMuted
+                color: Theme.Color.foregroundMuted
                 font.pixelSize: 12
             }
         }

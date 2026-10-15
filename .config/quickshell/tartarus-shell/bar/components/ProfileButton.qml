@@ -3,13 +3,13 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Effects
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
 
-    implicitWidth: Style.barControlHeight
-    implicitHeight: Style.barControlHeight
+    implicitWidth: Theme.Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
     property string avatarPath: ""
     required property var shellState
     required property Item anchorSurface
@@ -39,14 +39,14 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Style.radiusFull
+        radius: Theme.Style.radiusFull
         clip: true
         color: hoverHandler.hovered
-            ? Color.surfaceHover
-            : Color.surfaceContainerHigh
+            ? Theme.Color.surfaceHover
+            : Theme.Color.surfaceContainerHigh
 
         Behavior on color {
-            ColorAnimation { duration: Style.motionFast }
+            ColorAnimation { duration: Theme.Style.motionFast }
         }
 
         Image {
@@ -80,11 +80,11 @@ Item {
             autoPaddingEnabled: false
         }
 
-        MaterialIcon {
+        Theme.MaterialIcon {
             anchors.centerIn: parent
             text: "person"
-            iconSize: Style.barIconSmall
-            iconColor: Color.foreground
+            iconSize: Theme.Style.barIconSmall
+            iconColor: Theme.Color.foreground
             visible: avatar.status !== Image.Ready
         }
     }

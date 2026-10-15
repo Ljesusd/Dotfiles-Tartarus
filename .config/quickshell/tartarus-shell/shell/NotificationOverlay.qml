@@ -2,7 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Controls
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Scope {
     id: root
@@ -17,21 +17,21 @@ Scope {
         screen: root.monitorScreen
         anchors { top: true; right: true }
         margins {
-            top: Style.barHeight + Style.spacingLarge
-            right: Style.paddingLarge
+            top: Theme.Style.barHeight + Theme.Style.spacingLarge
+            right: Theme.Style.paddingLarge
         }
         implicitWidth: Math.min(
             380,
-            Math.max(280, (root.monitorScreen?.width ?? 1280) - Style.paddingLarge * 2)
+            Math.max(280, (root.monitorScreen?.width ?? 1280) - Theme.Style.paddingLarge * 2)
         )
         implicitHeight: Math.min(
             stack.implicitHeight,
             Math.max(
                 1,
                 (root.monitorScreen?.height ?? 1080)
-                    - Style.barHeight
-                    - Style.spacingLarge
-                    - Style.paddingLarge
+                    - Theme.Style.barHeight
+                    - Theme.Style.spacingLarge
+                    - Theme.Style.paddingLarge
             )
         )
         color: "transparent"
@@ -52,7 +52,7 @@ Scope {
             Column {
                 id: stack
                 width: parent.width
-                spacing: Style.spacingMedium
+                spacing: Theme.Style.spacingMedium
 
                 Repeater {
                     model: root.items
@@ -86,17 +86,17 @@ Scope {
                         transformOrigin: Item.Top
 
                         Behavior on opacity {
-                            Anim { duration: Style.motionFast }
+                            Theme.Anim { duration: Theme.Style.motionFast }
                         }
                         Behavior on scale {
-                            Anim {
-                                duration: Style.motionPopup
+                            Theme.Anim {
+                                duration: Theme.Style.motionPopup
                                 easing.type: Easing.OutCubic
                             }
                         }
                         Behavior on height {
-                            Anim {
-                                duration: Style.motionPopup
+                            Theme.Anim {
+                                duration: Theme.Style.motionPopup
                                 easing.type: Easing.OutCubic
                             }
                         }

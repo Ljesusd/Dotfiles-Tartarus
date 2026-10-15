@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../theme"
+import "../theme" as Theme
 
 Singleton {
     id: root
@@ -11,7 +11,7 @@ Singleton {
     property var toasts: []
     property int _nextId: 0
     property int defaultTimeoutMs: 2500
-    property int exitDurationMs: Style.motionSlow + 20
+    property int exitDurationMs: Theme.Style.motionSlow + 20
 
     Component {
         id: toastComponent

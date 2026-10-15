@@ -1,12 +1,12 @@
 import QtQuick
 
-import "."
+import "." as Theme
 
 Text {
     id: root
 
-    property color iconColor: Color.foreground
-    property int iconSize: Style.materialIconMedium
+    property color iconColor: Theme.Color.foreground
+    property int iconSize: Theme.Style.materialIconMedium
     property int fill: 0
     property int weight: 400
     property int grade: 0
@@ -14,7 +14,7 @@ Text {
 
     color: root.iconColor
 
-    font.family: Style.materialIconFont
+    font.family: Theme.Style.materialIconFont
     font.pixelSize: root.iconSize
     font.variableAxes: ({
         "FILL": root.fill,

@@ -162,6 +162,15 @@ hl.window_rule({
     rounding = 20,
 })
 
+-- The authentication UI is a standalone Qt Quick agent, never a tiled terminal.
+hl.window_rule({
+    name = "tartarus-authentication",
+    match = { class = "^(tartarus-polkit-agent|org\\.tartarus\\.PolkitAgent)$" },
+    float = true,
+    center = true,
+    rounding = 20,
+})
+
 -- Quickshell owns the bar and all of its popup surfaces. This gives those
 -- translucent surfaces the same compositor blur as the reference shells.
 hl.layer_rule({

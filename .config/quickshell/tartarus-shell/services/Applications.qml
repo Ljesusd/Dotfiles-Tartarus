@@ -40,12 +40,12 @@ QtObject {
         root.applicationValues = DesktopEntries.applications.values.slice()
     }
 
-    Connections {
+    readonly property Connections desktopEntriesConnection: Connections {
         target: DesktopEntries
         function onApplicationsChanged() { root.refresh() }
     }
 
-    Connections {
+    readonly property Connections installerConnection: Connections {
         target: Services.InstallerService
         function onApplicationInstalled() { root.refresh() }
     }

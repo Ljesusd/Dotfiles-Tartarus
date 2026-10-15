@@ -1,20 +1,20 @@
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Canvas {
     id: root
 
-    property color fillColor: Color.surfaceContainer
+    property color fillColor: Theme.Color.surfaceContainer
     // Caelestia's BlobInvertedRect keeps the whole lower edge attached to
     // the bar. The shoulders, rather than a small centred tab, create the
     // connected-drawer silhouette shared with the launcher.
     property real surfaceInset: 14
     property real joinRadius: 18
-    property real neckHeight: Style.barPopupGap * 2
-    property real cornerRadius: Style.panelRadius
-    property color outlineColor: Qt.alpha(Color.foreground, 0.12)
-    property color shadowColor: Qt.rgba(0, 0, 0, Color.mode === "light" ? 0.16 : 0.32)
+    property real neckHeight: Theme.Style.barPopupGap * 2
+    property real cornerRadius: Theme.Style.panelRadius
+    property color outlineColor: Qt.alpha(Theme.Color.foreground, 0.12)
+    property color shadowColor: Qt.rgba(0, 0, 0, Theme.Color.mode === "light" ? 0.16 : 0.32)
 
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()

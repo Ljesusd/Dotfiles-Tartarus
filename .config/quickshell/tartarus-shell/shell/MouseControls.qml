@@ -3,11 +3,11 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import Quickshell
 import Quickshell.Io
-import "../theme"
+import "../theme" as Theme
 
 ColumnLayout {
     id: root
-    spacing: Style.spacingSmall
+    spacing: Theme.Style.spacingSmall
 
     readonly property string daemon: Quickshell.env("HOME")
         + "/Repositorios/oma-logitech-g-mouse/bin/logitech-g-daemon"
@@ -97,17 +97,17 @@ ColumnLayout {
         Layout.fillWidth: true
         Rectangle {
             width: 8; height: 8; radius: 4
-            color: root.connected ? Color.primary : (root.protocolError ? Color.tertiary : Color.outline)
+            color: root.connected ? Theme.Color.primary : (root.protocolError ? Theme.Color.tertiary : Theme.Color.outline)
             Layout.alignment: Qt.AlignVCenter
         }
-        Text { Layout.fillWidth: true; text: "Estado del mouse"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall }
-        Text { text: root.connectionLabel; color: root.connected ? Color.primary : (root.protocolError ? Color.tertiary : Color.foregroundMuted); font.pixelSize: Style.fontSmall; font.bold: true; elide: Text.ElideRight }
+        Text { Layout.fillWidth: true; text: "Estado del mouse"; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall }
+        Text { text: root.connectionLabel; color: root.connected ? Theme.Color.primary : (root.protocolError ? Theme.Color.tertiary : Theme.Color.foregroundMuted); font.pixelSize: Theme.Style.fontSmall; font.bold: true; elide: Text.ElideRight }
     }
 
     RowLayout {
         Layout.fillWidth: true
-        Text { Layout.fillWidth: true; text: "Sensibilidad (DPI)"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall; font.bold: true }
-        Text { text: root.connected ? Math.round(dpiSlider.value) : "—"; color: Color.foreground; font.pixelSize: Style.fontSmall; font.bold: true }
+        Text { Layout.fillWidth: true; text: "Sensibilidad (DPI)"; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall; font.bold: true }
+        Text { text: root.connected ? Math.round(dpiSlider.value) : "—"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; font.bold: true }
     }
 
     Controls.Slider {
@@ -128,8 +128,8 @@ ColumnLayout {
     Text {
         Layout.fillWidth: true
         text: "Cambios rápidos"
-        color: Color.foregroundMuted
-        font.pixelSize: Style.fontSmall
+        color: Theme.Color.foregroundMuted
+        font.pixelSize: Theme.Style.fontSmall
     }
 
     Flow {
@@ -141,14 +141,14 @@ ColumnLayout {
                 required property int modelData
                 width: 54
                 height: 28
-                radius: Style.radiusSmall
-                color: root.dpi === modelData ? Color.primaryContainer : Color.surfaceContainerHigh
+                radius: Theme.Style.radiusSmall
+                color: root.dpi === modelData ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
                 border.width: root.dpi === modelData ? 2 : 1
-                border.color: root.dpi === modelData ? Color.primary : Color.outlineVariant
+                border.color: root.dpi === modelData ? Theme.Color.primary : Theme.Color.outlineVariant
                 Text {
                     anchors.centerIn: parent
                     text: parent.modelData
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                     font.pixelSize: 10
                 }
                 MouseArea {
@@ -162,18 +162,18 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        Text { Layout.fillWidth: true; text: "Frecuencia de sondeo"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall; font.bold: true }
+        Text { Layout.fillWidth: true; text: "Frecuencia de sondeo"; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall; font.bold: true }
         Repeater {
             model: [125, 250, 500, 1000, 2000, 4000]
             delegate: Rectangle {
                 required property int modelData
                 width: 42
                 height: 26
-                radius: Style.radiusSmall
-                color: root.reportRate === modelData ? Color.primaryContainer : Color.surfaceContainerHigh
+                radius: Theme.Style.radiusSmall
+                color: root.reportRate === modelData ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
                 border.width: 1
-                border.color: Color.outlineVariant
-                Text { anchors.centerIn: parent; text: modelData >= 1000 ? (modelData / 1000) + "k" : modelData; color: Color.foreground; font.pixelSize: 10 }
+                border.color: Theme.Color.outlineVariant
+                Text { anchors.centerIn: parent; text: modelData >= 1000 ? (modelData / 1000) + "k" : modelData; color: Theme.Color.foreground; font.pixelSize: 10 }
                 MouseArea { anchors.fill: parent; enabled: root.connected && !root.busy; onClicked: root.setRate(modelData) }
             }
         }
@@ -186,8 +186,8 @@ ColumnLayout {
             : (root.protocolError
                 ? "El receptor responde, pero este controlador no puede leer el perfil DPI de este G305."
                 : (root.errorText !== "" ? root.errorText : "Conecta y enciende el G305 para configurarlo."))
-        color: Color.foregroundMuted
-        font.pixelSize: Style.fontSmall
+        color: Theme.Color.foregroundMuted
+        font.pixelSize: Theme.Style.fontSmall
         wrapMode: Text.Wrap
     }
 }

@@ -42,6 +42,13 @@ QtObject {
             description: "Arrastra un AppImage, Flatpak o paquete local"
         },
         {
+            name: "Flathub Store",
+            icon: "storefront",
+            command: "store",
+            aliases: ["flathub", "tienda", "flatpak"],
+            description: "Buscar e instalar aplicaciones de Flathub"
+        },
+        {
             name: "Timer",
             icon: "timer",
             command: "timer",
@@ -76,7 +83,7 @@ QtObject {
         icon: "fiber_manual_record",
         command: "record",
         aliases: ["grabador", "grabar", "grabacion", "grabación"],
-        description: "Grabar este monitor a 60 FPS, sin audio"
+        description: "Grabar pantalla con la configuración guardada"
     }]).concat(DockerService.installed ? [{
         name: "Docker",
         icon: "deployed_code",

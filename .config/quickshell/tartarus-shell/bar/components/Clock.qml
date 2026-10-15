@@ -1,7 +1,7 @@
 import Quickshell
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../services" as Services
 
 Rectangle {
@@ -14,20 +14,20 @@ Rectangle {
     border.width: 0
 
     implicitWidth: clockText.implicitWidth
-        + Style.barPaddingNormal * 2
+        + Theme.Style.barPaddingNormal * 2
 
-    implicitHeight: Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
     Text {
         id: clockText
 
         anchors.centerIn: parent
 
-        font.pixelSize: Style.barFontNormal
+        font.pixelSize: Theme.Style.barFontNormal
 
         text: Services.LocationService.currentTime
 
-        color: Color.foreground
+        color: Theme.Color.foreground
     }
 
     TapHandler {

@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Scope {
     id: root
@@ -38,88 +38,88 @@ Scope {
 
             width: Math.min(
                 760,
-                Math.max(320, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
+                Math.max(320, (root.monitorScreen?.width ?? 1280) - Theme.Style.spacingLarge * 2)
             )
             height: Math.min(
                 620,
-                Math.max(420, (root.monitorScreen?.height ?? 800) - Style.barHeight - Style.spacingLarge * 2)
+                Math.max(420, (root.monitorScreen?.height ?? 800) - Theme.Style.barHeight - Theme.Style.spacingLarge * 2)
             )
             anchors.centerIn: parent
-            radius: Style.radiusLarge
-            color: Color.surfaceContainer
+            radius: Theme.Style.radiusLarge
+            color: Theme.Color.surfaceContainer
             border.width: 1
-            border.color: Color.outline
+            border.color: Theme.Color.outline
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Style.paddingLarge
-                spacing: Style.spacingMedium
+                anchors.margins: Theme.Style.paddingLarge
+                spacing: Theme.Style.spacingMedium
 
                 RowLayout {
                     Layout.fillWidth: true
 
-                    MaterialIcon {
+                    Theme.MaterialIcon {
                         text: "content_paste"
-                        color: Color.accent
-                        font.pixelSize: Style.materialIconMedium
+                        color: Theme.Color.accent
+                        font.pixelSize: Theme.Style.materialIconMedium
                     }
 
                     Text {
                         Layout.fillWidth: true
                         text: "Clipboard"
-                        color: Color.foreground
-                        font.pixelSize: Style.fontNormal
+                        color: Theme.Color.foreground
+                        font.pixelSize: Theme.Style.fontNormal
                         font.bold: true
                     }
 
                     Text {
                         text: `${root.visibleEntries.length} items`
-                        color: Color.foregroundSubtle
-                        font.pixelSize: Style.fontSmall
+                        color: Theme.Color.foregroundSubtle
+                        font.pixelSize: Theme.Style.fontSmall
                     }
 
                     ToolButton {
                         id: clearButton
-                        implicitWidth: Style.controlHeight
-                        implicitHeight: Style.controlHeight
+                        implicitWidth: Theme.Style.controlHeight
+                        implicitHeight: Theme.Style.controlHeight
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
                         ToolTip.text: "Clear recent entries"
                         background: Rectangle {
-                            radius: Style.radiusSmall
+                            radius: Theme.Style.radiusSmall
                             color: clearButton.hovered
-                                ? Color.surfaceHover
+                                ? Theme.Color.surfaceHover
                                 : "transparent"
                         }
-                        contentItem: MaterialIcon {
+                        contentItem: Theme.MaterialIcon {
                             text: "delete_sweep"
                             color: clearButton.hovered
-                                ? Color.foreground
-                                : Color.foregroundMuted
-                            font.pixelSize: Style.materialIconMedium
+                                ? Theme.Color.foreground
+                                : Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconMedium
                         }
                         onClicked: Services.ClipboardService.clear()
                     }
 
                     ToolButton {
                         id: closeButton
-                        implicitWidth: Style.controlHeight
-                        implicitHeight: Style.controlHeight
+                        implicitWidth: Theme.Style.controlHeight
+                        implicitHeight: Theme.Style.controlHeight
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
                         ToolTip.text: "Close"
                         background: Rectangle {
-                            radius: Style.radiusSmall
+                            radius: Theme.Style.radiusSmall
                             color: closeButton.hovered
-                                ? Color.surfaceHover
+                                ? Theme.Color.surfaceHover
                                 : "transparent"
                         }
-                        contentItem: MaterialIcon {
+                        contentItem: Theme.MaterialIcon {
                             text: "close"
                             color: closeButton.hovered
-                                ? Color.foreground
-                                : Color.foregroundMuted
-                            font.pixelSize: Style.materialIconMedium
+                                ? Theme.Color.foreground
+                                : Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconMedium
                         }
                         onClicked: Services.ClipboardService.close()
                     }
@@ -127,7 +127,7 @@ Scope {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
 
                     Repeater {
                         model: [
@@ -141,27 +141,27 @@ Scope {
 
                             text: modelData.label
                             implicitHeight: 32
-                            padding: Style.paddingSmall
+                            padding: Theme.Style.paddingSmall
                             highlighted:
                                 Services.ClipboardService.viewMode
                                 === modelData.mode
 
                             background: Rectangle {
-                                radius: Style.radiusSmall
+                                radius: Theme.Style.radiusSmall
                                 color: modeButton.highlighted
-                                    ? Color.selection
+                                    ? Theme.Color.selection
                                     : modeButton.hovered
-                                        ? Color.surfaceHover
+                                        ? Theme.Color.surfaceHover
                                         : "transparent"
                             }
 
                                 contentItem: Text {
                                     text: modeButton.text
                                     color: modeButton.highlighted
-                                        ? Color.foreground
-                                        : Color.foregroundMuted
+                                        ? Theme.Color.foreground
+                                        : Theme.Color.foregroundMuted
                                     font.bold: modeButton.highlighted
-                                    font.pixelSize: Style.fontSmall
+                                    font.pixelSize: Theme.Style.fontSmall
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                             }
@@ -181,29 +181,29 @@ Scope {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.controlHeight
-                    radius: Style.radiusMedium
-                    color: Color.surface
+                    Layout.preferredHeight: Theme.Style.controlHeight
+                    radius: Theme.Style.radiusMedium
+                    color: Theme.Color.surface
                     border.width: searchInput.activeFocus ? 1 : 0
-                    border.color: Color.accent
+                    border.color: Theme.Color.accent
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Style.paddingMedium
-                        anchors.rightMargin: Style.paddingMedium
+                        anchors.leftMargin: Theme.Style.paddingMedium
+                        anchors.rightMargin: Theme.Style.paddingMedium
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: "search"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.materialIconMedium
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconMedium
                         }
 
                         TextInput {
                             id: searchInput
                             Layout.fillWidth: true
                             focus: true
-                            color: Color.foreground
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foreground
+                            font.pixelSize: Theme.Style.fontSmall
                             clip: true
                             onTextChanged: {
                                 Services.ClipboardService.query = text
@@ -251,8 +251,8 @@ Scope {
                         Text {
                             visible: searchInput.text.length === 0
                             text: "Search clipboard..."
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                         }
                     }
                 }
@@ -268,7 +268,7 @@ Scope {
                     Row {
                         id: columnsRow
                         width: parent.width
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
                         Repeater {
                             model: 3
@@ -278,9 +278,9 @@ Scope {
 
                                 width: (
                                     columnsRow.width
-                                    - Style.spacingSmall * 2
+                                    - Theme.Style.spacingSmall * 2
                                 ) / 3
-                                spacing: Style.spacingSmall
+                                spacing: Theme.Style.spacingSmall
 
                                 Repeater {
                                     model: Services.ClipboardService.columnValues(
@@ -299,64 +299,64 @@ Scope {
                                                 : modelData.type === "multiline"
                                                     ? 94
                                                     : 76
-                                        radius: Style.radiusMedium
+                                        radius: Theme.Style.radiusMedium
                                         border.width: modelData.filteredIndex
                                             === Services.ClipboardService.selectedIndex
                                             ? 1
                                             : 0
-                                        border.color: Color.accent
+                                        border.color: Theme.Color.accent
                                         color: modelData.filteredIndex
                                             === Services.ClipboardService.selectedIndex
-                                            ? Color.selection
+                                            ? Theme.Color.selection
                                             : cardHover.hovered
-                                                ? Color.surfaceHover
-                                                : Color.surface
+                                                ? Theme.Color.surfaceHover
+                                                : Theme.Color.surface
                                         clip: true
 
                                         Column {
                                             anchors.fill: parent
-                                            anchors.margins: Style.paddingSmall
-                                            spacing: Style.spacingXs
+                                            anchors.margins: Theme.Style.paddingSmall
+                                            spacing: Theme.Style.spacingXs
 
                                             RowLayout {
                                                 width: parent.width
-                                                height: Style.barIconSmall
-                                                spacing: Style.spacingXs
+                                                height: Theme.Style.barIconSmall
+                                                spacing: Theme.Style.spacingXs
 
-                                                MaterialIcon {
+                                                Theme.MaterialIcon {
                                                     text: modelData.icon
-                                                    color: Color.accent
-                                                    font.pixelSize: Style.materialIconSmall
+                                                    color: Theme.Color.accent
+                                                    font.pixelSize: Theme.Style.materialIconSmall
                                                 }
 
                                                 Text {
                                                     Layout.fillWidth: true
                                                     text: modelData.label
-                                                    color: Color.foregroundMuted
-                                                    font.pixelSize: Style.fontSmall
+                                                    color: Theme.Color.foregroundMuted
+                                                    font.pixelSize: Theme.Style.fontSmall
                                                     elide: Text.ElideRight
                                                 }
 
                                                 ToolButton {
                                                     id: copyButton
-                                                    Layout.preferredWidth: Style.barIconSmall
-                                                    Layout.preferredHeight: Style.barIconSmall
+                                                    Layout.preferredWidth: Theme.Style.barIconSmall
+                                                    Layout.preferredHeight: Theme.Style.barIconSmall
                                                     padding: 0
                                                     display: AbstractButton.IconOnly
                                                     ToolTip.visible: hovered
                                                     ToolTip.text: "Copy"
                                                     background: Rectangle {
-                                                        radius: Style.radiusSmall
+                                                        radius: Theme.Style.radiusSmall
                                                         color: copyButton.hovered
-                                                            ? Color.surfaceHover
+                                                            ? Theme.Color.surfaceHover
                                                             : "transparent"
                                                     }
-                                                    contentItem: MaterialIcon {
+                                                    contentItem: Theme.MaterialIcon {
                                                         text: "content_copy"
                                                         color: copyButton.hovered
-                                                            ? Color.foreground
-                                                            : Color.foregroundMuted
-                                                        font.pixelSize: Style.materialIconSmall
+                                                            ? Theme.Color.foreground
+                                                            : Theme.Color.foregroundMuted
+                                                        font.pixelSize: Theme.Style.materialIconSmall
                                                     }
                                                     onClicked:
                                                         Services.ClipboardService.copyEntry(
@@ -371,9 +371,9 @@ Scope {
                                                             modelData
                                                         )
                                                     Layout.preferredWidth: visible
-                                                        ? Style.barIconSmall
+                                                        ? Theme.Style.barIconSmall
                                                         : 0
-                                                    Layout.preferredHeight: Style.barIconSmall
+                                                    Layout.preferredHeight: Theme.Style.barIconSmall
                                                     padding: 0
                                                     display: AbstractButton.IconOnly
                                                     ToolTip.visible: hovered
@@ -381,21 +381,21 @@ Scope {
                                                         ? "Open in viewer"
                                                         : "Open"
                                                     background: Rectangle {
-                                                        radius: Style.radiusSmall
+                                                        radius: Theme.Style.radiusSmall
                                                         color: openButton.hovered
-                                                            ? Color.surfaceHover
+                                                            ? Theme.Color.surfaceHover
                                                             : "transparent"
                                                     }
-                                                    contentItem: MaterialIcon {
+                                                    contentItem: Theme.MaterialIcon {
                                                         text: modelData.type === "image"
                                                             ? "visibility"
                                                             : modelData.type === "path"
                                                                 ? "folder_open"
                                                                 : "open_in_new"
                                                         color: openButton.hovered
-                                                            ? Color.foreground
-                                                            : Color.foregroundMuted
-                                                        font.pixelSize: Style.materialIconSmall
+                                                            ? Theme.Color.foreground
+                                                            : Theme.Color.foregroundMuted
+                                                        font.pixelSize: Theme.Style.materialIconSmall
                                                     }
                                                     onClicked:
                                                         Services.ClipboardService.openEntry(
@@ -406,8 +406,8 @@ Scope {
 
                                                 ToolButton {
                                                     id: pinButton
-                                                    Layout.preferredWidth: Style.barIconSmall
-                                                    Layout.preferredHeight: Style.barIconSmall
+                                                    Layout.preferredWidth: Theme.Style.barIconSmall
+                                                    Layout.preferredHeight: Theme.Style.barIconSmall
                                                     padding: 0
                                                     display: AbstractButton.IconOnly
                                                     ToolTip.visible: hovered
@@ -415,21 +415,21 @@ Scope {
                                                         ? "Unpin"
                                                         : "Pin"
                                                     background: Rectangle {
-                                                        radius: Style.radiusSmall
+                                                        radius: Theme.Style.radiusSmall
                                                         color: pinButton.hovered
-                                                            ? Color.surfaceHover
+                                                            ? Theme.Color.surfaceHover
                                                             : "transparent"
                                                     }
-                                                    contentItem: MaterialIcon {
+                                                    contentItem: Theme.MaterialIcon {
                                                         text: modelData.pinned
                                                             ? "push_pin"
                                                             : "push_pin"
                                                         color: modelData.pinned
-                                                            ? Color.accent
+                                                            ? Theme.Color.accent
                                                                 : pinButton.hovered
-                                                                ? Color.foreground
-                                                                : Color.foregroundMuted
-                                                        font.pixelSize: Style.materialIconSmall
+                                                                ? Theme.Color.foreground
+                                                                : Theme.Color.foregroundMuted
+                                                        font.pixelSize: Theme.Style.materialIconSmall
                                                     }
                                                     onClicked:
                                                         Services.ClipboardService.togglePin(
@@ -439,24 +439,24 @@ Scope {
 
                                                 ToolButton {
                                                     id: removeButton
-                                                    Layout.preferredWidth: Style.barIconSmall
-                                                    Layout.preferredHeight: Style.barIconSmall
+                                                    Layout.preferredWidth: Theme.Style.barIconSmall
+                                                    Layout.preferredHeight: Theme.Style.barIconSmall
                                                     padding: 0
                                                     display: AbstractButton.IconOnly
                                                     ToolTip.visible: hovered
                                                     ToolTip.text: "Remove"
                                                     background: Rectangle {
-                                                        radius: Style.radiusSmall
+                                                        radius: Theme.Style.radiusSmall
                                                         color: removeButton.hovered
-                                                            ? Color.surfaceHover
+                                                            ? Theme.Color.surfaceHover
                                                             : "transparent"
                                                     }
-                                                    contentItem: MaterialIcon {
+                                                    contentItem: Theme.MaterialIcon {
                                                         text: "close"
                                                         color: removeButton.hovered
-                                                            ? Color.foreground
-                                                            : Color.foregroundMuted
-                                                        font.pixelSize: Style.materialIconSmall
+                                                            ? Theme.Color.foreground
+                                                            : Theme.Color.foregroundMuted
+                                                        font.pixelSize: Theme.Style.materialIconSmall
                                                     }
                                                     onClicked:
                                                         Services.ClipboardService.remove(
@@ -482,8 +482,8 @@ Scope {
                                                 width: parent.width
                                                 text: modelData.preview
                                                 textFormat: Text.PlainText
-                                                color: Color.foreground
-                                                font.pixelSize: Style.fontSmall
+                                                color: Theme.Color.foreground
+                                                font.pixelSize: Theme.Style.fontSmall
                                                 wrapMode: Text.Wrap
                                                 maximumLineCount: modelData.type === "code"
                                                     ? 4
@@ -511,8 +511,8 @@ Scope {
                     Text {
                         anchors.centerIn: parent
                         text: "No clipboard entries"
-                        color: Color.foregroundMuted
-                        font.pixelSize: Style.fontSmall
+                        color: Theme.Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
                         visible: root.visibleEntries.length === 0
                     }
                 }

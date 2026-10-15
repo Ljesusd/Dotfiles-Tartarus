@@ -1,0 +1,15 @@
+[Unit]
+Description=Tartarus Rashin local agent daemon
+After=graphical-session.target tartarus-rashin-llama.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/tartarus-rashin serve
+Environment=TARTARUS_SHELL_ROOT=%h/.config/quickshell/tartarus-shell
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

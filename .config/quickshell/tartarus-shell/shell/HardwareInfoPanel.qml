@@ -3,17 +3,17 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 Item {
     id: root
     property var info: Services.HardwareInfoService
-    property color muted: Color.foregroundMuted
-    property color accent: Color.primary
+    property color muted: Theme.Color.foregroundMuted
+    property color accent: Theme.Color.primary
     property var d: info.data
     Flickable { anchors.fill:parent; contentWidth:width; contentHeight:body.implicitHeight; clip:true; boundsBehavior:Flickable.StopAtBounds; flickableDirection:Flickable.VerticalFlick
-        Column { id:body; width:parent.width; spacing:Style.spacingMedium
-            Text { text:"Información del equipo"; color:Color.foreground; font.pixelSize:Style.fontLarge; font.bold:true }
-            Text { text:info.ready ? "Datos del sistema · actualización cada 60 s" : "Recopilando información…"; color:muted; font.pixelSize:Style.fontSmall }
+        Column { id:body; width:parent.width; spacing:Theme.Style.spacingMedium
+            Text { text:"Información del equipo"; color:Theme.Color.foreground; font.pixelSize:Theme.Style.fontLarge; font.bold:true }
+            Text { text:info.ready ? "Datos del sistema · actualización cada 60 s" : "Recopilando información…"; color:muted; font.pixelSize:Theme.Style.fontSmall }
             Card { title:"SISTEMA Y PLACA"; icon:"computer"
                 Stat {label:"Fabricante";value:d.dmi?.board_vendor||"—"} Stat {label:"Placa";value:d.dmi?.board_name||"—"} Stat {label:"BIOS";value:(d.dmi?.bios_vendor||"—")+" · "+(d.dmi?.bios_version||"—")} Stat {label:"Fecha BIOS";value:d.dmi?.bios_date||"—"} Stat {label:"Sistema";value:d.os?.distro||"—"} Stat {label:"Kernel";value:d.os?.kernel||"—"} Stat {label:"Hostname";value:d.os?.hostname||"—"} Stat {label:"Uptime";value:d.os?.uptime||"—"}
             }
@@ -29,9 +29,9 @@ Item {
                 Repeater {model:d.storage?.mounts||[]; delegate:Stat{required property var modelData;label:modelData.mountpoint+" · "+modelData.fstype;value:modelData.used+" / "+modelData.size+" · "+modelData.use_pct}}
             }
             Card { title:"DISPOSITIVOS"; icon:"devices"
-                Text{ text:"GRÁFICOS";color:accent;font.bold:true;font.pixelSize:Style.fontSmall } Repeater{model:d.devices?.gpus||[];delegate:Stat{required property var modelData;label:modelData.slot;value:modelData.name}}
-                Text{ text:"RED";color:accent;font.bold:true;font.pixelSize:Style.fontSmall } Repeater{model:d.devices?.network||[];delegate:Stat{required property var modelData;label:modelData.slot;value:modelData.name}}
-                Text{ text:"AUDIO";color:accent;font.bold:true;font.pixelSize:Style.fontSmall } Repeater{model:d.devices?.audio||[];delegate:Stat{required property var modelData;label:modelData.slot;value:modelData.name}}
+                Text{ text:"GRÁFICOS";color:accent;font.bold:true;font.pixelSize:Theme.Style.fontSmall } Repeater{model:d.devices?.gpus||[];delegate:Stat{required property var modelData;label:modelData.slot;value:modelData.name}}
+                Text{ text:"RED";color:accent;font.bold:true;font.pixelSize:Theme.Style.fontSmall } Repeater{model:d.devices?.network||[];delegate:Stat{required property var modelData;label:modelData.slot;value:modelData.name}}
+                Text{ text:"AUDIO";color:accent;font.bold:true;font.pixelSize:Theme.Style.fontSmall } Repeater{model:d.devices?.audio||[];delegate:Stat{required property var modelData;label:modelData.slot;value:modelData.name}}
             }
             Card { title:"CAPACIDADES Y SEGURIDAD"; icon:"security"
                 FeatureGroup {title:"SIMD";items:d.cpu?.capabilities?.simd||[]} FeatureGroup{title:"Criptografía";items:d.cpu?.capabilities?.crypto||[]} FeatureGroup{title:"Virtualización";items:d.cpu?.capabilities?.virtualization||[]} FeatureGroup{title:"Mitigaciones del kernel";items:d.cpu?.vulnerabilities||[]}
@@ -44,19 +44,19 @@ Item {
         property string title: ""
         property string icon: ""
         width: root.width
-        radius: Style.cardRadius
-        color: Color.surfaceContainer
-        border.width: Style.panelBorderWidth
-        border.color: Color.outlineVariant
-        implicitHeight: inside.implicitHeight + Style.paddingMedium * 2
+        radius: Theme.Style.cardRadius
+        color: Theme.Color.surfaceContainer
+        border.width: Theme.Style.panelBorderWidth
+        border.color: Theme.Color.outlineVariant
+        implicitHeight: inside.implicitHeight + Theme.Style.paddingMedium * 2
         Column {
             id: inside
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: Style.paddingMedium }
-            spacing: Style.spacingSmall
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: Theme.Style.paddingMedium }
+            spacing: Theme.Style.spacingSmall
             Row {
                 width: parent.width
-                MaterialIcon { text: card.icon; iconColor: accent; iconSize: Style.sectionIconSize; width: 30 }
-                Text { text: card.title; color: accent; font.bold: true; font.pixelSize: Style.fontSmall }
+                Theme.MaterialIcon { text: card.icon; iconColor: accent; iconSize: Theme.Style.sectionIconSize; width: 30 }
+                Text { text: card.title; color: accent; font.bold: true; font.pixelSize: Theme.Style.fontSmall }
             }
         }
     }
@@ -65,15 +65,15 @@ Item {
         property string label: ""
         property string value: ""
         width: parent ? parent.width : root.width
-        spacing: Style.spacingSmall
-        Text { text: stat.label; color: muted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
-        Text { text: stat.value; color: Color.foreground; font.pixelSize: Style.fontSmall; Layout.preferredWidth: Math.min(230, Math.max(110, stat.width * 0.46)); Layout.minimumWidth: 80; elide: Text.ElideRight; horizontalAlignment: Text.AlignRight }
+        spacing: Theme.Style.spacingSmall
+        Text { text: stat.label; color: muted; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
+        Text { text: stat.value; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; Layout.preferredWidth: Math.min(230, Math.max(110, stat.width * 0.46)); Layout.minimumWidth: 80; elide: Text.ElideRight; horizontalAlignment: Text.AlignRight }
     }
     component FeatureGroup: Column {
         property string title: ""
         property var items: []
         width: root.width
-        Text { text: title; color: accent; font.bold: true; font.pixelSize: Style.fontSmall }
+        Text { text: title; color: accent; font.bold: true; font.pixelSize: Theme.Style.fontSmall }
         Flow {
             width: parent.width
             spacing: 4
@@ -84,9 +84,9 @@ Item {
                     width: Math.max(70, featureLabel.implicitWidth + 18)
                     height: 24
                     radius: 5
-                    color: modelData.supported || modelData.is_mitigated ? Color.primaryContainer : Color.surfaceContainer
-                    border.color: Color.outlineVariant
-                    Text { id: featureLabel; anchors.centerIn: parent; text: modelData.name || modelData.status; color: Color.foreground; font.pixelSize: 10; elide: Text.ElideRight }
+                    color: modelData.supported || modelData.is_mitigated ? Theme.Color.primaryContainer : Theme.Color.surfaceContainer
+                    border.color: Theme.Color.outlineVariant
+                    Text { id: featureLabel; anchors.centerIn: parent; text: modelData.name || modelData.status; color: Theme.Color.foreground; font.pixelSize: 10; elide: Text.ElideRight }
                 }
             }
         }

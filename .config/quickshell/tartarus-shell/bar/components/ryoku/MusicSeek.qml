@@ -3,7 +3,7 @@
 // Modified for Tartarus on 2026-10-10: imports, theme and service adapters.
 // See LICENSE and NOTICE.md in this directory.
 import QtQuick
-import "../../../theme"
+import "../../../theme" as Theme
 
 // The seek rail: the part already played is a travelling wave in the sleeve's
 // colour, the rest a flat hairline, with a handle where the two meet. Drag or
@@ -19,8 +19,8 @@ Item {
     property real s: 1
     property real frac: 0
     property bool live: false
-    property color accent: Color.primary
-    property color track: Qt.alpha(Color.foreground, 0.16)
+    property color accent: Theme.Color.primary
+    property color track: Qt.alpha(Theme.Color.foreground, 0.16)
     property bool seekable: true
 
     signal seekRequested(real fraction)

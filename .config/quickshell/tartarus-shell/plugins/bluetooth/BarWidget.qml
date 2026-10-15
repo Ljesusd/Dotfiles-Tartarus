@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -60,16 +60,16 @@ Rectangle {
         return true
     }
 
-    implicitWidth: Style.barControlHeight
+    implicitWidth: Theme.Style.barControlHeight
 
-    implicitHeight: Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
     color: "transparent"
 
-    radius: Style.barControlRadius
+    radius: Theme.Style.barControlRadius
     border.width: 0
 
-    MaterialIcon {
+    Theme.MaterialIcon {
         id: bluetoothText
 
         anchors.centerIn: parent
@@ -80,13 +80,13 @@ Rectangle {
                 ? "bluetooth_connected"
                 : "bluetooth"
 
-        iconSize: Style.barIconNormal
+        iconSize: Theme.Style.barIconNormal
 
         iconColor:
             root.service.available
             && root.service.enabled
-            ? Color.foreground
-            : Color.foregroundMuted
+            ? Theme.Color.foreground
+            : Theme.Color.foregroundMuted
     }
 
     MouseArea {

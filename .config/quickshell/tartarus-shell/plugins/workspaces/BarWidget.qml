@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../utils"
 import "components"
 
@@ -72,7 +72,7 @@ Item {
 
         return workspace
             ? workspace.width
-            : Style.barWorkspaceBaseSize
+            : Theme.Style.barWorkspaceBaseSize
     }
 
     onActiveSpecialIndexChanged: {
@@ -206,28 +206,28 @@ Item {
 
     implicitWidth: root.hasActiveSpecial
         ? Math.max(normalLayer.implicitWidth,
-            specialList.contentWidth + Style.barWorkspaceRailPaddingHorizontal * 2)
+            specialList.contentWidth + Theme.Style.barWorkspaceRailPaddingHorizontal * 2)
         : normalLayer.implicitWidth
     implicitHeight: normalLayer.implicitHeight
 
-    Behavior on implicitWidth { Anim { duration: Style.motionNormal } }
+    Behavior on implicitWidth { Theme.Anim { duration: Theme.Style.motionNormal } }
 
     Rectangle {
         id: normalLayer
 
         implicitWidth:
             workspaceContent.implicitWidth
-            + Style.barWorkspaceRailPaddingHorizontal * 2
+            + Theme.Style.barWorkspaceRailPaddingHorizontal * 2
 
-        implicitHeight: Style.barInnerHeight
+        implicitHeight: Theme.Style.barInnerHeight
 
         width: root.width
         height: implicitHeight
 
-        radius: Style.radiusFull
+        radius: Theme.Style.radiusFull
 
         // Keep a compact rail behind the workspace states, as in Caelestia.
-        color: Color.surfaceContainerHigh
+        color: Theme.Color.surfaceContainerHigh
         border.width: 0
 
         clip: true
@@ -244,31 +244,31 @@ Item {
             height: implicitHeight
             z: 0
             scale: root.hasActiveSpecial
-                ? Style.barWorkspaceBackgroundScale
+                ? Theme.Style.barWorkspaceBackgroundScale
                 : 1.0
             opacity: root.hasActiveSpecial
-                ? Style.barWorkspaceSpecialDimOpacity
+                ? Theme.Style.barWorkspaceSpecialDimOpacity
                 : 1.0
             enabled: !root.hasActiveSpecial
             transformOrigin: Item.Center
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: Style.motionNormal
+                    duration: Theme.Style.motionNormal
                     easing.type: Easing.OutCubic
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: Style.motionFast
+                    duration: Theme.Style.motionFast
                     easing.type: Easing.OutCubic
                 }
             }
 
             Behavior on enabled {
                 PropertyAnimation {
-                    duration: Style.motionFast
+                    duration: Theme.Style.motionFast
                 }
             }
 
@@ -321,9 +321,9 @@ Item {
                         ? startItem.height
                         : 0
 
-                    radius: Style.radiusSmall
+                    radius: Theme.Style.radiusSmall
 
-                    color: Color.surfaceHover
+                    color: Theme.Color.surfaceHover
                     opacity: 0.72
                     z: 0
                 }
@@ -374,7 +374,7 @@ Item {
                 visible: !root.hasActiveSpecial
                 source: workspaceRow
                 colorization: 1.0
-                colorizationColor: Color.onPrimary
+                colorizationColor: Theme.Color.onPrimary
                 maskEnabled: true
                 maskSource: activeColourMask
                 autoPaddingEnabled: false
@@ -384,7 +384,7 @@ Item {
                 id: workspaceRow
 
                 anchors.centerIn: parent
-                spacing: Style.barWorkspaceSpacing
+                spacing: Theme.Style.barWorkspaceSpacing
                 z: 2
 
                 Repeater {
@@ -428,14 +428,14 @@ Item {
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: Style.motionNormal
+                    duration: Theme.Style.motionNormal
                     easing.type: Easing.OutCubic
                 }
             }
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: Style.motionNormal
+                    duration: Theme.Style.motionNormal
                     easing.type: Easing.OutCubic
                 }
             }
@@ -446,8 +446,8 @@ Item {
                 x: (normalLayer.width - width) / 2
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(contentWidth,
-                    normalLayer.width - Style.barWorkspaceRailPaddingHorizontal * 2)
-                height: Style.barInnerHeight
+                    normalLayer.width - Theme.Style.barWorkspaceRailPaddingHorizontal * 2)
+                height: Theme.Style.barInnerHeight
 
                 clip: true
                 interactive: false
@@ -457,21 +457,21 @@ Item {
                 model: root.specialWorkspaces
                 currentIndex: root.displayedSpecialIndex
                 highlightFollowsCurrentItem: true
-                highlightMoveDuration: Style.motionNormal
-                highlightResizeDuration: Style.motionNormal
+                highlightMoveDuration: Theme.Style.motionNormal
+                highlightResizeDuration: Theme.Style.motionNormal
 
                 highlight: Item {
                     width: specialList.currentItem
                         ? specialList.currentItem.width
-                        : Style.barWorkspaceBaseSize
+                        : Theme.Style.barWorkspaceBaseSize
                     height: specialList.height
 
                     MaterialShape {
                         anchors.centerIn: parent
                         width: parent.width
-                        height: Style.barWorkspaceActiveHeight
+                        height: Theme.Style.barWorkspaceActiveHeight
                         shape: MaterialShape.Pill
-                        color: Color.primary
+                        color: Theme.Color.primary
                     }
                 }
 
@@ -492,34 +492,34 @@ Item {
                     readonly property int windowCount:
                         Math.min(windows.length, root.maxWindowIcons)
 
-                    width: Math.max(Style.barWorkspaceBaseSize,
-                        specialContent.implicitWidth + Style.spacingSm)
+                    width: Math.max(Theme.Style.barWorkspaceBaseSize,
+                        specialContent.implicitWidth + Theme.Style.spacingSm)
                     height: specialList.height
                     opacity: specialItem.active ? 1.0 : 0.72
                     scale: specialItem.active ? 1.0 : 0.86
                     transformOrigin: Item.Center
 
-                    Behavior on opacity { Anim { duration: Style.motionFast } }
-                    Behavior on scale { Anim { duration: Style.motionNormal; easing.type: Easing.OutBack } }
+                    Behavior on opacity { Theme.Anim { duration: Theme.Style.motionFast } }
+                    Behavior on scale { Theme.Anim { duration: Theme.Style.motionNormal; easing.type: Easing.OutBack } }
 
                     Row {
                         id: specialContent
                         anchors.centerIn: parent
-                        spacing: Style.barWorkspaceContentSpacing
+                        spacing: Theme.Style.barWorkspaceContentSpacing
 
                         Item {
-                            width: Style.barIconNormal
-                            height: Style.barIconNormal
+                            width: Theme.Style.barIconNormal
+                            height: Theme.Style.barIconNormal
 
-                            MaterialIcon {
+                            Theme.MaterialIcon {
                                 anchors.centerIn: parent
                                 text: root.plugin.service.specialWorkspaceIcon(
                                     specialItem.specialKey
                                 )
-                                iconSize: Style.barIconNormal
+                                iconSize: Theme.Style.barIconNormal
                                 iconColor: specialItem.active
-                                    ? Color.onPrimary
-                                    : Color.onSurfaceVariant
+                                    ? Theme.Color.onPrimary
+                                    : Theme.Color.onSurfaceVariant
                             }
                         }
 
@@ -528,18 +528,18 @@ Item {
 
                             Item {
                                 required property int index
-                                width: Style.barIconNormal
-                                height: Style.barIconNormal
+                                width: Theme.Style.barIconNormal
+                                height: Theme.Style.barIconNormal
 
-                                MaterialIcon {
+                                Theme.MaterialIcon {
                                     anchors.centerIn: parent
                                     text: Icons.iconForWindow(
                                         specialItem.windows[index], "apps"
                                     )
-                                    iconSize: Style.barIconNormal
+                                    iconSize: Theme.Style.barIconNormal
                                     iconColor: specialItem.active
-                                        ? Color.onPrimary
-                                        : Color.onSurfaceVariant
+                                        ? Theme.Color.onPrimary
+                                        : Theme.Color.onSurfaceVariant
                                     fill: 0
                                     grade: 0
                                 }

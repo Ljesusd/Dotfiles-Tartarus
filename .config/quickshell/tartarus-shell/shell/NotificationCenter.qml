@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 import "../launcher/components" as LauncherComponents
 
 Scope {
@@ -17,15 +17,15 @@ Scope {
     readonly property var groups: Services.NotificationService.groupedHistory
     readonly property real panelWidth: Math.min(
         440,
-        Math.max(300, (root.monitorScreen?.width ?? 1280) - Style.spacingLarge * 2)
+        Math.max(300, (root.monitorScreen?.width ?? 1280) - Theme.Style.spacingLarge * 2)
     )
     readonly property real panelHeight: Math.min(
         720,
         Math.max(
             420,
             (root.monitorScreen?.height ?? 800)
-                - Style.barHeight
-                - Style.paddingLarge * 2
+                - Theme.Style.barHeight
+                - Theme.Style.paddingLarge * 2
         )
     )
 
@@ -39,7 +39,7 @@ Scope {
             Math.max(1, root.monitorScreen?.width ?? 1280)
         )
         implicitHeight: root.panelHeight
-            + Style.barPopupGap * 2
+            + Theme.Style.barPopupGap * 2
             + notificationSurface.shadowPadding
         color: "transparent"
         visible: Services.NotificationService.centerOpen
@@ -66,9 +66,9 @@ Scope {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: Style.paddingLarge
-                    anchors.bottomMargin: Style.paddingLarge + Style.barPopupGap * 2
-                    spacing: Style.spacingMedium
+                    anchors.margins: Theme.Style.paddingLarge
+                    anchors.bottomMargin: Theme.Style.paddingLarge + Theme.Style.barPopupGap * 2
+                    spacing: Theme.Style.spacingMedium
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -78,14 +78,14 @@ Scope {
                         spacing: 0
                         Text {
                             text: "Notificaciones"
-                            color: Color.foreground
-                            font.pixelSize: Style.fontNormal
+                            color: Theme.Color.foreground
+                            font.pixelSize: Theme.Style.fontNormal
                             font.bold: true
                         }
                         Text {
                             text: `${historyList.count} aplicaciones · ${Services.NotificationService.history.count} avisos`
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                         }
                     }
 
@@ -95,14 +95,14 @@ Scope {
                         ToolTip.text: Services.NotificationService.dnd
                             ? "Desactivar no molestar"
                             : "Activar no molestar"
-                        contentItem: MaterialIcon {
+                        contentItem: Theme.MaterialIcon {
                             text: Services.NotificationService.dnd
                                 ? "notifications_off"
                                 : "notifications"
                             color: Services.NotificationService.dnd
-                                ? Color.tertiaryContainer
-                                : Color.foregroundMuted
-                            font.pixelSize: Style.materialIconMedium
+                                ? Theme.Color.tertiaryContainer
+                                : Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconMedium
                         }
                         onClicked: Services.NotificationService.toggleDnd(
                             root.monitorScreen.name
@@ -113,10 +113,10 @@ Scope {
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
                         ToolTip.text: "Limpiar historial"
-                        contentItem: MaterialIcon {
+                        contentItem: Theme.MaterialIcon {
                             text: "delete_sweep"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.materialIconMedium
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconMedium
                         }
                         onClicked: Services.NotificationService.clearHistory()
                     }
@@ -125,10 +125,10 @@ Scope {
                         display: AbstractButton.IconOnly
                         ToolTip.visible: hovered
                         ToolTip.text: "Cerrar"
-                        contentItem: MaterialIcon {
+                        contentItem: Theme.MaterialIcon {
                             text: "close"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.materialIconMedium
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconMedium
                         }
                         onClicked: {
                             root.monitorContext.closeNotificationCenter()
@@ -140,7 +140,7 @@ Scope {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: Color.surfaceHover
+                    color: Theme.Color.surfaceHover
                 }
 
                 ListView {
@@ -148,7 +148,7 @@ Scope {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
                     model: root.groups
                     verticalLayoutDirection: ListView.TopToBottom
 
@@ -187,7 +187,7 @@ Scope {
                         Column {
                             id: groupContent
                             width: parent.width
-                            spacing: Style.spacingSmall
+                            spacing: Theme.Style.spacingSmall
 
                             NotificationCard {
                                 width: parent.width
@@ -215,17 +215,17 @@ Scope {
                                 onClicked: groupItem.expanded = !groupItem.expanded
 
                                 background: Rectangle {
-                                    radius: Style.controlRadius
+                                    radius: Theme.Style.controlRadius
                                     color: parent.hovered
-                                        ? Color.surfaceHover
-                                        : Color.surfaceElevated
+                                        ? Theme.Color.surfaceHover
+                                        : Theme.Color.surfaceElevated
                                     border.width: 1
-                                    border.color: Color.outlineVariant
+                                    border.color: Theme.Color.outlineVariant
                                 }
                                 contentItem: Text {
                                     text: parent.text
-                                    color: Color.foregroundMuted
-                                    font.pixelSize: Style.fontSmall
+                                    color: Theme.Color.foregroundMuted
+                                    font.pixelSize: Theme.Style.fontSmall
                                     horizontalAlignment: Text.AlignHCenter
                                     verticalAlignment: Text.AlignVCenter
                                 }
@@ -233,7 +233,7 @@ Scope {
 
                             Column {
                                 width: parent.width
-                                spacing: Style.spacingSmall
+                                spacing: Theme.Style.spacingSmall
                                 visible: groupItem.expanded
 
                                 Repeater {
@@ -262,8 +262,8 @@ Scope {
                     Text {
                         anchors.centerIn: parent
                         text: "No hay notificaciones"
-                        color: Color.foregroundMuted
-                        font.pixelSize: Style.fontSmall
+                        color: Theme.Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
                         visible: historyList.count === 0
                     }
                 }
@@ -271,41 +271,41 @@ Scope {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: Color.surfaceHover
+                    color: Theme.Color.surfaceHover
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
-                    Layout.leftMargin: Style.paddingSmall
-                    Layout.rightMargin: Style.paddingSmall
-                    radius: Style.controlRadius
-                    color: Color.surfaceElevated
+                    Layout.leftMargin: Theme.Style.paddingSmall
+                    Layout.rightMargin: Theme.Style.paddingSmall
+                    radius: Theme.Style.controlRadius
+                    color: Theme.Color.surfaceElevated
                     border.width: 1
-                    border.color: Color.outlineVariant
+                    border.color: Theme.Color.outlineVariant
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Style.paddingSmall
-                        anchors.rightMargin: Style.paddingSmall
-                        spacing: Style.spacingSmall
+                        anchors.leftMargin: Theme.Style.paddingSmall
+                        anchors.rightMargin: Theme.Style.paddingSmall
+                        spacing: Theme.Style.spacingSmall
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: Services.NotificationService.dnd
                                 ? "notifications_off"
                                 : "notifications"
                             color: Services.NotificationService.dnd
-                                ? Color.tertiaryContainer
-                                : Color.foregroundMuted
-                            font.pixelSize: Style.materialIconSmall
+                                ? Theme.Color.tertiaryContainer
+                                : Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.materialIconSmall
                         }
                         Text {
                             Layout.fillWidth: true
                             text: Services.NotificationService.dnd
                                 ? "No molestar activo"
                                 : "Notificaciones activas"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                             elide: Text.ElideRight
                         }
                     }

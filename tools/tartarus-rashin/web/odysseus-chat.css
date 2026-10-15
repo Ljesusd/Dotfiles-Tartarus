@@ -1,0 +1,575 @@
+/* Tartarus adaptation of the Odysseus chat workspace. */
+
+#page-chat .chat-layout {
+  grid-template-columns: minmax(238px, 278px) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+#page-chat .session-panel {
+  padding: 12px;
+  border-color: #3d4664;
+  background: linear-gradient(155deg, rgba(35, 42, 64, .96), rgba(24, 29, 44, .98));
+}
+
+#page-chat .session-actions button {
+  min-height: 38px;
+  font-weight: 650;
+}
+
+#page-chat .session-actions .primary::first-letter,
+#page-chat .session-actions .secondary::first-letter {
+  color: var(--accent);
+}
+
+.workspace-row {
+  position: relative;
+  min-height: 44px;
+  margin: 3px 0;
+  border: 1px solid transparent;
+  transition: background .16s ease, border-color .16s ease;
+}
+
+.workspace-row:hover,
+.workspace-row.active {
+  border-color: #46537a;
+  background: #2b3453;
+}
+
+.workspace-select {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 9px;
+  padding: 8px 8px 8px 10px;
+  color: var(--muted);
+}
+
+.workspace-select > svg,
+.workspace-select > span:first-child svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.project-row.active .workspace-select,
+.session-row.active .workspace-select,
+.workspace-select:hover {
+  color: var(--text);
+}
+
+.workspace-title,
+.workspace-title-wrap {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.workspace-title-wrap strong {
+  max-width: 175px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 550;
+}
+
+.workspace-title-wrap small {
+  color: #7f8aa8;
+  font-size: 10px;
+}
+
+.workspace-menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 3px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8590ad;
+  opacity: 0;
+  transition: opacity .15s ease, background .15s ease, color .15s ease;
+}
+
+.workspace-row:hover .workspace-menu-toggle,
+.workspace-row.active .workspace-menu-toggle,
+.workspace-menu-toggle:focus-visible {
+  opacity: 1;
+}
+
+.workspace-menu-toggle:hover {
+  background: #404b70;
+  color: var(--text);
+}
+
+.workspace-menu-toggle svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+.workspace-menu-toggle svg,
+.workspace-menu-item svg,
+.rashin-dialog svg,
+.odysseus-composer svg,
+.attachment-card svg,
+.queue-item svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
+.workspace-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 2px);
+  right: 4px;
+  display: none;
+  min-width: 154px;
+  padding: 5px;
+  border: 1px solid #4a5579;
+  border-radius: 10px;
+  background: #171c2b;
+  box-shadow: 0 16px 34px #080a1075;
+}
+
+.workspace-menu.open {
+  display: grid;
+}
+
+.workspace-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  font-size: 12px;
+}
+
+.workspace-menu-item:hover {
+  background: #2d3858;
+  color: var(--text);
+}
+
+.workspace-menu-item.danger:hover {
+  background: #492b40;
+  color: var(--danger);
+}
+
+.odysseus-composer {
+  position: relative;
+  margin: 0 16px 16px;
+  padding: 0 !important;
+  overflow: visible;
+  border: 1px solid #46537a;
+  border-radius: 15px;
+  background: #151a29;
+  box-shadow: 0 12px 30px #080a1024;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.odysseus-composer:focus-within,
+.odysseus-composer.dragging {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px #b493ff26, 0 16px 36px #080a1040;
+}
+
+.odysseus-composer textarea#question {
+  display: block;
+  width: 100%;
+  min-height: 112px;
+  max-height: 310px;
+  padding: 17px 18px 8px;
+  border: 0;
+  border-radius: 15px 15px 0 0;
+  background: transparent;
+  color: var(--text);
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.odysseus-composer textarea#question:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.odysseus-composer .attachment-preview {
+  display: flex;
+  gap: 7px;
+  margin: 0 12px 4px;
+  padding: 0 6px 4px;
+  overflow-x: auto;
+}
+
+.attachment-card {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  max-width: 235px;
+  gap: 7px;
+  padding: 6px 7px;
+  border: 1px solid #455175;
+  border-radius: 9px;
+  background: #252d48;
+}
+
+.attachment-visual {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+  color: var(--accent);
+  background: #353d5d;
+}
+
+.attachment-visual svg {
+  width: 14px;
+  height: 14px;
+}
+
+.attachment-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.attachment-info strong,
+.attachment-info small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-info strong {
+  max-width: 150px;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.attachment-info small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.attachment-remove,
+.queue-cancel {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #8994b0;
+}
+
+.attachment-remove:hover,
+.queue-cancel:hover {
+  background: #4b3048;
+  color: var(--danger);
+}
+
+.queue-cancel.resume {
+  color: var(--accent);
+}
+
+.queue-cancel.resume:hover {
+  background: #3d315d;
+  color: #d6c3ff;
+}
+
+.odysseus-composer .composer-row {
+  justify-content: flex-end;
+  min-height: 50px;
+  margin: 0;
+  padding: 7px 10px 9px;
+  border-top: 1px solid #2e3855;
+}
+
+.odysseus-composer .attach-button,
+.odysseus-composer #clear-attachments,
+.odysseus-composer button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+}
+
+.odysseus-composer .attach-button {
+  width: 34px;
+  border-radius: 9px;
+  font-size: 0;
+}
+
+.odysseus-composer .attach-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.odysseus-composer #clear-attachments {
+  padding: 6px 9px;
+  font-size: 11px;
+}
+
+.odysseus-composer #clear-attachments svg {
+  width: 13px;
+  height: 13px;
+}
+
+.odysseus-composer button[type="submit"] {
+  min-width: 92px;
+  padding: 7px 14px;
+}
+
+.odysseus-composer button[type="submit"] svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+}
+
+.odysseus-composer #working {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-right: auto;
+  color: var(--accent2);
+  font-size: 11px;
+}
+
+.attach-menu {
+  bottom: 47px;
+  min-width: 190px;
+  padding: 6px;
+  border-color: #4a5579;
+  background: #171c2b;
+}
+
+.attach-menu button {
+  padding: 9px 11px;
+}
+
+.odysseus-queue-item {
+  min-height: 49px;
+  gap: 10px;
+  padding: 9px 3px;
+  border-color: #343e5b;
+}
+
+.odysseus-queue-item > .rashin-spinner {
+  flex: 0 0 auto;
+}
+
+.queue-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.queue-title,
+.queue-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-title {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.queue-detail,
+.queue-state {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.queue-state {
+  flex: 0 0 auto;
+  color: var(--accent2);
+}
+
+.rashin-spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid #536184;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: rashin-spin .8s linear infinite;
+}
+
+@keyframes rashin-spin {
+  to { transform: rotate(360deg); }
+}
+
+.odysseus-empty {
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  gap: 8px;
+  text-align: center;
+}
+
+.odysseus-empty .empty-chat-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 5px;
+  border: 1px solid #5b4c88;
+  border-radius: 13px;
+  color: var(--accent);
+  background: #2d2946;
+  font-size: 20px;
+}
+
+.odysseus-empty small {
+  color: var(--muted);
+}
+
+.rashin-dialog-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #080a10a8;
+  backdrop-filter: blur(6px);
+}
+
+.rashin-dialog {
+  width: min(430px, 100%);
+  padding: 20px;
+  border: 1px solid #53618a;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #272f49, #1a1f31);
+  box-shadow: 0 24px 80px #05060c99;
+}
+
+.rashin-dialog-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rashin-dialog-heading h3 {
+  margin: 0;
+}
+
+.rashin-dialog-close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.rashin-dialog-copy {
+  margin: 17px 0 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.rashin-dialog-input {
+  margin: 0;
+}
+
+.rashin-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.rashin-dialog-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.rashin-danger-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid #b35d78;
+  border-radius: 9px;
+  background: #5a2944;
+  color: #ffd6df;
+  font-weight: 700;
+}
+
+.rashin-danger-button:hover {
+  border-color: #ff91aa;
+  background: #71304f;
+}
+
+#rashin-toast-host {
+  position: fixed;
+  z-index: 120;
+  right: 22px;
+  bottom: 22px;
+  display: grid;
+  gap: 8px;
+  max-width: min(390px, calc(100vw - 44px));
+}
+
+.rashin-toast {
+  padding: 11px 14px;
+  border: 1px solid #52618b;
+  border-radius: 10px;
+  background: #252e49;
+  color: var(--text);
+  box-shadow: 0 14px 30px #080a1066;
+  font-size: 12px;
+}
+
+.rashin-toast.error {
+  border-color: #a65d78;
+  background: #43283d;
+  color: #ffd4df;
+}
+
+.message.cancelled {
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  #page-chat .chat-layout { grid-template-columns: 1fr; }
+  #page-chat .session-panel { height: auto; min-height: 0; }
+  .workspace-menu-toggle { opacity: 1; }
+  .odysseus-composer { margin: 0 9px 9px; }
+  .queue-state { display: none; }
+}

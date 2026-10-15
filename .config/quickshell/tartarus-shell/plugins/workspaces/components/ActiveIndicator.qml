@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../../../theme"
+import "../../../theme" as Theme
 
 Rectangle {
     id: root
@@ -9,7 +9,7 @@ Rectangle {
     property int targetIndex: -1
     property int groupStart: -1
     readonly property real pillHeight:
-        Style.barWorkspaceActiveHeight
+        Theme.Style.barWorkspaceActiveHeight
 
     property real leftEdge: 0
     property real rightEdge: 0
@@ -31,15 +31,15 @@ Rectangle {
     )
     height: root.pillHeight
 
-    radius: Style.radiusFull
-    color: Color.primary
+    radius: Theme.Style.radiusFull
+    color: Theme.Color.primary
 
     function movementDuration(distance) {
         return Math.min(
-            Style.barWorkspaceTrailMaxDuration,
-            Style.barWorkspaceTrailBaseDuration
+            Theme.Style.barWorkspaceTrailMaxDuration,
+            Theme.Style.barWorkspaceTrailBaseDuration
                 + distance
-                * Style.barWorkspaceTrailDistanceFactor
+                * Theme.Style.barWorkspaceTrailDistanceFactor
         )
     }
 
@@ -53,12 +53,12 @@ Rectangle {
 
         const nextLeft =
             root.targetItem.x
-            - Style.barWorkspaceActivePaddingHorizontal
+            - Theme.Style.barWorkspaceActivePaddingHorizontal
 
         const nextRight =
             root.targetItem.x
             + root.targetItem.width
-            + Style.barWorkspaceActivePaddingHorizontal
+            + Theme.Style.barWorkspaceActivePaddingHorizontal
 
         const nextCenter =
             (nextLeft + nextRight) / 2
@@ -101,7 +101,7 @@ Rectangle {
 
         const trailingDuration =
             leadingDuration
-            + Style.barWorkspaceTrailLag
+            + Theme.Style.barWorkspaceTrailLag
 
         leftAnimation.stop()
         rightAnimation.stop()
@@ -152,7 +152,7 @@ Rectangle {
         root.scheduleSync()
     }
 
-    Anim {
+    Theme.Anim {
         id: leftAnimation
 
         target: root
@@ -160,7 +160,7 @@ Rectangle {
         easing.type: Easing.OutCubic
     }
 
-    Anim {
+    Theme.Anim {
         id: rightAnimation
 
         target: root

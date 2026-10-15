@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 
-import "../../theme"
+import "../../theme" as Theme
 import "../components"
 
 Item {
@@ -22,7 +22,7 @@ Item {
     readonly property int wallpaperCardWidth: Math.max(1, Math.min(280,
         Math.floor((wallpaperList.width / root.carouselItemCount - 20) / 0.9)))
     readonly property int wallpaperCardHeight: Math.round(root.wallpaperCardWidth * 9 / 16)
-    readonly property int carouselDuration: Style.launcherMotionPanel
+    readonly property int carouselDuration: Theme.Style.launcherMotionPanel
     readonly property int carouselItemCount: root.visibleSlots
     readonly property string monitorWallpaperPath:
         root.wallpapers.currentPathForMonitor(root.monitorName)
@@ -89,43 +89,43 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.leftMargin: Style.paddingXLarge
-        anchors.rightMargin: Style.paddingXLarge
-        anchors.topMargin: Style.paddingLarge
-        anchors.bottomMargin: Style.paddingLarge
+        anchors.leftMargin: Theme.Style.paddingXLarge
+        anchors.rightMargin: Theme.Style.paddingXLarge
+        anchors.topMargin: Theme.Style.paddingLarge
+        anchors.bottomMargin: Theme.Style.paddingLarge
 
-        spacing: Style.spacingLarge
+        spacing: Theme.Style.spacingLarge
 
         RowLayout {
             visible: false
             Layout.fillWidth: true
 
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
-            MaterialIcon {
+            Theme.MaterialIcon {
                 text: "photo"
-                iconSize: Style.materialIconMedium
-                iconColor: Color.primary
+                iconSize: Theme.Style.materialIconMedium
+                iconColor: Theme.Color.primary
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
 
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
 
                 Text {
                     text: "Wallpaper"
 
-                    font.pixelSize: Style.fontNormal
+                    font.pixelSize: Theme.Style.fontNormal
                     font.weight: Font.DemiBold
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                 }
 
                 Text {
                     text: "Pick a wallpaper image"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
             }
 
@@ -134,8 +134,8 @@ Item {
                     ? "Current"
                     : ""
 
-                font.pixelSize: Style.fontSmall
-                color: Color.tertiary
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.tertiary
                 opacity: root.monitorWallpaperPath ? 1 : 0
             }
         }
@@ -143,10 +143,10 @@ Item {
             Item {
                 id: wallpaperViewport
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.wallpaperCardHeight + Style.paddingLarge * 2
-                Layout.minimumHeight: root.wallpaperCardHeight + Style.paddingLarge * 2
-                Layout.leftMargin: Style.spacingLarge
-                Layout.rightMargin: Style.spacingLarge
+                Layout.preferredHeight: root.wallpaperCardHeight + Theme.Style.paddingLarge * 2
+                Layout.minimumHeight: root.wallpaperCardHeight + Theme.Style.paddingLarge * 2
+                Layout.leftMargin: Theme.Style.spacingLarge
+                Layout.rightMargin: Theme.Style.spacingLarge
 
             MouseArea {
                 id: wallpaperWheelArea
@@ -307,40 +307,40 @@ Item {
                 property bool hovered: false
                 anchors {
                     left: parent.left
-                    leftMargin: Style.spacingSmall
+                    leftMargin: Theme.Style.spacingSmall
                     verticalCenter: parent.verticalCenter
                 }
                 width: 34
                 height: 34
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 color: prevButton.hovered
-                    ? Color.surfaceHover
-                    : Color.surface
-                border.width: Style.panelBorderWidth
+                    ? Theme.Color.surfaceHover
+                    : Theme.Color.surface
+                border.width: Theme.Style.panelBorderWidth
                 border.color: prevButton.hovered
-                    ? Color.outline
-                    : Color.outlineVariant
+                    ? Theme.Color.outline
+                    : Theme.Color.outlineVariant
                 z: 2
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: Style.launcherMotionFast
+                        duration: Theme.Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
 
                 Behavior on border.color {
                     ColorAnimation {
-                        duration: Style.launcherMotionFast
+                        duration: Theme.Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     anchors.centerIn: parent
                     text: "chevron_left"
-                    iconSize: Style.materialIconSmall
-                    iconColor: Color.foreground
+                    iconSize: Theme.Style.materialIconSmall
+                    iconColor: Theme.Color.foreground
                 }
 
                 MouseArea {
@@ -359,40 +359,40 @@ Item {
                 property bool hovered: false
                 anchors {
                     right: parent.right
-                    rightMargin: Style.spacingSmall
+                    rightMargin: Theme.Style.spacingSmall
                     verticalCenter: parent.verticalCenter
                 }
                 width: 34
                 height: 34
-                radius: Style.radiusFull
+                radius: Theme.Style.radiusFull
                 color: nextButton.hovered
-                    ? Color.surfaceHover
-                    : Color.surface
-                border.width: Style.panelBorderWidth
+                    ? Theme.Color.surfaceHover
+                    : Theme.Color.surface
+                border.width: Theme.Style.panelBorderWidth
                 border.color: nextButton.hovered
-                    ? Color.outline
-                    : Color.outlineVariant
+                    ? Theme.Color.outline
+                    : Theme.Color.outlineVariant
                 z: 2
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: Style.launcherMotionFast
+                        duration: Theme.Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
 
                 Behavior on border.color {
                     ColorAnimation {
-                        duration: Style.launcherMotionFast
+                        duration: Theme.Style.launcherMotionFast
                         easing.type: Easing.OutCubic
                     }
                 }
 
-                MaterialIcon {
+                Theme.MaterialIcon {
                     anchors.centerIn: parent
                     text: "chevron_right"
-                    iconSize: Style.materialIconSmall
-                    iconColor: Color.foreground
+                    iconSize: Theme.Style.materialIconSmall
+                    iconColor: Theme.Color.foreground
                 }
 
                 MouseArea {
@@ -408,7 +408,7 @@ Item {
 
             Column {
                 anchors.centerIn: wallpaperList
-                spacing: Style.spacingMedium
+                spacing: Theme.Style.spacingMedium
                 visible: root.active && wallpaperList.count === 0
                 width: Math.min(parent.width * 0.8, 320)
 
@@ -419,8 +419,8 @@ Item {
                     horizontalAlignment: Text.AlignHCenter
                     lineHeight: 1.35
                     lineHeightMode: Text.ProportionalHeight
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                     font.weight: Font.Medium
                     width: parent.width
                     wrapMode: Text.WordWrap
@@ -430,25 +430,25 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     width: Math.min(parent.width, 240)
-                    height: Style.itemHeight
-                    radius: Style.radiusMedium
-                    color: Color.primary
-                    border.color: Color.primary
+                    height: Theme.Style.itemHeight
+                    radius: Theme.Style.radiusMedium
+                    color: Theme.Color.primary
+                    border.color: Theme.Color.primary
 
                     RowLayout {
                         anchors.centerIn: parent
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: "folder_open"
-                            iconSize: Style.materialIconSmall
-                            iconColor: Color.onPrimary
+                            iconSize: Theme.Style.materialIconSmall
+                            iconColor: Theme.Color.onPrimary
                         }
 
                         Text {
                             text: "Open wallpapers folder"
-                            color: Color.onPrimary
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.onPrimary
+                            font.pixelSize: Theme.Style.fontSmall
                             font.weight: Font.Medium
                         }
                     }

@@ -4,7 +4,7 @@ import QtQuick.Controls.Basic as Controls
 import Quickshell.Wayland
 import "../bar/components"
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Item {
     id: root
@@ -67,11 +67,11 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Style.panelRadius
+        radius: Theme.Style.panelRadius
         color: "transparent"
         visible: root.mediaVisible
         border.width: root.dragging ? 1 : 0
-        border.color: Color.primary
+        border.color: Theme.Color.primary
     }
 
     VerticalMusicCard {

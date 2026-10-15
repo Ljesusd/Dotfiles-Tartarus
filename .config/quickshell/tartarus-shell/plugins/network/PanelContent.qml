@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -57,7 +57,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: Style.barPopupGap
+        anchors.margins: Theme.Style.barPopupGap
 
         radius: 0
         color: "transparent"
@@ -79,10 +79,10 @@ Item {
 
             anchors {
                 fill: parent
-                margins: Style.paddingLarge
+                margins: Theme.Style.paddingLarge
             }
 
-            spacing: Style.spacingMedium
+            spacing: Theme.Style.spacingMedium
 
             RowLayout {
                 id: headerRow
@@ -96,21 +96,21 @@ Item {
 
                     text: "Network"
 
-                    font.pixelSize: Style.fontNormal
-                    color: Color.foreground
+                    font.pixelSize: Theme.Style.fontNormal
+                    color: Theme.Color.foreground
                 }
 
                 Rectangle {
                     implicitWidth: wifiToggleText.implicitWidth
-                        + Style.paddingMedium * 2
+                        + Theme.Style.paddingMedium * 2
 
                     implicitHeight: 30
 
-                    radius: Style.radiusFull
+                    radius: Theme.Style.radiusFull
 
                     color: wifiToggleHover.hovered
-                        ? Color.surfaceHover
-                        : Color.surface
+                        ? Theme.Color.surfaceHover
+                        : Theme.Color.surface
 
                     Text {
                         id: wifiToggleText
@@ -121,8 +121,8 @@ Item {
                             ? "Wi-Fi On"
                             : "Wi-Fi Off"
 
-                        font.pixelSize: Style.fontSmall
-                        color: Color.foregroundMuted
+                        font.pixelSize: Theme.Style.fontSmall
+                        color: Theme.Color.foregroundMuted
                     }
 
                     HoverHandler {
@@ -147,19 +147,19 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.spacingMedium
+                spacing: Theme.Style.spacingMedium
 
                 Repeater {
                     model: [
-                        { label: "↑", value: root.service.uploadSpeed, color: Color.accent },
-                        { label: "↓", value: root.service.downloadSpeed, color: Color.primary }
+                        { label: "↑", value: root.service.uploadSpeed, color: Theme.Color.accent },
+                        { label: "↓", value: root.service.downloadSpeed, color: Theme.Color.primary }
                     ]
                     delegate: RowLayout {
                         required property var modelData
                         readonly property real rate: Number(modelData.value) || 0
                         readonly property color rateColor: modelData.color
                         Layout.fillWidth: true
-                        spacing: Style.spacingXs
+                        spacing: Theme.Style.spacingXs
                         Text { text: modelData.label; color: modelData.color; font.bold: true }
                         Row {
                             spacing: 2
@@ -175,7 +175,7 @@ Item {
                                 }
                             }
                         }
-                        Text { text: root.service.formatRate(rate); color: Color.foregroundMuted; font.pixelSize: Style.fontSmall }
+                        Text { text: root.service.formatRate(rate); color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall }
                     }
                 }
             }
@@ -185,25 +185,25 @@ Item {
 
                 Layout.fillWidth: true
 
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
                 Text {
                     Layout.fillWidth: true
 
                     text: "Ethernet"
 
-                    font.pixelSize: Style.fontSmall
-                    color: Color.foregroundMuted
+                    font.pixelSize: Theme.Style.fontSmall
+                    color: Theme.Color.foregroundMuted
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
 
                     implicitHeight: ethernetContent.implicitHeight
-                        + Style.paddingMedium * 2
+                        + Theme.Style.paddingMedium * 2
 
-                    radius: Style.radiusMedium
-                    color: Color.surface
+                    radius: Theme.Style.radiusMedium
+                    color: Theme.Color.surface
 
                     RowLayout {
                         id: ethernetContent
@@ -212,19 +212,19 @@ Item {
                             left: parent.left
                             right: parent.right
                             verticalCenter: parent.verticalCenter
-                            leftMargin: Style.paddingMedium
-                            rightMargin: Style.paddingMedium
+                            leftMargin: Theme.Style.paddingMedium
+                            rightMargin: Theme.Style.paddingMedium
                         }
 
-                        spacing: Style.spacingMedium
+                        spacing: Theme.Style.spacingMedium
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: "lan"
 
-                            iconSize: Style.iconMedium
+                            iconSize: Theme.Style.iconMedium
                             iconColor: root.service.ethernetConnected
-                                ? Color.accent
-                                : Color.foregroundMuted
+                                ? Theme.Color.accent
+                                : Theme.Color.foregroundMuted
                         }
 
                         ColumnLayout {
@@ -240,8 +240,8 @@ Item {
                                     ? root.service.ethernetName
                                     : root.service.ethernetInterface
 
-                                font.pixelSize: Style.fontNormal
-                                color: Color.foreground
+                                font.pixelSize: Theme.Style.fontNormal
+                                color: Theme.Color.foreground
 
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
@@ -256,8 +256,8 @@ Item {
 
                                 text: root.service.ethernetInterface
 
-                                font.pixelSize: Style.fontSmall
-                                color: Color.foregroundMuted
+                                font.pixelSize: Theme.Style.fontSmall
+                                color: Theme.Color.foregroundMuted
 
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
@@ -268,8 +268,8 @@ Item {
 
                                 text: root.ethernetDetails
 
-                                font.pixelSize: Style.fontSmall
-                                color: Color.foregroundMuted
+                                font.pixelSize: Theme.Style.fontSmall
+                                color: Theme.Color.foregroundMuted
 
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
@@ -282,15 +282,15 @@ Item {
                                 || root.service.ethernetHasLink
 
                             implicitWidth: ethernetActionText.implicitWidth
-                                + Style.paddingMedium * 2
+                                + Theme.Style.paddingMedium * 2
 
                             implicitHeight: 30
 
-                            radius: Style.radiusSmall
+                            radius: Theme.Style.radiusSmall
 
                             color: ethernetActionHover.hovered
-                                ? Color.surfaceHover
-                                : Color.background
+                                ? Theme.Color.surfaceHover
+                                : Theme.Color.background
 
                             Text {
                                 id: ethernetActionText
@@ -301,8 +301,8 @@ Item {
                                     ? "Disconnect"
                                     : "Connect"
 
-                                font.pixelSize: Style.fontSmall
-                                color: Color.foreground
+                                font.pixelSize: Theme.Style.fontSmall
+                                color: Theme.Color.foreground
                             }
 
                             HoverHandler {
@@ -330,7 +330,7 @@ Item {
 
                 implicitHeight: 1
 
-                color: Color.surface
+                color: Theme.Color.surface
             }
 
             Rectangle {
@@ -342,22 +342,22 @@ Item {
                     root.service.wifiEnabled
                     && root.service.connected
 
-                radius: Style.radiusMedium
-                color: Color.surface
+                radius: Theme.Style.radiusMedium
+                color: Theme.Color.surface
 
                 RowLayout {
                     anchors {
                         fill: parent
-                        margins: Style.paddingMedium
+                        margins: Theme.Style.paddingMedium
                     }
 
-                    spacing: Style.spacingMedium
+                    spacing: Theme.Style.spacingMedium
 
-                    MaterialIcon {
+                    Theme.MaterialIcon {
                         text: "wifi"
 
-                        iconSize: Style.iconMedium
-                        iconColor: Color.accent
+                        iconSize: Theme.Style.iconMedium
+                        iconColor: Theme.Color.accent
                     }
 
                     ColumnLayout {
@@ -370,8 +370,8 @@ Item {
 
                             text: root.service.ssid
 
-                            font.pixelSize: Style.fontNormal
-                            color: Color.foreground
+                            font.pixelSize: Theme.Style.fontNormal
+                            color: Theme.Color.foreground
 
                             elide: Text.ElideRight
                             maximumLineCount: 1
@@ -380,8 +380,8 @@ Item {
                         Text {
                             text: root.service.strength + "%"
 
-                            font.pixelSize: Style.fontSmall
-                            color: Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
+                            color: Theme.Color.foregroundMuted
                         }
                     }
                 }
@@ -394,8 +394,8 @@ Item {
 
                 text: "Scanning..."
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             Item {
@@ -409,21 +409,21 @@ Item {
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
 
-                    MaterialIcon {
+                    Theme.MaterialIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: "wifi_off"
-                        iconSize: Style.materialIconExtraLarge
-                        iconColor: Color.foregroundMuted
+                        iconSize: Theme.Style.materialIconExtraLarge
+                        iconColor: Theme.Color.foregroundMuted
                     }
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: "Wi-Fi disabled"
-                        font.pixelSize: Style.fontSmall
+                        font.pixelSize: Theme.Style.fontSmall
                         font.weight: Font.Medium
-                        color: Color.foregroundMuted
+                        color: Theme.Color.foregroundMuted
                     }
                 }
             }
@@ -442,8 +442,8 @@ Item {
 
                 text: "No networks found"
 
-                font.pixelSize: Style.fontSmall
-                color: Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
+                color: Theme.Color.foregroundMuted
             }
 
             ListView {
@@ -457,7 +457,7 @@ Item {
 
                 model: root.service.networks
 
-                spacing: Style.spacingSmall
+                spacing: Theme.Style.spacingSmall
 
                 delegate: Rectangle {
                     id: networkItem
@@ -465,32 +465,32 @@ Item {
                     required property var modelData
 
                     width: ListView.view.width
-                    height: Style.itemHeight
+                    height: Theme.Style.itemHeight
 
-                    radius: Style.radiusMedium
+                    radius: Theme.Style.radiusMedium
 
                     color: networkItem.modelData.connected
-                        ? Color.selection
+                        ? Theme.Color.selection
                         : hoverHandler.hovered
-                            ? Color.surfaceHover
+                            ? Theme.Color.surfaceHover
                             : "transparent"
 
                     RowLayout {
                         anchors {
                             fill: parent
-                            leftMargin: Style.paddingMedium
-                            rightMargin: Style.paddingMedium
+                            leftMargin: Theme.Style.paddingMedium
+                            rightMargin: Theme.Style.paddingMedium
                         }
 
-                        spacing: Style.spacingMedium
+                        spacing: Theme.Style.spacingMedium
 
-                        MaterialIcon {
+                        Theme.MaterialIcon {
                             text: networkItem.modelData.connected ? "wifi" : "wifi_off"
 
-                            iconSize: Style.iconMedium
+                            iconSize: Theme.Style.iconMedium
                             iconColor: networkItem.modelData.connected
-                                ? Color.accent
-                                : Color.foregroundMuted
+                                ? Theme.Color.accent
+                                : Theme.Color.foregroundMuted
                         }
 
                         Text {
@@ -498,8 +498,8 @@ Item {
 
                             text: networkItem.modelData.ssid
 
-                            font.pixelSize: Style.fontNormal
-                            color: Color.foreground
+                            font.pixelSize: Theme.Style.fontNormal
+                            color: Theme.Color.foreground
 
                             elide: Text.ElideRight
                             maximumLineCount: 1
@@ -510,8 +510,8 @@ Item {
                                 networkItem.modelData.strength
                                 + "%"
 
-                            font.pixelSize: Style.fontSmall
-                            color: Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
+                            color: Theme.Color.foregroundMuted
                         }
                     }
 

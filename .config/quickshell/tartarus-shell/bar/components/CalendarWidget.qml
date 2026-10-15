@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../services" as Services
 import "../../launcher/components" as LauncherComponents
 
@@ -40,9 +40,9 @@ Item {
         Math.max(
             420,
             (root.anchorSurface?.screen?.height ?? 800)
-                - Style.barHeight
-                - Style.paddingLarge * 2
-                - Style.barPopupGap * 2
+                - Theme.Style.barHeight
+                - Theme.Style.paddingLarge * 2
+                - Theme.Style.barPopupGap * 2
                 - surface.shadowPadding
         )
     )
@@ -161,22 +161,22 @@ Item {
         }
     }
 
-    implicitWidth: Style.barControlHeight
-    implicitHeight: Style.barControlHeight
+    implicitWidth: Theme.Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
     Rectangle {
         anchors.fill: parent
-        radius: Style.radiusFull
-        color: root.popupOpen ? Qt.rgba(Color.primary.r, Color.primary.g, Color.primary.b, 0.18) : "transparent"
-        Behavior on color { ColorAnimation { duration: Style.motionFast } }
-        MaterialIcon { anchors.centerIn: parent; text: "calendar_month"; iconSize: Style.barIconNormal; iconColor: Color.foreground }
+        radius: Theme.Style.radiusFull
+        color: root.popupOpen ? Qt.rgba(Theme.Color.primary.r, Theme.Color.primary.g, Theme.Color.primary.b, 0.18) : "transparent"
+        Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
+        Theme.MaterialIcon { anchors.centerIn: parent; text: "calendar_month"; iconSize: Theme.Style.barIconNormal; iconColor: Theme.Color.foreground }
         Rectangle {
             visible: Services.CalendarService.todayEvents.length > 0
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             width: 7; height: 7; radius: width / 2
-            color: Color.primary
-            border.width: 1; border.color: Color.surfaceContainer
+            color: Theme.Color.primary
+            border.width: 1; border.color: Theme.Color.surfaceContainer
         }
         TapHandler {
             onTapped: {
@@ -196,7 +196,7 @@ Item {
         anchor.adjustment: PopupAdjustment.Slide
         implicitWidth: root.popupContentWidth + surface.horizontalInset * 2
         implicitHeight: root.popupContentHeight
-            + Style.barPopupGap * 2
+            + Theme.Style.barPopupGap * 2
             + surface.shadowPadding
         color: "transparent"
         visible: root.popupOpen || surface.reveal > 0
@@ -212,24 +212,24 @@ Item {
             ColumnLayout {
                 parent: surface.contentItem
                 anchors.fill: parent
-                anchors.leftMargin: Style.paddingLarge
-                anchors.rightMargin: Style.paddingLarge
-                anchors.topMargin: Style.paddingLarge
-                anchors.bottomMargin: Style.paddingLarge + Style.barPopupGap * 2
-                spacing: Style.spacingMedium
+                anchors.leftMargin: Theme.Style.paddingLarge
+                anchors.rightMargin: Theme.Style.paddingLarge
+                anchors.topMargin: Theme.Style.paddingLarge
+                anchors.bottomMargin: Theme.Style.paddingLarge + Theme.Style.barPopupGap * 2
+                spacing: Theme.Style.spacingMedium
 
                 RowLayout {
                     Layout.fillWidth: true
-                    MaterialIcon { text: "event"; iconSize: Style.materialIconMedium; iconColor: Color.primary }
-                    ColumnLayout { Layout.fillWidth: true; Text { text: "Calendario"; color: Color.foreground; font.pixelSize: Style.fontNormal; font.bold: true } Text { text: Services.CalendarService.loading ? "Actualizando…" : Services.CalendarService.configured ? "Agenda sincronizada" : Services.CalendarService.localTasks.length > 0 ? "Tareas locales" : "Añade un feed iCalendar"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall } }
-                    MaterialIcon { text: "refresh"; iconSize: Style.materialIconSmall; iconColor: Color.foregroundMuted; TapHandler { onTapped: Services.CalendarService.refresh() } }
-                    MaterialIcon { text: "close"; iconSize: Style.materialIconSmall; iconColor: Color.foregroundMuted; TapHandler { onTapped: root.popupOpen = false } }
+                    Theme.MaterialIcon { text: "event"; iconSize: Theme.Style.materialIconMedium; iconColor: Theme.Color.primary }
+                    ColumnLayout { Layout.fillWidth: true; Text { text: "Calendario"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontNormal; font.bold: true } Text { text: Services.CalendarService.loading ? "Actualizando…" : Services.CalendarService.configured ? "Agenda sincronizada" : Services.CalendarService.localTasks.length > 0 ? "Tareas locales" : "Añade un feed iCalendar"; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall } }
+                    Theme.MaterialIcon { text: "refresh"; iconSize: Theme.Style.materialIconSmall; iconColor: Theme.Color.foregroundMuted; TapHandler { onTapped: Services.CalendarService.refresh() } }
+                    Theme.MaterialIcon { text: "close"; iconSize: Theme.Style.materialIconSmall; iconColor: Theme.Color.foregroundMuted; TapHandler { onTapped: root.popupOpen = false } }
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
                     ActionButton { text: "‹"; onClicked: root.changeRange(-1) }
-                    Text { Layout.fillWidth: true; text: root.viewMode === "agenda" ? root.weekLabel() : root.monthLabel(); color: Color.foreground; font.pixelSize: Style.fontNormal; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                    Text { Layout.fillWidth: true; text: root.viewMode === "agenda" ? root.weekLabel() : root.monthLabel(); color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontNormal; font.bold: true; horizontalAlignment: Text.AlignHCenter }
                     ActionButton { text: "Hoy"; implicitWidth: 52; onClicked: root.selectDate(Qt.formatDate(new Date(), "yyyy-MM-dd")) }
                     ActionButton { text: root.viewMode === "agenda" ? "Mes" : "Agenda"; implicitWidth: 70; accented: root.viewMode === "agenda"; onClicked: root.viewMode = root.viewMode === "agenda" ? "month" : "agenda" }
                     ActionButton { text: "›"; onClicked: root.changeRange(1) }
@@ -245,7 +245,7 @@ Item {
                             required property string modelData
                             Layout.fillWidth: true
                             text: modelData
-                            color: Color.foregroundMuted
+                            color: Theme.Color.foregroundMuted
                             font.pixelSize: 12
                             font.bold: true
                             horizontalAlignment: Text.AlignHCenter
@@ -267,22 +267,22 @@ Item {
                             required property var modelData
                             Layout.fillWidth: true
                             Layout.preferredHeight: 43
-                            radius: Style.controlRadius
+                            radius: Theme.Style.controlRadius
                             color: root.viewedDate === dayCell.modelData.date
-                                ? Qt.rgba(Color.primary.r, Color.primary.g, Color.primary.b, 0.30)
+                                ? Qt.rgba(Theme.Color.primary.r, Theme.Color.primary.g, Theme.Color.primary.b, 0.30)
                                 : dayCell.modelData.today
-                                    ? Qt.rgba(Color.primary.r, Color.primary.g, Color.primary.b, 0.12)
+                                    ? Qt.rgba(Theme.Color.primary.r, Theme.Color.primary.g, Theme.Color.primary.b, 0.12)
                                     : "transparent"
                             border.width: root.viewedDate === dayCell.modelData.date || dayCell.modelData.today ? 1 : 0
-                            border.color: Color.primary
+                            border.color: Theme.Color.primary
                             opacity: dayCell.modelData.inMonth ? 1 : 0.38
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: 3
                                 Text {
                                     text: dayCell.modelData.day
-                                    color: root.viewedDate === dayCell.modelData.date ? Color.foreground : Color.foregroundMuted
-                                    font.pixelSize: Style.fontSmall
+                                    color: root.viewedDate === dayCell.modelData.date ? Theme.Color.foreground : Theme.Color.foregroundMuted
+                                    font.pixelSize: Theme.Style.fontSmall
                                     font.bold: root.viewedDate === dayCell.modelData.date || dayCell.modelData.today
                                     horizontalAlignment: Text.AlignHCenter
                                     Layout.alignment: Qt.AlignHCenter
@@ -292,7 +292,7 @@ Item {
                                     Layout.preferredWidth: 6
                                     Layout.preferredHeight: 6
                                     radius: 3
-                                    color: Color.primary
+                                    color: Theme.Color.primary
                                     Layout.alignment: Qt.AlignHCenter
                                 }
                             }
@@ -305,22 +305,22 @@ Item {
                     visible: root.viewMode === "month"
                     Layout.fillWidth: true
                     implicitHeight: 1
-                    color: Color.outlineVariant
+                    color: Theme.Color.outlineVariant
                     opacity: 0.6
                 }
 
                 RowLayout {
                     visible: root.viewMode === "month"
                     Layout.fillWidth: true
-                    Text { text: root.selectedDateLabel(); color: Color.foreground; font.pixelSize: Style.fontSmall; font.bold: true; Layout.fillWidth: true }
-                    Text { text: Services.CalendarService.eventsForDate(root.viewedDate).length + " elementos"; color: Color.foregroundMuted; font.pixelSize: 12 }
+                    Text { text: root.selectedDateLabel(); color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; font.bold: true; Layout.fillWidth: true }
+                    Text { text: Services.CalendarService.eventsForDate(root.viewedDate).length + " elementos"; color: Theme.Color.foregroundMuted; font.pixelSize: 12 }
                     ActionButton { text: "+ Tarea"; implicitWidth: 76; accented: true; onClicked: { root.newTaskOpen = !root.newTaskOpen; root.taskFeedback = ""; if (!root.newTaskOpen) { root.taskText = ""; root.taskTime = "" } } }
                 }
 
                 RowLayout {
                     visible: root.viewMode === "month" && root.newTaskOpen
                     Layout.fillWidth: true
-                    spacing: Style.spacingSmall
+                    spacing: Theme.Style.spacingSmall
                     TextField {
                         id: taskField
                         Layout.fillWidth: true
@@ -330,9 +330,9 @@ Item {
                         text: root.taskText
                         onTextEdited: root.taskText = text
                         onAccepted: root.submitTask()
-                        color: Color.foreground
-                        placeholderTextColor: Color.foregroundMuted
-                        background: Rectangle { radius: Style.controlRadius; color: Color.surfaceContainerHigh; border.width: 1; border.color: Color.outlineVariant }
+                        color: Theme.Color.foreground
+                        placeholderTextColor: Theme.Color.foregroundMuted
+                        background: Rectangle { radius: Theme.Style.controlRadius; color: Theme.Color.surfaceContainerHigh; border.width: 1; border.color: Theme.Color.outlineVariant }
                     }
                     TextField {
                         id: taskTimeField
@@ -343,10 +343,10 @@ Item {
                         text: root.taskTime
                         onTextEdited: root.taskTime = text
                         onAccepted: root.submitTask()
-                        color: Color.foreground
-                        placeholderTextColor: Color.foregroundMuted
+                        color: Theme.Color.foreground
+                        placeholderTextColor: Theme.Color.foregroundMuted
                         horizontalAlignment: Text.AlignHCenter
-                        background: Rectangle { radius: Style.controlRadius; color: Color.surfaceContainerHigh; border.width: 1; border.color: Color.outlineVariant }
+                        background: Rectangle { radius: Theme.Style.controlRadius; color: Theme.Color.surfaceContainerHigh; border.width: 1; border.color: Theme.Color.outlineVariant }
                     }
                     ActionButton {
                         text: "Añadir"
@@ -359,7 +359,7 @@ Item {
                 Text {
                     visible: root.viewMode === "month" && (root.taskFeedback !== "" || Services.CalendarService.taskSaveError !== "")
                     text: Services.CalendarService.taskSaveError !== "" ? "No se pudo guardar: " + Services.CalendarService.taskSaveError : root.taskFeedback
-                    color: Services.CalendarService.taskSaveError !== "" ? Color.error : root.taskFeedbackSuccess ? Color.success : Color.warning
+                    color: Services.CalendarService.taskSaveError !== "" ? Theme.Color.error : root.taskFeedbackSuccess ? Theme.Color.success : Theme.Color.warning
                     font.pixelSize: 12
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
@@ -375,7 +375,7 @@ Item {
                     ColumnLayout {
                         id: eventsColumn
                         width: parent.width
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
                         Repeater {
                             model: Services.CalendarService.eventsForDate(root.viewedDate)
                             delegate: Rectangle {
@@ -383,17 +383,17 @@ Item {
                                 required property var modelData
                                 Layout.fillWidth: true
                                 implicitHeight: 64
-                                radius: Style.controlRadius
-                                color: eventCard.modelData.task ? Color.secondaryContainer : Color.surfaceContainerHigh
+                                radius: Theme.Style.controlRadius
+                                color: eventCard.modelData.task ? Theme.Color.secondaryContainer : Theme.Color.surfaceContainerHigh
                                 RowLayout {
                                     anchors.fill: parent
-                                    anchors.margins: Style.paddingSmall
-                                    spacing: Style.spacingSmall
-                                    Rectangle { Layout.preferredWidth: 4; Layout.fillHeight: true; radius: 2; color: eventCard.modelData.task ? Color.secondary : Color.primary }
+                                    anchors.margins: Theme.Style.paddingSmall
+                                    spacing: Theme.Style.spacingSmall
+                                    Rectangle { Layout.preferredWidth: 4; Layout.fillHeight: true; radius: 2; color: eventCard.modelData.task ? Theme.Color.secondary : Theme.Color.primary }
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        Text { text: eventCard.modelData.task ? "Tarea · " + eventCard.modelData.title : eventCard.modelData.title; color: eventCard.modelData.completed ? Color.foregroundMuted : Color.foreground; font.pixelSize: Style.fontSmall; font.bold: true; font.strikeout: Boolean(eventCard.modelData.completed); Layout.fillWidth: true; elide: Text.ElideRight }
-                                        Text { text: eventCard.modelData.task ? (eventCard.modelData.completed ? "Completada" : (eventCard.modelData.time ? "Alarma a las " + eventCard.modelData.time : "Tarea local")) : Services.CalendarService.formatEventTime(eventCard.modelData) + (eventCard.modelData.location ? " · " + eventCard.modelData.location : ""); color: Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                        Text { text: eventCard.modelData.task ? "Tarea · " + eventCard.modelData.title : eventCard.modelData.title; color: eventCard.modelData.completed ? Theme.Color.foregroundMuted : Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; font.bold: true; font.strikeout: Boolean(eventCard.modelData.completed); Layout.fillWidth: true; elide: Text.ElideRight }
+                                        Text { text: eventCard.modelData.task ? (eventCard.modelData.completed ? "Completada" : (eventCard.modelData.time ? "Alarma a las " + eventCard.modelData.time : "Tarea local")) : Services.CalendarService.formatEventTime(eventCard.modelData) + (eventCard.modelData.location ? " · " + eventCard.modelData.location : ""); color: Theme.Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
                                     }
                                     ActionButton { visible: Boolean(eventCard.modelData.task); text: eventCard.modelData.completed ? "✓" : "○"; implicitWidth: 32; onClicked: Services.CalendarService.toggleTask(eventCard.modelData.id) }
                                     ActionButton { visible: Boolean(eventCard.modelData.task); text: "×"; implicitWidth: 32; onClicked: Services.CalendarService.removeTask(eventCard.modelData.id) }
@@ -403,8 +403,8 @@ Item {
                         ColumnLayout {
                             visible: Services.CalendarService.eventsForDate(root.viewedDate).length === 0
                             Layout.fillWidth: true
-                            spacing: Style.spacingSmall
-                            Text { text: Services.CalendarService.configured ? "No hay eventos este día" : "Configura una URL iCalendar para mostrar tu agenda"; color: Color.foregroundMuted; font.pixelSize: Style.fontSmall; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap }
+                            spacing: Theme.Style.spacingSmall
+                            Text { text: Services.CalendarService.configured ? "No hay eventos este día" : "Configura una URL iCalendar para mostrar tu agenda"; color: Theme.Color.foregroundMuted; font.pixelSize: Theme.Style.fontSmall; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap }
                             ActionButton {
                                 visible: !Services.CalendarService.configured
                                 Layout.alignment: Qt.AlignHCenter
@@ -430,7 +430,7 @@ Item {
                     ColumnLayout {
                         id: agendaColumn
                         width: parent.width
-                        spacing: Style.spacingSmall
+                        spacing: Theme.Style.spacingSmall
 
                         Repeater {
                             model: root.agendaDays()
@@ -443,22 +443,22 @@ Item {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: 34
-                                    radius: Style.controlRadius
-                                    color: weekDaySection.modelData.date === root.viewedDate ? Qt.rgba(Color.primary.r, Color.primary.g, Color.primary.b, 0.22) : Color.surfaceContainerHigh
+                                    radius: Theme.Style.controlRadius
+                                    color: weekDaySection.modelData.date === root.viewedDate ? Qt.rgba(Theme.Color.primary.r, Theme.Color.primary.g, Theme.Color.primary.b, 0.22) : Theme.Color.surfaceContainerHigh
                                     RowLayout {
                                         anchors.fill: parent
-                                        anchors.leftMargin: Style.paddingSmall
-                                        anchors.rightMargin: Style.paddingSmall
+                                        anchors.leftMargin: Theme.Style.paddingSmall
+                                        anchors.rightMargin: Theme.Style.paddingSmall
                                         Text {
                                             text: weekDaySection.modelData.label + "  " + weekDaySection.modelData.day
-                                            color: Color.foreground
-                                            font.pixelSize: Style.fontSmall
+                                            color: Theme.Color.foreground
+                                            font.pixelSize: Theme.Style.fontSmall
                                             font.bold: true
                                             Layout.fillWidth: true
                                         }
                                         Text {
                                             text: Services.CalendarService.eventsForDate(weekDaySection.modelData.date).length + " elementos"
-                                            color: Color.foregroundMuted
+                                            color: Theme.Color.foregroundMuted
                                             font.pixelSize: 12
                                         }
                                     }
@@ -472,17 +472,17 @@ Item {
                                         required property var modelData
                                         Layout.fillWidth: true
                                         implicitHeight: 56
-                                        radius: Style.controlRadius
-                                        color: agendaEventCard.modelData.task ? Color.secondaryContainer : Color.surfaceContainerHigh
+                                        radius: Theme.Style.controlRadius
+                                        color: agendaEventCard.modelData.task ? Theme.Color.secondaryContainer : Theme.Color.surfaceContainerHigh
                                         RowLayout {
                                             anchors.fill: parent
-                                            anchors.margins: Style.paddingSmall
-                                            spacing: Style.spacingSmall
-                                            Rectangle { Layout.preferredWidth: 4; Layout.fillHeight: true; radius: 2; color: agendaEventCard.modelData.task ? Color.secondary : Color.primary }
+                                            anchors.margins: Theme.Style.paddingSmall
+                                            spacing: Theme.Style.spacingSmall
+                                            Rectangle { Layout.preferredWidth: 4; Layout.fillHeight: true; radius: 2; color: agendaEventCard.modelData.task ? Theme.Color.secondary : Theme.Color.primary }
                                             ColumnLayout {
                                                 Layout.fillWidth: true
-                                                Text { text: agendaEventCard.modelData.task ? agendaEventCard.modelData.title : agendaEventCard.modelData.title; color: agendaEventCard.modelData.completed ? Color.foregroundMuted : Color.foreground; font.pixelSize: Style.fontSmall; font.bold: true; font.strikeout: Boolean(agendaEventCard.modelData.completed); Layout.fillWidth: true; elide: Text.ElideRight }
-                                                Text { text: agendaEventCard.modelData.task ? (agendaEventCard.modelData.completed ? "Completada" : (agendaEventCard.modelData.time ? "Tarea · " + agendaEventCard.modelData.time : "Tarea local")) : Services.CalendarService.formatEventTime(agendaEventCard.modelData) + (agendaEventCard.modelData.location ? " · " + agendaEventCard.modelData.location : ""); color: Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                                Text { text: agendaEventCard.modelData.task ? agendaEventCard.modelData.title : agendaEventCard.modelData.title; color: agendaEventCard.modelData.completed ? Theme.Color.foregroundMuted : Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; font.bold: true; font.strikeout: Boolean(agendaEventCard.modelData.completed); Layout.fillWidth: true; elide: Text.ElideRight }
+                                                Text { text: agendaEventCard.modelData.task ? (agendaEventCard.modelData.completed ? "Completada" : (agendaEventCard.modelData.time ? "Tarea · " + agendaEventCard.modelData.time : "Tarea local")) : Services.CalendarService.formatEventTime(agendaEventCard.modelData) + (agendaEventCard.modelData.location ? " · " + agendaEventCard.modelData.location : ""); color: Theme.Color.foregroundMuted; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
                                             }
                                             ActionButton { visible: Boolean(agendaEventCard.modelData.task); text: agendaEventCard.modelData.completed ? "✓" : "○"; implicitWidth: 32; onClicked: Services.CalendarService.toggleTask(agendaEventCard.modelData.id) }
                                             ActionButton { visible: Boolean(agendaEventCard.modelData.task); text: "×"; implicitWidth: 32; onClicked: Services.CalendarService.removeTask(agendaEventCard.modelData.id) }
@@ -496,16 +496,16 @@ Item {
                         Text {
                             visible: root.agendaDays().length === 0
                             text: "No hay eventos esta semana"
-                            color: Color.foregroundMuted
-                            font.pixelSize: Style.fontSmall
+                            color: Theme.Color.foregroundMuted
+                            font.pixelSize: Theme.Style.fontSmall
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
-                            topPadding: Style.paddingLarge
+                            topPadding: Theme.Style.paddingLarge
                         }
                     }
                 }
 
-                Text { visible: Services.CalendarService.errorMessage !== ""; text: Services.CalendarService.errorMessage; color: Color.error; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                Text { visible: Services.CalendarService.errorMessage !== ""; text: Services.CalendarService.errorMessage; color: Theme.Color.error; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
             }
         }
     }
@@ -516,13 +516,13 @@ Item {
         implicitWidth: Math.max(34, contentItem.implicitWidth + 22)
         implicitHeight: 34
         padding: 0
-        contentItem: Text { text: actionButton.text; color: actionButton.accented ? Color.onPrimary : Color.foreground; font.pixelSize: Style.fontSmall; font.bold: actionButton.accented; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+        contentItem: Text { text: actionButton.text; color: actionButton.accented ? Theme.Color.onPrimary : Theme.Color.foreground; font.pixelSize: Theme.Style.fontSmall; font.bold: actionButton.accented; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
         background: Rectangle {
-            radius: Style.radiusFull
-            color: actionButton.down ? Color.primary : actionButton.accented ? Color.primaryContainer : actionButton.hovered ? Color.surfaceHover : Color.surfaceContainerHigh
+            radius: Theme.Style.radiusFull
+            color: actionButton.down ? Theme.Color.primary : actionButton.accented ? Theme.Color.primaryContainer : actionButton.hovered ? Theme.Color.surfaceHover : Theme.Color.surfaceContainerHigh
             border.width: actionButton.accented || actionButton.hovered ? 1 : 0
-            border.color: actionButton.accented ? Color.primary : Color.outlineVariant
-            Behavior on color { ColorAnimation { duration: Style.motionFast } }
+            border.color: actionButton.accented ? Theme.Color.primary : Theme.Color.outlineVariant
+            Behavior on color { ColorAnimation { duration: Theme.Style.motionFast } }
         }
     }
 

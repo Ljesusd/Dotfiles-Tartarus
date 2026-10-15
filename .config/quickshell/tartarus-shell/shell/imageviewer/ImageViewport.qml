@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -35,7 +35,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Color.backgroundAlt
+        color: Theme.Color.backgroundAlt
     }
 
     Item {

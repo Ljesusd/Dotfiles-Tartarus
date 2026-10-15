@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 
 Item {
     id: root
@@ -36,7 +36,7 @@ Item {
             ? root.contentItem.implicitWidth
             : 0
 
-    implicitHeight: Style.barInnerHeight
+    implicitHeight: Theme.Style.barInnerHeight
 
     Layout.preferredWidth: implicitWidth
     Layout.preferredHeight: implicitHeight

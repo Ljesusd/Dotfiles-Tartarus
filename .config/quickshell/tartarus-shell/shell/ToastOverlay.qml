@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 import "."
 
 Scope {
@@ -32,14 +32,14 @@ Scope {
         }
 
         margins {
-            top: Style.barHeight
-                + Style.spacingLarge
-            right: Style.paddingLarge
+            top: Theme.Style.barHeight
+                + Theme.Style.spacingLarge
+            right: Theme.Style.paddingLarge
         }
 
         implicitWidth: Math.min(
             360,
-            Math.max(280, (root.monitorScreen?.width ?? 1280) - Style.paddingLarge * 2)
+            Math.max(280, (root.monitorScreen?.width ?? 1280) - Theme.Style.paddingLarge * 2)
         )
         implicitHeight: toastStack.childrenRect.height
 
@@ -69,11 +69,11 @@ Scope {
                         ? 0
                         : toastRepeater.itemAt(index - 1).y
                             + toastRepeater.itemAt(index - 1).height
-                            + Style.spacingMedium
+                            + Theme.Style.spacingMedium
 
                     Behavior on y {
                         NumberAnimation {
-                            duration: Style.motionNormal
+                            duration: Theme.Style.motionNormal
                             easing.type: Easing.OutCubic
                         }
                     }

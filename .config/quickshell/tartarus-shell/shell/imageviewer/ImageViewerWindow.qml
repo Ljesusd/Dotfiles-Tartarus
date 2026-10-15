@@ -5,7 +5,7 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 
 import "../../services" as Services
-import "../../theme"
+import "../../theme" as Theme
 import "."
 
 FloatingWindow {
@@ -38,7 +38,7 @@ FloatingWindow {
     visible:
         root.targetContext?.imageViewerOpen === true
         && root.targetScreen !== null
-    color: Color.background
+    color: Theme.Color.background
     minimumSize: Qt.size(560, 315)
 
     // Keep the viewer compact on the target monitor. FloatingWindow lets
@@ -131,21 +131,21 @@ FloatingWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 44
-        color: Color.surfaceContainer
+        color: Theme.Color.surfaceContainer
         z: 4
 
         Row {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: 8
-            spacing: Style.spacingXs
+            spacing: Theme.Style.spacingXs
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: viewport.drawing ? "edit_off" : "edit"
-                    color: Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
                 ToolTip.text: viewport.drawing ? "Desactivar dibujo" : "Dibujar"
                 ToolTip.visible: hovered
@@ -154,10 +154,10 @@ FloatingWindow {
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: "delete_sweep"
-                    color: Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
                 ToolTip.text: "Borrar dibujo"
                 ToolTip.visible: hovered
@@ -166,15 +166,15 @@ FloatingWindow {
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: "remove"
-                    color: Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
                 background: Rectangle {
-                    radius: Style.radiusSmall
-                    color: parent.pressed ? Color.selection
-                        : parent.hovered ? Color.surfaceHover : "transparent"
+                    radius: Theme.Style.radiusSmall
+                    color: parent.pressed ? Theme.Color.selection
+                        : parent.hovered ? Theme.Color.surfaceHover : "transparent"
                 }
                 onClicked: viewport.zoomOut()
             }
@@ -182,84 +182,84 @@ FloatingWindow {
             Label {
                 text: Math.round(viewport.userScale * 100) + "%"
                 anchors.verticalCenter: parent.verticalCenter
-                color: Color.foreground
+                color: Theme.Color.foreground
             }
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: "add"
-                    color: Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
                 background: Rectangle {
-                    radius: Style.radiusSmall
-                    color: parent.pressed ? Color.selection
-                        : parent.hovered ? Color.surfaceHover : "transparent"
+                    radius: Theme.Style.radiusSmall
+                    color: parent.pressed ? Theme.Color.selection
+                        : parent.hovered ? Theme.Color.surfaceHover : "transparent"
                 }
                 onClicked: viewport.zoomIn()
             }
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: "restart_alt"
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                     font.pixelSize: 18
                 }
                 background: Rectangle {
-                    radius: Style.radiusSmall
-                    color: parent.pressed ? Color.selection
-                        : parent.hovered ? Color.surfaceHover : "transparent"
+                    radius: Theme.Style.radiusSmall
+                    color: parent.pressed ? Theme.Color.selection
+                        : parent.hovered ? Theme.Color.surfaceHover : "transparent"
                 }
                 onClicked: viewport.resetView()
             }
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: root.fullscreen ? "fullscreen_exit" : "fullscreen"
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                     font.pixelSize: 18
                 }
                 background: Rectangle {
-                    radius: Style.radiusSmall
-                    color: parent.pressed ? Color.selection
-                        : parent.hovered ? Color.surfaceHover : "transparent"
+                    radius: Theme.Style.radiusSmall
+                    color: parent.pressed ? Theme.Color.selection
+                        : parent.hovered ? Theme.Color.surfaceHover : "transparent"
                 }
                 onClicked: root.fullscreen = !root.fullscreen
             }
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: "save_as"
-                    color: Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
                 ToolTip.text: "Guardar como…"
                 ToolTip.visible: hovered
                 background: Rectangle {
-                    radius: Style.radiusSmall
-                    color: parent.pressed ? Color.selection
-                        : parent.hovered ? Color.surfaceHover : "transparent"
+                    radius: Theme.Style.radiusSmall
+                    color: parent.pressed ? Theme.Color.selection
+                        : parent.hovered ? Theme.Color.surfaceHover : "transparent"
                 }
                 onClicked: saveDialog.open()
             }
 
             ToolButton {
                 display: AbstractButton.IconOnly
-                contentItem: MaterialIcon {
+                contentItem: Theme.MaterialIcon {
                     text: "close"
-                    color: parent.parent.hovered ? Color.error : Color.foreground
-                    font.pixelSize: Style.materialIconMedium
+                    color: parent.parent.hovered ? Theme.Color.error : Theme.Color.foreground
+                    font.pixelSize: Theme.Style.materialIconMedium
                 }
                 ToolTip.text: "Cerrar"
                 ToolTip.visible: hovered
                 background: Rectangle {
-                    radius: Style.radiusSmall
-                    color: parent.pressed ? Color.error
-                        : parent.hovered ? Color.surfaceHover : "transparent"
+                    radius: Theme.Style.radiusSmall
+                    color: parent.pressed ? Theme.Color.error
+                        : parent.hovered ? Theme.Color.surfaceHover : "transparent"
                 }
                 onClicked: Services.ImageViewerService.close()
             }

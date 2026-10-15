@@ -4,7 +4,7 @@
 // See LICENSE and NOTICE.md in this directory.
 import QtQuick
 import Quickshell.Widgets
-import "../../../theme"
+import "../../../theme" as Theme
 
 // The sleeve: one square plate that crossfades to the next cover instead of
 // snapping, because the daemon resolves art asynchronously and a hard swap reads
@@ -42,7 +42,7 @@ Item {
         radius: cover.radius
         color: cover.plate
 
-        MaterialIcon {
+        Theme.MaterialIcon {
             anchors.centerIn: parent
             visible: !cover.ready
             iconSize: Math.round(parent.width * 0.26)

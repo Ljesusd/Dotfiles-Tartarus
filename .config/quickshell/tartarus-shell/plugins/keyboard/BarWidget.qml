@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../../theme"
+import "../../theme" as Theme
 
 Rectangle {
     id: root
@@ -24,26 +24,26 @@ Rectangle {
         return true
     }
 
-    implicitWidth: Style.barControlHeight
+    implicitWidth: Theme.Style.barControlHeight
 
-    implicitHeight: Style.barControlHeight
+    implicitHeight: Theme.Style.barControlHeight
 
     color: "transparent"
 
-    radius: Style.barControlRadius
+    radius: Theme.Style.barControlRadius
     border.width: 0
 
-    MaterialIcon {
+    Theme.MaterialIcon {
         id: keyboardIcon
 
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Style.barPaddingNormal
+        anchors.leftMargin: Theme.Style.barPaddingNormal
         text: "keyboard"
-        font.pixelSize: Style.barIconNormal
+        font.pixelSize: Theme.Style.barIconNormal
         color: root.plugin.service.available
-            ? Color.foreground
-            : Color.foregroundMuted
+            ? Theme.Color.foreground
+            : Theme.Color.foregroundMuted
     }
 
     Text {
@@ -52,13 +52,13 @@ Rectangle {
 
         anchors.left: keyboardIcon.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Style.barSpacingSmall
+        anchors.leftMargin: Theme.Style.barSpacingSmall
 
         text: root.plugin.service.displayText
         color: root.plugin.service.available
-            ? Color.foreground
-            : Color.foregroundMuted
-        font.pixelSize: Style.barFontNormal
+            ? Theme.Color.foreground
+            : Theme.Color.foregroundMuted
+        font.pixelSize: Theme.Style.barFontNormal
     }
 
     MouseArea {

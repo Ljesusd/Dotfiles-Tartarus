@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../services" as Services
-import "../theme"
+import "../theme" as Theme
 
 Item {
     id: root
@@ -20,20 +20,20 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Style.panelRadius
-        color: Qt.alpha(Color.surfaceContainer, 0.94)
+        radius: Theme.Style.panelRadius
+        color: Qt.alpha(Theme.Color.surfaceContainer, 0.94)
         border.width: 1
-        border.color: Qt.alpha(Color.outlineVariant, 0.7)
+        border.color: Qt.alpha(Theme.Color.outlineVariant, 0.7)
     }
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.paddingLarge
-        spacing: Style.spacingSmall
+        anchors.margins: Theme.Style.paddingLarge
+        spacing: Theme.Style.spacingSmall
         RowLayout {
             Layout.fillWidth: true
-            MaterialIcon { text: "memory"; iconSize: 20; iconColor: Color.primary }
-            Text { text: "Sistema"; color: Color.foreground; font.pixelSize: Style.fontNormal; font.bold: true; Layout.fillWidth: true }
-            Text { text: root.hw.available ? "Actualizado" : "Consultando…"; color: Color.foregroundMuted; font.pixelSize: 11 }
+            Theme.MaterialIcon { text: "memory"; iconSize: 20; iconColor: Theme.Color.primary }
+            Text { text: "Sistema"; color: Theme.Color.foreground; font.pixelSize: Theme.Style.fontNormal; font.bold: true; Layout.fillWidth: true }
+            Text { text: root.hw.available ? "Actualizado" : "Consultando…"; color: Theme.Color.foregroundMuted; font.pixelSize: 11 }
         }
         RowLayout {
             Layout.fillWidth: true
@@ -48,19 +48,19 @@ Item {
                     required property var modelData
                     Layout.fillWidth: true
                     Layout.preferredHeight: 76
-                    radius: Style.controlRadius
-                    color: Color.surfaceContainerHigh
+                    radius: Theme.Style.controlRadius
+                    color: Theme.Color.surfaceContainerHigh
                     ColumnLayout {
                         anchors.fill: parent
                         anchors.margins: 9
                         spacing: 2
-                        MaterialIcon { text: modelData.icon; iconSize: 18; iconColor: Color.primary }
-                        Text { text: modelData.name; color: Color.foregroundMuted; font.pixelSize: 11 }
-                        Text { text: modelData.value; color: Color.foreground; font.pixelSize: 18; font.bold: true }
+                        Theme.MaterialIcon { text: modelData.icon; iconSize: 18; iconColor: Theme.Color.primary }
+                        Text { text: modelData.name; color: Theme.Color.foregroundMuted; font.pixelSize: 11 }
+                        Text { text: modelData.value; color: Theme.Color.foreground; font.pixelSize: 18; font.bold: true }
                     }
                 }
             }
         }
-        Text { text: root.hw.cpuCores + " núcleos · " + root.hw.cpuTemperatureLabel; color: Color.foregroundMuted; font.pixelSize: 11; Layout.fillWidth: true; elide: Text.ElideRight }
+        Text { text: root.hw.cpuCores + " núcleos · " + root.hw.cpuTemperatureLabel; color: Theme.Color.foregroundMuted; font.pixelSize: 11; Layout.fillWidth: true; elide: Text.ElideRight }
     }
 }

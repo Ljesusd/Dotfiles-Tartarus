@@ -6,7 +6,7 @@ import Quickshell
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import "../../services" as Services
-import "../../theme"
+import "../../theme" as Theme
 import "ryoku" as Ryoku
 import "ryoku/ArtColor.js" as ArtColor
 
@@ -33,14 +33,14 @@ Item {
         id: palette
         source: root.wanted ? root.service.artUrl : ""
     }
-    readonly property color sleeveAccent: ArtColor.accentOf(palette.colors, Color.primary)
+    readonly property color sleeveAccent: ArtColor.accentOf(palette.colors, Theme.Color.primary)
 
     HoverHandler { id: hover }
     Ryoku.MusicCard {
         anchors.fill: parent
         art: root.service.artUrl
         accent: root.sleeveAccent
-        plate: ArtColor.plateOf(root.sleeveAccent, Color.surface)
+        plate: ArtColor.plateOf(root.sleeveAccent, Theme.Color.surface)
         hovered: hover.hovered
     }
 
@@ -60,13 +60,13 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 24
-            MaterialIcon { text: "music_note"; iconSize: 18; iconColor: root.sleeveAccent }
+            Theme.MaterialIcon { text: "music_note"; iconSize: 18; iconColor: root.sleeveAccent }
             Text {
                 Layout.fillWidth: true
                 text: root.service.identity || "Música"
                 textFormat: Text.PlainText
-                color: Color.foregroundMuted
-                font.pixelSize: Style.fontSmall
+                color: Theme.Color.foregroundMuted
+                font.pixelSize: Theme.Style.fontSmall
                 elide: Text.ElideRight
             }
             Controls.Button {
@@ -75,8 +75,8 @@ Item {
                 implicitWidth: 24; implicitHeight: 24
                 Accessible.name: "Cerrar tarjeta"
                 onClicked: root.closeRequested()
-                contentItem: MaterialIcon { text: "close"; iconSize: 18; iconColor: Color.foreground }
-                background: Rectangle { radius: 12; color: closeButton.hovered ? Color.surfaceHover : "transparent" }
+                contentItem: Theme.MaterialIcon { text: "close"; iconSize: 18; iconColor: Theme.Color.foreground }
+                background: Rectangle { radius: 12; color: closeButton.hovered ? Theme.Color.surfaceHover : "transparent" }
             }
         }
 
@@ -88,8 +88,8 @@ Item {
                 Layout.preferredWidth: root.coverSize
                 Layout.preferredHeight: root.coverSize
                 source: root.service.artUrl
-                plate: Color.surfaceContainerHigh
-                ink: Color.foregroundMuted
+                plate: Theme.Color.surfaceContainerHigh
+                ink: Theme.Color.foregroundMuted
             }
             Item {
                 Layout.fillWidth: true
@@ -108,7 +108,7 @@ Item {
                     Layout.fillWidth: true
                     text: root.service.title || "Sin reproducción"
                     textFormat: Text.PlainText
-                    color: Color.foreground
+                    color: Theme.Color.foreground
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
@@ -117,7 +117,7 @@ Item {
                     Layout.fillWidth: true
                     text: root.service.artist
                     textFormat: Text.PlainText
-                    color: Color.foregroundMuted
+                    color: Theme.Color.foregroundMuted
                     font.pixelSize: 12
                     elide: Text.ElideRight
                 }
@@ -126,7 +126,7 @@ Item {
                 Layout.alignment: Qt.AlignBottom
                 visible: root.hasProgress
                 text: root.service.formatTime(root.position) + " / " + root.service.formatTime(root.duration)
-                color: Color.foregroundMuted
+                color: Theme.Color.foregroundMuted
                 font.family: "monospace"
                 font.pixelSize: 10
             }
@@ -142,7 +142,7 @@ Item {
                 opacity: root.hasProgress ? 1 : 0.35
                 live: root.wanted && root.service.playing
                 accent: root.sleeveAccent
-                track: Qt.alpha(Color.foreground, 0.16)
+                track: Qt.alpha(Theme.Color.foreground, 0.16)
                 seekable: root.wanted && root.hasProgress && (root.player?.canSeek ?? false)
                 onSeekStarted: {
                     root.gesturePlayer = root.player
@@ -157,8 +157,8 @@ Item {
                 Layout.preferredHeight: 38
                 active: root.wanted
                 accent: root.sleeveAccent
-                ink: Color.foreground
-                inkOnAccent: Color.surface
+                ink: Theme.Color.foreground
+                inkOnAccent: Theme.Color.surface
                 playing: root.service.playing
                 canPrevious: root.wanted && root.service.canPrevious
                 canNext: root.wanted && root.service.canNext
@@ -189,12 +189,12 @@ Item {
                         text: modelData.identity || "Reproductor"
                         Accessible.name: "Seleccionar " + text
                         onClicked: root.service.selectPlayer(modelData)
-                        contentItem: Text { text: choice.text; textFormat: Text.PlainText; color: Color.foreground; font.pixelSize: 12 }
+                        contentItem: Text { text: choice.text; textFormat: Text.PlainText; color: Theme.Color.foreground; font.pixelSize: 12 }
                         background: Rectangle {
-                            radius: Style.controlRadius
-                            color: choice.modelData === root.player ? Color.primaryContainer : Color.surfaceContainerHigh
+                            radius: Theme.Style.controlRadius
+                            color: choice.modelData === root.player ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
                             border.width: choice.modelData === root.player || choice.activeFocus ? 1 : 0
-                            border.color: Color.primary
+                            border.color: Theme.Color.primary
                         }
                     }
                 }

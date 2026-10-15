@@ -1,6 +1,7 @@
 import QtQuick
+import "." as Theme
 
 NumberAnimation {
-    duration: Motion.normal
+    duration: Theme.Motion.normal
     easing.type: Easing.OutCubic
 }

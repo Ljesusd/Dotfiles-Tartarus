@@ -3,7 +3,7 @@ import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
 
-import "../../theme"
+import "../../theme" as Theme
 import "../../services" as Services
 import "../../launcher/components" as LauncherComponents
 
@@ -31,7 +31,7 @@ PopupWindow {
     )
     readonly property real menuHeight: Math.min(
         390,
-        menuColumn.implicitHeight + Style.paddingMedium * 2
+        menuColumn.implicitHeight + Theme.Style.paddingMedium * 2
     )
 
     function open() {
@@ -96,16 +96,16 @@ PopupWindow {
             id: content
             parent: surface.contentItem
             anchors.fill: parent
-            anchors.leftMargin: Style.paddingMedium
-            anchors.rightMargin: Style.paddingMedium
-            anchors.topMargin: Style.paddingSmall
-            anchors.bottomMargin: Style.paddingMedium
+            anchors.leftMargin: Theme.Style.paddingMedium
+            anchors.rightMargin: Theme.Style.paddingMedium
+            anchors.topMargin: Theme.Style.paddingSmall
+            anchors.bottomMargin: Theme.Style.paddingMedium
             clip: true
 
             ColumnLayout {
                 id: menuColumn
                 anchors.fill: parent
-                spacing: Style.spacingXs
+                spacing: Theme.Style.spacingXs
 
                 Repeater {
                     model: root.entries
@@ -115,30 +115,30 @@ PopupWindow {
 
                         Layout.fillWidth: true
                         Layout.preferredHeight: 52
-                        radius: Style.controlRadius
+                        radius: Theme.Style.controlRadius
                         color: itemHover.hovered
-                            ? Color.surfaceHover
+                            ? Theme.Color.surfaceHover
                             : "transparent"
 
                         HoverHandler { id: itemHover }
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: Style.paddingSmall
-                            anchors.rightMargin: Style.paddingSmall
-                            spacing: Style.spacingMedium
+                            anchors.leftMargin: Theme.Style.paddingSmall
+                            anchors.rightMargin: Theme.Style.paddingSmall
+                            spacing: Theme.Style.spacingMedium
 
                             Rectangle {
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 32
-                                radius: Style.radiusFull
-                                color: Color.primaryContainer
+                                radius: Theme.Style.radiusFull
+                                color: Theme.Color.primaryContainer
 
-                                MaterialIcon {
+                                Theme.MaterialIcon {
                                     anchors.centerIn: parent
                                     text: modelData.icon
-                                    iconSize: Style.materialIconSmall
-                                    iconColor: Color.onPrimaryContainer
+                                    iconSize: Theme.Style.materialIconSmall
+                                    iconColor: Theme.Color.onPrimaryContainer
                                 }
                             }
 
@@ -149,8 +149,8 @@ PopupWindow {
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData.title
-                                    color: Color.foreground
-                                    font.pixelSize: Style.fontSmall
+                                    color: Theme.Color.foreground
+                                    font.pixelSize: Theme.Style.fontSmall
                                     font.weight: Font.Medium
                                     elide: Text.ElideRight
                                 }
@@ -158,16 +158,16 @@ PopupWindow {
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData.subtitle
-                                    color: Color.foregroundMuted
+                                    color: Theme.Color.foregroundMuted
                                     font.pixelSize: 11
                                     elide: Text.ElideRight
                                 }
                             }
 
-                            MaterialIcon {
+                            Theme.MaterialIcon {
                                 text: "chevron_right"
-                                iconSize: Style.materialIconSmall
-                                iconColor: Color.foregroundMuted
+                                iconSize: Theme.Style.materialIconSmall
+                                iconColor: Theme.Color.foregroundMuted
                             }
                         }
 

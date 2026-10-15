@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic as Controls
 import Quickshell.Services.Pipewire
-import "../theme"
+import "../theme" as Theme
 
 ColumnLayout {
     id: root
     required property string deviceName
-    spacing: Style.spacingSmall
+    spacing: Theme.Style.spacingSmall
 
     // Require a unique capture device. Never fall back to a different default mic.
     readonly property var matchingSources: Pipewire.nodes.values.filter(node => {
@@ -35,14 +35,14 @@ ColumnLayout {
         Text {
             Layout.fillWidth: true
             text: "Volumen de entrada"
-            color: Color.foregroundMuted
-            font.pixelSize: Style.fontSmall
+            color: Theme.Color.foregroundMuted
+            font.pixelSize: Theme.Style.fontSmall
         }
         Text {
             objectName: "microphonePercentage"
             text: root.available ? Math.round(volumeSlider.pressed ? volumeSlider.value : root.volume) + "%" : "—"
-            color: Color.foreground
-            font.pixelSize: Style.fontSmall
+            color: Theme.Color.foreground
+            font.pixelSize: Theme.Style.fontSmall
             font.bold: true
         }
     }
@@ -74,12 +74,12 @@ ColumnLayout {
             width: volumeSlider.availableWidth
             height: 6
             radius: 3
-            color: Color.outlineVariant
+            color: Theme.Color.outlineVariant
             Rectangle {
                 width: volumeSlider.position * parent.width
                 height: parent.height
                 radius: parent.radius
-                color: volumeSlider.enabled ? Color.primary : Color.foregroundMuted
+                color: volumeSlider.enabled ? Theme.Color.primary : Theme.Color.foregroundMuted
             }
         }
         handle: Rectangle {
@@ -88,9 +88,9 @@ ColumnLayout {
             width: 18
             height: 18
             radius: 9
-            color: volumeSlider.enabled ? Color.primary : Color.foregroundMuted
+            color: volumeSlider.enabled ? Theme.Color.primary : Theme.Color.foregroundMuted
             border.width: volumeSlider.activeFocus ? 2 : 0
-            border.color: Color.foreground
+            border.color: Theme.Color.foreground
         }
     }
 
@@ -103,16 +103,16 @@ ColumnLayout {
         onClicked: if (root.available) root.source.audio.muted = !root.source.audio.muted
         contentItem: Text {
             text: parent.text
-            color: parent.enabled ? Color.foreground : Color.foregroundMuted
-            font.pixelSize: Style.fontSmall
+            color: parent.enabled ? Theme.Color.foreground : Theme.Color.foregroundMuted
+            font.pixelSize: Theme.Style.fontSmall
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-            radius: Style.radiusSmall
-            color: root.muted ? Color.primaryContainer : Color.surfaceContainerHigh
+            radius: Theme.Style.radiusSmall
+            color: root.muted ? Theme.Color.primaryContainer : Theme.Color.surfaceContainerHigh
             border.width: 1
-            border.color: Color.outlineVariant
+            border.color: Theme.Color.outlineVariant
         }
     }
 
@@ -122,7 +122,7 @@ ColumnLayout {
         text: !root.available ? "Micrófono no disponible para controlar."
             : "Micrófono silenciado; el volumen se conserva."
         wrapMode: Text.Wrap
-        font.pixelSize: Style.fontSmall
-        color: Color.foregroundMuted
+        font.pixelSize: Theme.Style.fontSmall
+        color: Theme.Color.foregroundMuted
     }
 }

@@ -1,5 +1,5 @@
 import QtQuick
-import "../../../theme"
+import "../../../theme" as Theme
 
 ListView {
     id: root
@@ -12,8 +12,8 @@ ListView {
     readonly property bool ready: true
     readonly property bool adding: false
     readonly property bool removing: false
-    property int addDuration: Style.motionNormal
-    property int removeDuration: Style.motionNormal
+    property int addDuration: Theme.Style.motionNormal
+    property int removeDuration: Theme.Style.motionNormal
 
     implicitHeight: root.preferredHeight
 
